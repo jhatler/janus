@@ -1,0 +1,31 @@
+{
+  "name": "janus.js",
+  "description": "Just Another Neural Utility System",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhatler/janus"
+  },
+  "author": "https://github.com/jhatler",
+  "homepage": "https://github.com/jhatler/",
+  "bugs": {
+    "url": "https://github.com/jhatler/janus/issues",
+    "email": "hatler.jaremy@gmail.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-jsonc": "^2.16.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  }
+}

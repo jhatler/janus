@@ -1,0 +1,151 @@
+name: 'Devcontainer Semver Publisher'
+description: |
+  Sets up Docker and the Devcontainer CLI. Then builds the specified
+  devcontainer configuration. Requires registry credentials for usage
+  in order to leverage caching. Can optionally push image with Semver
+  and SHA Tags
+
+# jscpd:ignore-start
+inputs:
+  workspace:
+    description: 'Devconatiner workspace (dir with .devcontainer or devcontainer.json)'
+    required: true
+  platforms:
+    description: 'Platforms to Build'
+    required: true
+    default: 'linux/amd64'
+  push:
+    description: 'Push images?'
+    required: true
+    default: false
+  repository:
+    description: 'Image Repository to use for caching and pushing'
+    required: true
+  semver_major:
+    description: 'Major version to use for pushed semver tags'
+    required: false
+  semver_minor:
+    description: 'Minor version to use for pushed semver tags'
+    required: false
+  semver_patch:
+    description: 'Patch version to use for pushed semver tags'
+    required: false
+  registry:
+    description: 'OCI Registry to use for caching and pushing'
+    required: true
+  username:
+    description: 'OCI Registry Username'
+    required: true
+  password:
+    description: 'OCI Registry Password'
+    required: true
+  cleanup:
+    description: 'Cleanup images after build?'
+    required: true
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Set short git commit SHA
+      id: git
+      shell: bash
+      run: echo "short_sha=$(git rev-parse --short ${{ github.sha }})" >> "$GITHUB_OUTPUT"
+
+    - name: Set devcontainer UUID
+      id: uuid
+      shell: bash
+      run: echo "uuid=$(uuidgen -s -n @url -N ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }})" >> "$GITHUB_OUTPUT"
+
+    # jscpd:ignore-end
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install Devcontainer CLI
+      shell: bash
+      run: npm install -g @devcontainers/cli
+
+    - name: Build devcontainer
+      id: build
+      shell: bash
+      run: |
+        devcontainer build \
+          --workspace-folder ${{ inputs.workspace }} \
+          --cache-from ${{ inputs.repository }} \
+          --cache-to type=inline \
+          --platform ${{ inputs.platforms }} \
+          --output type=docker,dest=${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar \
+          | tee ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout
+
+        echo "image_name=$(cat ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout \
+          | jq -r .imageName[0])" >> "$GITHUB_OUTPUT"
+
+    - name: Load devcontainer
+      id: load
+      if: ${{ inputs.push == 'true' }}
+      shell: bash
+      run: |
+        docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout
+        echo "digest=$(docker inspect -f '{{ .Id }}' ${{ steps.build.outputs.image_name }})" >> "$GITHUB_OUTPUT"
+
+    - name: Tag devcontainer
+      if: ${{ inputs.push == 'true' }}
+      shell: bash
+      run: |
+        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:latest
+        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
+        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
+        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
+        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}
+
+    - name: Push devcontainer
+      if: ${{ inputs.push == 'true' }}
+      shell: bash
+      run: |
+        docker push ${{ inputs.repository }}:latest
+        docker push ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
+        docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
+        docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
+        docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}
+
+    - name: Cleanup devcontainer build
+      if: ${{ inputs.cleanup == 'true' }}
+      shell: bash
+      run: |
+        docker image rm -f ${{ steps.build.outputs.image_name }} \
+          ${{ inputs.repository }}:latest \
+          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}
+
+        docker builder prune --all --force --verbose
+
+    # jscpd:ignore-start
+    - name: Attest
+      uses: actions/attest-build-provenance@v1
+      id: attest
+      if: ${{ inputs.push == 'true' }}
+      with:
+        subject-name: ${{ inputs.repository }}
+        subject-digest: ${{ steps.load.outputs.digest }}
+        push-to-registry: true
+    # jscpd:ignore-end

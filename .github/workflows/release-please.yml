@@ -1,0 +1,65 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    environment: main
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      packages: write
+      attestations: write
+    steps:
+      - name: Process Release
+        uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          command: manifest
+
+      - name: Checkout
+        if: ${{ steps.release.outputs.releases_created }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # jscpd:ignore-start
+      - name: Publish Janus Container
+        if: ${{ steps.release.outputs['containers/janus--release_created'] }}
+        uses: ./.github/actions/container
+        with:
+          context: "{{defaultContext}}:containers/janus"
+          platforms: linux/amd64
+          push: true
+          repository: ghcr.io/jhatler/janus
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          semver_major: ${{ steps.release.outputs['containers/janus--major'] }}
+          semver_minor: ${{ steps.release.outputs['containers/janus--minor'] }}
+          semver_patch: ${{ steps.release.outputs['containers/janus--patch'] }}
+      # jscpd:ignore-end
+
+      # jscpd:ignore-start
+      - name: Publish Janus Devcontainer
+        if: ${{ steps.release.outputs['devcontainers/janus--release_created'] || steps.release.outputs['containers/janus--release_created'] }}
+        uses: ./.github/actions/devcontainer
+        with:
+          workspace: ${{ github.workspace }}/devcontainers/janus
+          platforms: linux/amd64
+          push: true
+          repository: ghcr.io/jhatler/janus-devcontainer
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          semver_major: ${{ steps.release.outputs['devcontainers/janus--major'] }}
+          semver_minor: ${{ steps.release.outputs['devcontainers/janus--minor'] }}
+          semver_patch: ${{ steps.release.outputs['devcontainers/janus--patch'] }}
+      # jscpd:ignore-end
