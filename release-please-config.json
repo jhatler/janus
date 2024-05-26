@@ -71,7 +71,7 @@
     ],
     "include-component-in-tag": true,
     "include-v-in-tag": true,
-    "initial-version": "0.0.1",
+    "initial-version": "0.1.0",
     "packages": {
         ".": {
             "release-type": "node",
