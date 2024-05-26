@@ -15,18 +15,59 @@
     "bump-minor-pre-major": true,
     "bump-patch-for-minor-pre-major": true,
     "changelog-sections": [
-        { "type": "feat", "section": "Features" },
-        { "type": "feature", "section": "Features" },
-        { "type": "fix", "section": "Bug Fixes" },
-        { "type": "perf", "section": "Performance Improvements" },
-        { "type": "revert", "section": "Reverts" },
-        { "type": "docs", "section": "Documentation" },
-        { "type": "style", "section": "Styles" },
-        { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
-        { "type": "refactor", "section": "Code Refactoring", "hidden": false },
-        { "type": "test", "section": "Tests", "hidden": true },
-        { "type": "build", "section": "Build System", "hidden": true },
-        { "type": "ci", "section": "Continuous Integration", "hidden": true }
+        {
+            "type": "feat",
+            "section": "Features"
+        },
+        {
+            "type": "feature",
+            "section": "Features"
+        },
+        {
+            "type": "fix",
+            "section": "Bug Fixes"
+        },
+        {
+            "type": "perf",
+            "section": "Performance Improvements"
+        },
+        {
+            "type": "revert",
+            "section": "Reverts"
+        },
+        {
+            "type": "docs",
+            "section": "Documentation"
+        },
+        {
+            "type": "style",
+            "section": "Styles"
+        },
+        {
+            "type": "chore",
+            "section": "Miscellaneous Chores",
+            "hidden": true
+        },
+        {
+            "type": "refactor",
+            "section": "Code Refactoring",
+            "hidden": false
+        },
+        {
+            "type": "test",
+            "section": "Tests",
+            "hidden": true
+        },
+        {
+            "type": "build",
+            "section": "Build System",
+            "hidden": true
+        },
+        {
+            "type": "ci",
+            "section": "Continuous Integration",
+            "hidden": true
+        }
     ],
     "include-component-in-tag": true,
     "include-v-in-tag": true,
@@ -46,7 +87,7 @@
             ]
         },
         "containers/janus": {
-            "release-type": "docker",
+            "release-type": "simple",
             "package-name": "container-janus",
             "component": "container-janus"
         },
