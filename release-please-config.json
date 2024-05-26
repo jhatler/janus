@@ -75,7 +75,7 @@
     "packages": {
         ".": {
             "release-type": "node",
-            "package-name": "janus",
+            "package-name": "Janus",
             "component": "janus"
         },
         ".devcontainer": {
@@ -85,6 +85,14 @@
             "extra-files": [
                 "devcontainer.json"
             ]
+        },
+        "packages/janus.js": {
+            "release-type": "node",
+            "package-name": "Janus.js"
+        },
+        "lib/pyjanus": {
+            "release-type": "python",
+            "package-name": "pyJanus"
         },
         "containers/janus": {
             "release-type": "simple",
@@ -98,14 +106,6 @@
             "extra-files": [
                 ".devcontainer/devcontainer.json"
             ]
-        },
-        "packages/janus.js": {
-            "release-type": "node",
-            "package-name": "janusjs"
-        },
-        "lib/pyjanus": {
-            "release-type": "python",
-            "package-name": "janusjs"
         }
     }
 }
