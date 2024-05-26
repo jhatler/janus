@@ -1,0 +1,48 @@
+---
+name: PR Checks for Janus Devcontainer
+on:
+  pull_request:
+    paths:
+      - 'devcontainers/janus/**'
+      - '!devcontainers/janus/CHANGELOG.md'
+
+# jscpd:ignore-start
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build Devcontainer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: linux/amd64
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # jscpd:ignore-end
+
+      - name: Build Devcontainer
+        uses: ./.github/actions/devcontainer
+        with:
+          workspace: ${{ github.workspace }}/devcontainers/janus
+          platforms: ${{ matrix.arch }}
+          push: false
+          repository: ghcr.io/jhatler/janus-devcontainer
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}

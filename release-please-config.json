@@ -1,0 +1,70 @@
+{
+    "plugins": [
+        "sentence-case",
+        {
+            "type": "linked-versions",
+            "group-name": "devenv",
+            "components": [
+                "devcontainer",
+                "container-janus",
+                "devcontainer-janus"
+            ],
+            "merge": false
+        }
+    ],
+    "bump-minor-pre-major": true,
+    "bump-patch-for-minor-pre-major": true,
+    "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "feature", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "perf", "section": "Performance Improvements" },
+        { "type": "revert", "section": "Reverts" },
+        { "type": "docs", "section": "Documentation" },
+        { "type": "style", "section": "Styles" },
+        { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
+        { "type": "refactor", "section": "Code Refactoring", "hidden": false },
+        { "type": "test", "section": "Tests", "hidden": true },
+        { "type": "build", "section": "Build System", "hidden": true },
+        { "type": "ci", "section": "Continuous Integration", "hidden": true }
+    ],
+    "include-component-in-tag": true,
+    "include-v-in-tag": true,
+    "initial-version": "0.0.1",
+    "packages": {
+        ".": {
+            "release-type": "node",
+            "package-name": "janus",
+            "component": "janus"
+        },
+        ".devcontainer": {
+            "release-type": "simple",
+            "package-name": "devcontainer",
+            "component": "devcontainer",
+            "extra-files": [
+                "devcontainer.json"
+            ]
+        },
+        "containers/janus": {
+            "release-type": "docker",
+            "package-name": "container-janus",
+            "component": "container-janus"
+        },
+        "devcontainers/janus": {
+            "release-type": "simple",
+            "package-name": "devcontainer-janus",
+            "component": "devcontainer-janus",
+            "extra-files": [
+                ".devcontainer/devcontainer.json"
+            ]
+        },
+        "packages/janus.js": {
+            "release-type": "node",
+            "package-name": "janusjs"
+        },
+        "lib/pyjanus": {
+            "release-type": "python",
+            "package-name": "janusjs"
+        }
+    }
+}
