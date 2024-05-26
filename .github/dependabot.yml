@@ -1,7 +1,7 @@
 version: 2
 updates:
-  - package-ecosystem: "devcontainers"
-    directory: "/"
+  - package-ecosystem: "docker"
+    directory: "/containers/janus/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "devcontainers"
@@ -13,6 +13,6 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/lib/pyjanus/"
     schedule:
       interval: "weekly"
