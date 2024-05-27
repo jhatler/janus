@@ -86,11 +86,13 @@ runs:
         push: false
 
     - name: Load container
+      id: load
       if: ${{ inputs.push == 'true' }}
       shell: bash
       run: |
         docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
         rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.imageid }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
 
     - name: Tag container
       if: ${{ inputs.push == 'true' }}
@@ -132,6 +134,6 @@ runs:
       if: ${{ inputs.push == 'true' }}
       with:
         subject-name: ${{ inputs.repository }}
-        subject-digest: ${{ steps.build.outputs.digest }}
+        subject-digest: ${{ steps.load.outputs.digest }}
         push-to-registry: true
     # jscpd:ignore-end
