@@ -104,7 +104,7 @@ runs:
         docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
         rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
         rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout
-        echo "digest=$(docker inspect -f '{{ .Id }}' ${{ steps.build.outputs.image_name }})" >> "$GITHUB_OUTPUT"
+        echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.image_name }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
 
     - name: Tag devcontainer
       if: ${{ inputs.push == 'true' }}
