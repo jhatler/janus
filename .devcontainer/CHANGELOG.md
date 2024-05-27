@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/jhatler/janus/compare/devcontainer-v0.1.1...devcontainer-v0.1.2) (2024-05-27)
+
+
+### Bug Fixes
+
+* Perform attest before cleanup ([#35](https://github.com/jhatler/janus/issues/35)) ([49146e6](https://github.com/jhatler/janus/commit/49146e67b0dd18b70f97a6e950af01f6a2e8cc28)), closes [#34](https://github.com/jhatler/janus/issues/34)
+
 ## [0.1.1](https://github.com/jhatler/janus/compare/devcontainer-v0.1.0...devcontainer-v0.1.1) (2024-05-27)
 
 
