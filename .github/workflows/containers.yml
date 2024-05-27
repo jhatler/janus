@@ -1,0 +1,129 @@
+---
+name: Containers PR
+on:
+  pull_request:
+    paths:
+      - 'containers/janus/**'
+      - '!containers/janus/CHANGELOG.md'
+      - 'devcontainers/janus/**'
+      - '!devcontainers/janus/CHANGELOG.md'
+      - '.devcontainer/**'
+      - '!.devcontainer/CHANGELOG.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  # jscpd:ignore-start
+  container:
+    name: Build Janus Container
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      packages: write
+      attestations: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Git Version
+        id: container-git-version
+        uses: codacy/git-version@2.8.0
+        with:
+          release-branch: main
+          minor-identifier: /(feat|feature):/
+          major-identifier: /!:/
+          prefix: container-janus-v
+          log-paths: |
+            containers/janus/
+
+      - name: Git Version Output
+        id: container-version
+        run: |
+          echo "major=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f1 | rev | cut -f1 -dv)" >> "$GITHUB_OUTPUT"
+          echo "minor=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f2)" >> "$GITHUB_OUTPUT"
+          echo "patch=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f3-)" >> "$GITHUB_OUTPUT"
+
+      - name: Build Container
+        uses: ./.github/actions/container
+        with:
+          context: "{{defaultContext}}:containers/janus"
+          platforms: linux/amd64,linux/arm64
+          push: true
+          repository: ghcr.io/jhatler/janus
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          semver_major: ${{ steps.container-version.outputs.major }}
+          semver_minor: ${{ steps.container-version.outputs.minor }}
+          semver_patch: ${{ steps.container-version.outputs.patch }}
+  # jscpd:ignore-end
+
+  # jscpd:ignore-start
+  devcontainer:
+    name: Build Devcontainer
+    needs: container
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      packages: write
+      attestations: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Git Version
+        id: devcontainer-git-version
+        uses: codacy/git-version@2.8.0
+        with:
+          release-branch: main
+          minor-identifier: /(feat|feature):/
+          major-identifier: /!:/
+          prefix: devcontainer-janus-v
+          log-paths: |
+            devcontainers/janus/
+
+      - name: Git Version Output
+        id: devcontainer-version
+        run: |
+          echo "major=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f1 | rev | cut -f1 -dv)" >> "$GITHUB_OUTPUT"
+          echo "minor=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f2)" >> "$GITHUB_OUTPUT"
+          echo "patch=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f3-)" >> "$GITHUB_OUTPUT"
+
+      - name: Build Devcontainer
+        uses: ./.github/actions/devcontainer
+        with:
+          workspace: ${{ github.workspace }}/devcontainers/janus
+          platforms: linux/amd64,linux/arm64
+          push: true
+          repository: ghcr.io/jhatler/janus-devcontainer
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          semver_major: ${{ steps.devcontainer-version.outputs.major }}
+          semver_minor: ${{ steps.devcontainer-version.outputs.minor }}
+          semver_patch: ${{ steps.devcontainer-version.outputs.patch }}
+
+      - name: Update checkout devcontainer
+        shell: bash
+        run: |
+          sed -Ei 's/:v[^"]+"(.* x-release-please-version)/:v${{ steps.devcontainer-version.outputs.major }}.${{ steps.devcontainer-version.outputs.minor }}.${{ steps.devcontainer-version.outputs.patch }}"\1/' .devcontainer/devcontainer.json
+          cat .devcontainer/devcontainer.json
+
+      - name: Test Devcontainer Using CLI
+        shell: bash
+        run: |
+          devcontainer up --workspace-folder .
+          devcontainer exec --workspace-folder . /usr/local/share/nvm/versions/node/v22.2.0/bin/devcontainer --version
+  # jscpd:ignore-end
