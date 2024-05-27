@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/jhatler/janus/compare/janus-v0.1.2...janus-v0.1.3) (2024-05-27)
+
+
+### Bug Fixes
+
+* Container attestation fixes ([#38](https://github.com/jhatler/janus/issues/38)) ([92ca0e9](https://github.com/jhatler/janus/commit/92ca0e9d275d9a2712df79229e1a8e50a0c95274)), closes [#37](https://github.com/jhatler/janus/issues/37)
+* Overhaul devcontainer and container actions ([#41](https://github.com/jhatler/janus/issues/41)) ([579dc0f](https://github.com/jhatler/janus/commit/579dc0fb18f0e324900274e2112489397cefddd0)), closes [#37](https://github.com/jhatler/janus/issues/37)
+
 ## [0.1.2](https://github.com/jhatler/janus/compare/janus-v0.1.1...janus-v0.1.2) (2024-05-27)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/jhatler/janus/compare/devcontainer-v0.1.2...devcontainer-v0.1.3) (2024-05-27)
+
+
+### Bug Fixes
+
+* Overhaul devcontainer and container actions ([#41](https://github.com/jhatler/janus/issues/41)) ([579dc0f](https://github.com/jhatler/janus/commit/579dc0fb18f0e324900274e2112489397cefddd0)), closes [#37](https://github.com/jhatler/janus/issues/37)
+
 ## [0.1.2](https://github.com/jhatler/janus/compare/devcontainer-v0.1.1...devcontainer-v0.1.2) (2024-05-27)
 
 
