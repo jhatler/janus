@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/jhatler/janus/compare/devcontainer-janus-v0.1.0...devcontainer-janus-v0.1.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* Remove vscode extension valentjn.vscode-ltex ([0a36654](https://github.com/jhatler/janus/commit/0a366548840c35f47faa6c2679a464179c6ecb4d)), closes [#31](https://github.com/jhatler/janus/issues/31)
+
 ## 0.1.0 (2024-05-27)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/jhatler/janus/compare/container-janus-v0.1.0...container-janus-v0.1.1) (2024-05-27)
+
+
+### Miscellaneous Chores
+
+* **container-janus:** Synchronize undefined versions
+
 ## 0.1.0 (2024-05-27)
 
 

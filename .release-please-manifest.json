@@ -1,8 +1,8 @@
 {
-  ".": "0.1.0",
-  ".devcontainer": "0.1.0",
-  "containers/janus": "0.1.0",
-  "devcontainers/janus": "0.1.0",
+  ".": "0.1.1",
+  ".devcontainer": "0.1.1",
+  "containers/janus": "0.1.1",
+  "devcontainers/janus": "0.1.1",
   "packages/janus.js": "0.1.0",
   "lib/pyjanus": "0.1.0"
 }
