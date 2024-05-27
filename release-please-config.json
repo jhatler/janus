@@ -83,7 +83,10 @@
             "package-name": "devcontainer",
             "component": "devcontainer",
             "extra-files": [
-                "devcontainer.json"
+                {
+                    "type": "generic",
+                    "path": "devcontainer.json"
+                }
             ]
         },
         "packages/janus.js": {
@@ -104,7 +107,10 @@
             "package-name": "devcontainer-janus",
             "component": "devcontainer-janus",
             "extra-files": [
-                ".devcontainer/devcontainer.json"
+                {
+                    "type": "generic",
+                    "path": ".devcontainer/devcontainer.json"
+                }
             ]
         }
     }
