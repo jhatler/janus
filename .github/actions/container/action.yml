@@ -87,13 +87,18 @@ runs:
 
     - name: Load container
       id: load
-      if: ${{ inputs.push == 'true' }}
       shell: bash
       run: |
         docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        date
         rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        date
+        docker inspect -f '{{index .Id}}' ${{ steps.build.outputs.imageid }}
+        date
         docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.imageid }}
+        date
         echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.imageid }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
+        date
 
     - name: Tag container
       if: ${{ inputs.push == 'true' }}
@@ -119,11 +124,11 @@ runs:
     - name: Attest
       uses: actions/attest-build-provenance@v1
       id: attest
-      if: ${{ inputs.push == 'true' }}
+      if: ${{ inputs.push == 'false' }}
       with:
         subject-name: ${{ inputs.repository }}
         subject-digest: ${{ steps.load.outputs.digest }}
-        push-to-registry: true
+        push-to-registry: false
     # jscpd:ignore-end
 
     - name: Cleanup container build
