@@ -92,6 +92,7 @@ runs:
       run: |
         docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
         rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
+        docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.imageid }}
         echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.imageid }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
 
     - name: Tag container
@@ -114,19 +115,6 @@ runs:
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}
 
-    - name: Cleanup container build
-      if: ${{ inputs.cleanup == 'true' }}
-      shell: bash
-      run: |
-        docker image rm -f ${{ steps.build.outputs.imageid }} \
-          ${{ inputs.repository }}:latest \
-          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}
-
-        docker builder prune --all --force --verbose
-
     # jscpd:ignore-start
     - name: Attest
       uses: actions/attest-build-provenance@v1
@@ -137,3 +125,15 @@ runs:
         subject-digest: ${{ steps.load.outputs.digest }}
         push-to-registry: true
     # jscpd:ignore-end
+
+    - name: Cleanup container build
+      if: ${{ inputs.cleanup == 'true' }}
+      shell: bash
+      run: |
+        docker image rm -f ${{ steps.build.outputs.imageid }} \
+          ${{ inputs.repository }}:latest \
+          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }} \
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}
+        docker builder prune --all --force --verbose

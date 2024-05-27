@@ -126,6 +126,17 @@ runs:
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}
 
+    # jscpd:ignore-start
+    - name: Attest
+      uses: actions/attest-build-provenance@v1
+      id: attest
+      if: ${{ inputs.push == 'true' }}
+      with:
+        subject-name: ${{ inputs.repository }}
+        subject-digest: ${{ steps.load.outputs.digest }}
+        push-to-registry: true
+    # jscpd:ignore-end
+
     - name: Cleanup devcontainer build
       if: ${{ inputs.cleanup == 'true' }}
       shell: bash
@@ -138,14 +149,3 @@ runs:
           ${{ inputs.repository }}:v${{ inputs.semver_major }}
 
         docker builder prune --all --force --verbose
-
-    # jscpd:ignore-start
-    - name: Attest
-      uses: actions/attest-build-provenance@v1
-      id: attest
-      if: ${{ inputs.push == 'true' }}
-      with:
-        subject-name: ${{ inputs.repository }}
-        subject-digest: ${{ steps.load.outputs.digest }}
-        push-to-registry: true
-    # jscpd:ignore-end
