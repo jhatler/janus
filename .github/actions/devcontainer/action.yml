@@ -75,11 +75,38 @@ runs:
     - name: Set up Node
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: '18.x'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@microsoft'
 
-    - name: Install Devcontainer CLI
+    - name: Cache devcontainers CLI
+      id: cache-devcontainers-cli
+      uses: actions/cache@v4
+      with:
+        path: devcontainers-cli-6b04427324f9c27bf7c43f27ce9f0abfb4912f81.tgz
+        key: devcontainers-cli-6b04427324f9c27bf7c43f27ce9f0abfb4912f81
+
+    - name: Build devcontainers CLI
       shell: bash
-      run: npm install -g @devcontainers/cli
+      id: tgz
+      if: steps.cache-devcontainers-cli.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/devcontainers/cli.git ${{ runner.temp }}/cli
+        cd ${{ runner.temp }}/cli
+
+        git checkout 6b04427324f9c27bf7c43f27ce9f0abfb4912f81
+
+        yarn install --frozen-lockfile
+        yarn type-check
+        yarn lint
+        yarn package
+
+        mv devcontainers-cli-$(jq -r '.version' < package.json).tgz ${{ github.workspace }}/devcontainers-cli-6b04427324f9c27bf7c43f27ce9f0abfb4912f81.tgz
+
+    - name: Install devcontainers CLI
+      shell: bash
+      run: |
+        npm install -g ${{ github.workspace }}/devcontainers-cli-6b04427324f9c27bf7c43f27ce9f0abfb4912f81.tgz
 
     - name: Build devcontainer
       id: build
@@ -90,31 +117,22 @@ runs:
           --cache-from ${{ inputs.repository }} \
           --cache-to type=inline \
           --platform ${{ inputs.platforms }} \
-          --output type=docker,dest=${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar \
-          | tee ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout
+          --image-name ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
+          --output type=image,name=${{ inputs.repository }}:${{ steps.git.outputs.short_sha }},push=${{ inputs.push }}
 
-        echo "image_name=$(cat ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout \
-          | jq -r .imageName[0])" >> "$GITHUB_OUTPUT"
-
-    - name: Load devcontainer
-      id: load
+    - name: Retrieve and Tag devcontainer
+      id: tag
       if: ${{ inputs.push == 'true' }}
       shell: bash
       run: |
-        docker load -i ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
-        rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.tar
-        rm -f ${{ github.workspace }}/${{ steps.uuid.outputs.uuid }}.stdout
-        echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.build.outputs.image_name }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
+        docker pull ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
 
-    - name: Tag devcontainer
-      if: ${{ inputs.push == 'true' }}
-      shell: bash
-      run: |
-        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:latest
-        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
-        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
-        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
-        docker tag ${{ steps.build.outputs.image_name }} ${{ inputs.repository }}:v${{ inputs.semver_major }}
+        docker tag ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} ${{ inputs.repository }}:latest
+        docker tag ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
+        docker tag ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
+        docker tag ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} ${{ inputs.repository }}:v${{ inputs.semver_major }}
+
+        echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} | cut -f2 -d@)" >> "$GITHUB_OUTPUT"
 
     - name: Push devcontainer
       if: ${{ inputs.push == 'true' }}
@@ -133,19 +151,6 @@ runs:
       if: ${{ inputs.push == 'true' }}
       with:
         subject-name: ${{ inputs.repository }}
-        subject-digest: ${{ steps.load.outputs.digest }}
+        subject-digest: ${{ steps.tag.outputs.digest }}
         push-to-registry: true
     # jscpd:ignore-end
-
-    - name: Cleanup devcontainer build
-      if: ${{ inputs.cleanup == 'true' }}
-      shell: bash
-      run: |
-        docker image rm -f ${{ steps.build.outputs.image_name }} \
-          ${{ inputs.repository }}:latest \
-          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }} \
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}
-
-        docker builder prune --all --force --verbose

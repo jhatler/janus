@@ -1,5 +1,5 @@
 ---
-name: PR Checks
+name: Lint Codebase
 on:
   pull_request:
 
