@@ -3,7 +3,9 @@
     "@tsconfig/node22/tsconfig.json"
   ],
   "include": [
-    "packages/*/src/**/*"
+    "packages/*/src/**/*",
+    "packages/*/test/**/*.ts",
+    "packages/release-trigger/.prettierrc.js"
   ],
   "exclude": [
     "**/*.json"

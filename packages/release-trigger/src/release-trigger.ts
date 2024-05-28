@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// eslint-disable-next-line node/no-extraneous-import
 import {Octokit} from '@octokit/rest';
 import {logger as defaultLogger, GCFLogger} from 'gcf-utils';
 
@@ -126,16 +125,13 @@ export async function findPendingReleasePullRequests(
   logger: GCFLogger = defaultLogger
 ): Promise<PullRequest[]> {
   // TODO: switch to graphql
-  const listGenerator = octokit.paginate.iterator(
-    'GET /repos/{owner}/{repo}/pulls',
-    {
-      owner: repository.owner,
-      repo: repository.repo,
-      state: 'closed',
-      sort: 'updated',
-      direction: 'desc',
-    }
-  );
+  const listGenerator = octokit.paginate.iterator('GET /repos/{owner}/{repo}/pulls', {
+    owner: repository.owner,
+    repo: repository.repo,
+    state: 'closed',
+    sort: 'updated',
+    direction: 'desc',
+  });
 
   const found: PullRequest[] = [];
   let page = 1;
@@ -166,12 +162,7 @@ export async function triggerKokoroJob(
   token: string,
   options: TriggerKokoroOptions = {}
 ): Promise<{stdout: string; stderr: string; jobName?: string}> {
-  return invokeAutoreleaseWithArgs(
-    pullRequestUrl,
-    token,
-    ['trigger-single', `--pull=${pullRequestUrl}`],
-    options
-  );
+  return invokeAutoreleaseWithArgs(pullRequestUrl, token, ['trigger-single', `--pull=${pullRequestUrl}`], options);
 }
 
 /**
@@ -227,11 +218,7 @@ export async function markTriggered(
   });
 }
 
-export async function markFailed(
-  octokit: Octokit,
-  pullRequest: BasicPullRequest,
-  logger: GCFLogger = defaultLogger
-) {
+export async function markFailed(octokit: Octokit, pullRequest: BasicPullRequest, logger: GCFLogger = defaultLogger) {
   logger.info('adding `autorelease: failed` label');
   await octokit.issues.addLabels({
     owner: pullRequest.owner,

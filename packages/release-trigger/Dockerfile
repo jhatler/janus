@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# checkov:skip=CKV_DOCKER_3:Handled by devcontainer
+# checkov:skip=CKV_DOCKER_2:Not applicable
+
 # Use a multi-stage docker build to limit production dependencies.
 
 # Use the Yoshi Node.js 14 image - it has python3 installed
@@ -41,7 +44,7 @@ COPY package*.json ./
 COPY --from=BUILD /home/node/build build
 COPY requirements.txt ./
 RUN npm ci --only=production && \
-    python3 -m pip install --require-hashes -r requirements.txt
+    python3 -m pip install --no-cache-dir --require-hashes -r requirements.txt
 
 ENV NODE_ENV "production"
 

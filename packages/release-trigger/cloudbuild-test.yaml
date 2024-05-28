@@ -24,7 +24,7 @@ steps:
       - "."
 
   - name: gcr.io/gcp-runtimes/container-structure-test
-    args: 
+    args:
       - "test"
       - "--image"
       - "gcr.io/$PROJECT_ID/release-trigger"

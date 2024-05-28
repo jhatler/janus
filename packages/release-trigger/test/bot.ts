@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* eslint-disable node/no-extraneous-import */
 import myProbotApp from '../src/bot';
 import {resolve} from 'path';
 import {Probot, createProbot, ProbotOctokit} from 'probot';
@@ -77,9 +76,7 @@ describe('bot', () => {
     getConfigStub = sandbox.stub(botConfigModule, 'getConfig');
     datastoreLockAcquireStub = sandbox.stub(DatastoreLock.prototype, 'acquire');
     datastoreLockReleaseStub = sandbox.stub(DatastoreLock.prototype, 'release');
-    sandbox.replace(releaseTriggerModule, 'ALLOWED_ORGANIZATIONS', [
-      'Codertocat',
-    ]);
+    sandbox.replace(releaseTriggerModule, 'ALLOWED_ORGANIZATIONS', ['Codertocat']);
     sandbox.stub(gcfUtils, 'getAuthenticatedOctokit').resolves(new Octokit());
   });
 
@@ -92,10 +89,7 @@ describe('bot', () => {
       sandbox.stub(releaseTriggerModule, 'delay').resolves();
     });
     it('should trigger a kokoro job via releasetool', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/release_published'
-      ));
+      const payload = require(resolve(fixturesPath, './events/release_published'));
       const pull1 = buildFakePullRequest('Codertocat', 'Hello-World', 1234);
       const pull2 = buildFakePullRequest('Codertocat', 'Hello-World', 1235);
       const requests = nock('https://api.github.com')
@@ -113,9 +107,7 @@ describe('bot', () => {
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'release',
@@ -125,14 +117,8 @@ describe('bot', () => {
 
       sinon.assert.calledOnce(getConfigStub);
       sinon.assert.calledOnce(findPullRequestsStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1234'
-      );
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1235'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1234');
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1235');
       sinon.assert.calledWith(
         markTriggeredStub,
         sinon.match.any,
@@ -147,14 +133,9 @@ describe('bot', () => {
     });
 
     it('should comment on pull request after triggering job', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/release_published'
-      ));
+      const payload = require(resolve(fixturesPath, './events/release_published'));
       const pull1 = buildFakePullRequest('Codertocat', 'Hello-World', 1234);
-      const requests = nock('https://api.github.com')
-        .get('/repos/Codertocat/Hello-World/pulls/1234')
-        .reply(200, pull1);
+      const requests = nock('https://api.github.com').get('/repos/Codertocat/Hello-World/pulls/1234').reply(200, pull1);
 
       getConfigStub.resolves({enabled: true});
       datastoreLockAcquireStub.resolves(true);
@@ -165,12 +146,8 @@ describe('bot', () => {
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: '', jobName: 'my-job-name'});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
-      const commentStub = sandbox
-        .stub(gcfUtils, 'addOrUpdateIssueComment')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
+      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'release',
@@ -180,10 +157,7 @@ describe('bot', () => {
 
       sinon.assert.calledOnce(getConfigStub);
       sinon.assert.calledOnce(findPullRequestsStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1234'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1234');
       sinon.assert.calledWith(
         markTriggeredStub,
         sinon.match.any,
@@ -202,17 +176,12 @@ describe('bot', () => {
     });
 
     it('should ignore if pull request already triggered', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/release_published'
-      ));
+      const payload = require(resolve(fixturesPath, './events/release_published'));
       const pull1 = buildFakePullRequest('Codertocat', 'Hello-World', 1234);
-      const pull1Triggered = buildFakePullRequest(
-        'Codertocat',
-        'Hello-World',
-        1234,
-        ['autorelease: tagged', 'autorelease: triggered']
-      );
+      const pull1Triggered = buildFakePullRequest('Codertocat', 'Hello-World', 1234, [
+        'autorelease: tagged',
+        'autorelease: triggered',
+      ]);
       const pull2 = buildFakePullRequest('Codertocat', 'Hello-World', 1235);
       const requests = nock('https://api.github.com')
         .get('/repos/Codertocat/Hello-World/pulls/1234')
@@ -229,9 +198,7 @@ describe('bot', () => {
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'release',
@@ -242,10 +209,7 @@ describe('bot', () => {
       sinon.assert.calledOnce(getConfigStub);
       sinon.assert.calledOnce(findPullRequestsStub);
       sinon.assert.calledOnce(triggerKokoroJobStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1235'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1235');
       sinon.assert.calledOnce(markTriggeredStub);
       sinon.assert.calledWith(
         markTriggeredStub,
@@ -256,10 +220,7 @@ describe('bot', () => {
     });
 
     it('should comment on the pull request if triggering crashes', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/release_published'
-      ));
+      const payload = require(resolve(fixturesPath, './events/release_published'));
       const pull1 = buildFakePullRequest('Codertocat', 'Hello-World', 1234);
       const pull2 = buildFakePullRequest('Codertocat', 'Hello-World', 1235);
       const requests = nock('https://api.github.com')
@@ -276,23 +237,10 @@ describe('bot', () => {
         .resolves([pull1, pull2]);
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
-        .rejects(
-          new TriggerError(
-            new Error(),
-            'some command',
-            'some stdout',
-            'some stderr'
-          )
-        );
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
-      const markFailedStub = sandbox
-        .stub(releaseTriggerModule, 'markFailed')
-        .resolves();
-      const commentStub = sandbox
-        .stub(gcfUtils, 'addOrUpdateIssueComment')
-        .resolves();
+        .rejects(new TriggerError(new Error(), 'some command', 'some stdout', 'some stderr'));
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
+      const markFailedStub = sandbox.stub(releaseTriggerModule, 'markFailed').resolves();
+      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'release',
@@ -302,14 +250,8 @@ describe('bot', () => {
 
       sinon.assert.calledOnce(getConfigStub);
       sinon.assert.calledOnce(findPullRequestsStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1234'
-      );
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/1235'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1234');
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/1235');
       sinon.assert.calledWith(
         markTriggeredStub,
         sinon.match.any,
@@ -330,30 +272,13 @@ describe('bot', () => {
         sinon.match.any,
         sinon.match({owner: 'Codertocat', repo: 'Hello-World', number: 1235})
       );
-      sinon.assert.calledWith(
-        commentStub,
-        sinon.match.any,
-        'Codertocat',
-        'Hello-World',
-        1234,
-        11835543
-      );
-      sinon.assert.calledWith(
-        commentStub,
-        sinon.match.any,
-        'Codertocat',
-        'Hello-World',
-        1235,
-        11835543
-      );
+      sinon.assert.calledWith(commentStub, sinon.match.any, 'Codertocat', 'Hello-World', 1234, 11835543);
+      sinon.assert.calledWith(commentStub, sinon.match.any, 'Codertocat', 'Hello-World', 1235, 11835543);
       requests.done();
     });
 
     it('should trigger a multi_scm job via releasetool', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/release_published'
-      ));
+      const payload = require(resolve(fixturesPath, './events/release_published'));
       const pull1 = buildFakePullRequest('Codertocat', 'Hello-World', 1234);
       const pull2 = buildFakePullRequest('Codertocat', 'Hello-World', 1235);
       const requests = nock('https://api.github.com')
@@ -371,9 +296,7 @@ describe('bot', () => {
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'release',
@@ -415,23 +338,16 @@ describe('bot', () => {
 
   describe('on pull request unlabeled', () => {
     it('should trigger a kokoro job if the label removed was autorelease: triggered', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_unlabeled'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_unlabeled'));
       getConfigStub.resolves({enabled: true});
       datastoreLockAcquireStub.resolves(true);
       datastoreLockReleaseStub.resolves(true);
       const pull = buildFakePullRequest('Codertocat', 'Hello-World', 2);
-      const requests = nock('https://api.github.com')
-        .get('/repos/Codertocat/Hello-World/pulls/2')
-        .reply(200, pull);
+      const requests = nock('https://api.github.com').get('/repos/Codertocat/Hello-World/pulls/2').reply(200, pull);
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'pull_request',
@@ -440,10 +356,7 @@ describe('bot', () => {
       });
 
       sinon.assert.calledOnce(getConfigStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/2'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/2');
       sinon.assert.calledWith(
         markTriggeredStub,
         sinon.match.any,
@@ -453,17 +366,12 @@ describe('bot', () => {
     });
 
     it('should ignore if pull request is not tagged', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_unlabeled_untagged'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_unlabeled_untagged'));
       getConfigStub.resolves({enabled: true});
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'pull_request',
@@ -477,17 +385,12 @@ describe('bot', () => {
     });
 
     it('should ignore other labels', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_unlabeled_other'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_unlabeled_other'));
       getConfigStub.resolves({enabled: true});
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: ''});
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
 
       await probot.receive({
         name: 'pull_request',
@@ -501,36 +404,18 @@ describe('bot', () => {
     });
 
     it('should comment on the pull request if triggering crashes', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_unlabeled'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_unlabeled'));
       getConfigStub.resolves({enabled: true});
       datastoreLockAcquireStub.resolves(true);
       datastoreLockReleaseStub.resolves(true);
       const pull = buildFakePullRequest('Codertocat', 'Hello-World', 2);
-      const requests = nock('https://api.github.com')
-        .get('/repos/Codertocat/Hello-World/pulls/2')
-        .reply(200, pull);
+      const requests = nock('https://api.github.com').get('/repos/Codertocat/Hello-World/pulls/2').reply(200, pull);
       const triggerKokoroJobStub = sandbox
         .stub(releaseTriggerModule, 'triggerKokoroJob')
-        .rejects(
-          new TriggerError(
-            new Error(),
-            'some command',
-            'some stdout',
-            'some stderr'
-          )
-        );
-      const markTriggeredStub = sandbox
-        .stub(releaseTriggerModule, 'markTriggered')
-        .resolves();
-      const markFailedStub = sandbox
-        .stub(releaseTriggerModule, 'markFailed')
-        .resolves();
-      const commentStub = sandbox
-        .stub(gcfUtils, 'addOrUpdateIssueComment')
-        .resolves();
+        .rejects(new TriggerError(new Error(), 'some command', 'some stdout', 'some stderr'));
+      const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
+      const markFailedStub = sandbox.stub(releaseTriggerModule, 'markFailed').resolves();
+      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'pull_request',
@@ -539,10 +424,7 @@ describe('bot', () => {
       });
 
       sinon.assert.calledOnce(getConfigStub);
-      sinon.assert.calledWith(
-        triggerKokoroJobStub,
-        'https://github.com/Codertocat/Hello-World/pull/2'
-      );
+      sinon.assert.calledWith(triggerKokoroJobStub, 'https://github.com/Codertocat/Hello-World/pull/2');
       sinon.assert.calledWith(
         markTriggeredStub,
         sinon.match.any,
@@ -553,28 +435,16 @@ describe('bot', () => {
         sinon.match.any,
         sinon.match({owner: 'Codertocat', repo: 'Hello-World', number: 2})
       );
-      sinon.assert.calledWith(
-        commentStub,
-        sinon.match.any,
-        'Codertocat',
-        'Hello-World',
-        2,
-        11835543
-      );
+      sinon.assert.calledWith(commentStub, sinon.match.any, 'Codertocat', 'Hello-World', 2, 11835543);
       requests.done();
     });
   });
 
   describe('on pull request labeled', () => {
     it('should remove labels if published', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_labeled'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_labeled'));
       getConfigStub.resolves({enabled: true});
-      const cleanupStub = sandbox
-        .stub(releaseTriggerModule, 'cleanupPublished')
-        .resolves(true);
+      const cleanupStub = sandbox.stub(releaseTriggerModule, 'cleanupPublished').resolves(true);
 
       await probot.receive({
         name: 'pull_request',
@@ -587,14 +457,9 @@ describe('bot', () => {
     });
 
     it('should ignore other labels', async () => {
-      const payload = require(resolve(
-        fixturesPath,
-        './events/pull_request_labeled_other'
-      ));
+      const payload = require(resolve(fixturesPath, './events/pull_request_labeled_other'));
       getConfigStub.resolves({enabled: true});
-      const cleanupStub = sandbox
-        .stub(releaseTriggerModule, 'cleanupPublished')
-        .resolves(true);
+      const cleanupStub = sandbox.stub(releaseTriggerModule, 'cleanupPublished').resolves(true);
 
       await probot.receive({
         name: 'pull_request',

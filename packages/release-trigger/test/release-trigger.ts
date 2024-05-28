@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* eslint-disable node/no-extraneous-import */
-
 import {describe, it, afterEach} from 'mocha';
 import * as sinon from 'sinon';
 import nock from 'nock';
@@ -78,37 +76,25 @@ describe('release-trigger', () => {
   describe('findPendingReleasePullRequests', () => {
     it('should paginate through pull requests', async () => {
       const scope = nock('https://api.github.com')
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc')
         .reply(200, [buildFakePullRequest('testOwner', 'testRepo', 1234)], {
           Link: '</repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2>; rel="next"',
         })
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2')
         .reply(200, [buildFakePullRequest('testOwner', 'testRepo', 1235)]);
       const pullRequests = await findPendingReleasePullRequests(octokit, {
         owner: 'testOwner',
         repo: 'testRepo',
       });
       assert.strictEqual(pullRequests.length, 2);
-      assert.strictEqual(
-        pullRequests[0].html_url,
-        'https://github.com/testOwner/testRepo/pull/1234'
-      );
-      assert.strictEqual(
-        pullRequests[1].html_url,
-        'https://github.com/testOwner/testRepo/pull/1235'
-      );
+      assert.strictEqual(pullRequests[0].html_url, 'https://github.com/testOwner/testRepo/pull/1234');
+      assert.strictEqual(pullRequests[1].html_url, 'https://github.com/testOwner/testRepo/pull/1235');
       scope.done();
     });
 
     it('should ignore older pull requests', async () => {
       const scope = nock('https://api.github.com')
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc')
         .reply(
           200,
           [
@@ -120,27 +106,20 @@ describe('release-trigger', () => {
             Link: '</repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2>; rel="next"',
           }
         )
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc&page=2')
         .reply(200, [buildFakePullRequest('testOwner', 'testRepo', 1235)]);
       const pullRequests = await findPendingReleasePullRequests(octokit, {
         owner: 'testOwner',
         repo: 'testRepo',
       });
       assert.strictEqual(pullRequests.length, 1);
-      assert.strictEqual(
-        pullRequests[0].html_url,
-        'https://github.com/testOwner/testRepo/pull/1235'
-      );
+      assert.strictEqual(pullRequests[0].html_url, 'https://github.com/testOwner/testRepo/pull/1235');
       scope.done();
     });
 
     it('should ignore non-release pull requests', async () => {
       const scope = nock('https://api.github.com')
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc')
         .reply(200, [
           buildFakePullRequest('testOwner', 'testRepo', 1234),
           buildFakePullRequest('testOwner', 'testRepo', 1235, {
@@ -152,18 +131,13 @@ describe('release-trigger', () => {
         repo: 'testRepo',
       });
       assert.strictEqual(pullRequests.length, 1);
-      assert.strictEqual(
-        pullRequests[0].html_url,
-        'https://github.com/testOwner/testRepo/pull/1234'
-      );
+      assert.strictEqual(pullRequests[0].html_url, 'https://github.com/testOwner/testRepo/pull/1234');
       scope.done();
     });
 
     it('should ignore pull requests already triggered', async () => {
       const scope = nock('https://api.github.com')
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc')
         .reply(200, [
           buildFakePullRequest('testOwner', 'testRepo', 1234),
           buildFakePullRequest('testOwner', 'testRepo', 1235, {
@@ -175,18 +149,13 @@ describe('release-trigger', () => {
         repo: 'testRepo',
       });
       assert.strictEqual(pullRequests.length, 1);
-      assert.strictEqual(
-        pullRequests[0].html_url,
-        'https://github.com/testOwner/testRepo/pull/1234'
-      );
+      assert.strictEqual(pullRequests[0].html_url, 'https://github.com/testOwner/testRepo/pull/1234');
       scope.done();
     });
 
     it('should ignore closed, unmerged pull requests', async () => {
       const scope = nock('https://api.github.com')
-        .get(
-          '/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc'
-        )
+        .get('/repos/testOwner/testRepo/pulls?state=closed&sort=updated&direction=desc')
         .reply(200, [
           buildFakePullRequest('testOwner', 'testRepo', 1234),
           buildFakePullRequest('testOwner', 'testRepo', 1235, {
@@ -198,10 +167,7 @@ describe('release-trigger', () => {
         repo: 'testRepo',
       });
       assert.strictEqual(pullRequests.length, 1);
-      assert.strictEqual(
-        pullRequests[0].html_url,
-        'https://github.com/testOwner/testRepo/pull/1234'
-      );
+      assert.strictEqual(pullRequests[0].html_url, 'https://github.com/testOwner/testRepo/pull/1234');
       scope.done();
     });
   });
@@ -214,10 +180,7 @@ describe('release-trigger', () => {
       const execStub = sandbox
         .stub(releaseTriggerModule, 'execFile')
         .resolves({stdout: 'some output', stderr: 'some error output'});
-      const {stdout, stderr} = await triggerKokoroJob(
-        'https://github.com/testOwner/testRepo/pull/1234',
-        'fake-token'
-      );
+      const {stdout, stderr} = await triggerKokoroJob('https://github.com/testOwner/testRepo/pull/1234', 'fake-token');
       assert.strictEqual(stdout, 'some output');
       assert.strictEqual(stderr, 'some error output');
       sinon.assert.calledOnce(execStub);
@@ -230,36 +193,23 @@ describe('release-trigger', () => {
         error: new Error('Command failed: /bin/false'),
       });
       const errorStub = sandbox.stub(logger, 'error');
-      await assert.rejects(
-        triggerKokoroJob(
-          'https://github.com/testOwner/testRepo/pull/1234',
-          'fake-token'
-        ),
-        err => {
-          if (err instanceof releaseTriggerModule.TriggerError) {
-            return err.message.includes('Command failed: /bin/false');
-          }
-          return false;
+      await assert.rejects(triggerKokoroJob('https://github.com/testOwner/testRepo/pull/1234', 'fake-token'), err => {
+        if (err instanceof releaseTriggerModule.TriggerError) {
+          return err.message.includes('Command failed: /bin/false');
         }
-      );
+        return false;
+      });
       sinon.assert.calledOnce(execStub);
-      sinon.assert.calledWithMatch(
-        errorStub,
-        sinon.match('error executing command')
-      );
+      sinon.assert.calledWithMatch(errorStub, sinon.match('error executing command'));
     });
 
     it('should trigger multi-scm job', async () => {
       const execStub = sandbox
         .stub(releaseTriggerModule, 'execFile')
         .resolves({stdout: 'some output', stderr: 'some error output'});
-      const {stdout, stderr} = await triggerKokoroJob(
-        'https://github.com/testOwner/testRepo/pull/1234',
-        'fake-token',
-        {
-          multiScmName: 'some-multi-scm-name',
-        }
-      );
+      const {stdout, stderr} = await triggerKokoroJob('https://github.com/testOwner/testRepo/pull/1234', 'fake-token', {
+        multiScmName: 'some-multi-scm-name',
+      });
       assert.strictEqual(stdout, 'some output');
       assert.strictEqual(stderr, 'some error output');
       sinon.assert.calledOnce(execStub);
@@ -275,9 +225,7 @@ describe('release-trigger', () => {
 
   describe('markTriggered', () => {
     it('should add a label to a pull request', async () => {
-      const scope = nock('https://api.github.com/')
-        .post('/repos/testOwner/testRepo/issues/1234/labels')
-        .reply(201);
+      const scope = nock('https://api.github.com/').post('/repos/testOwner/testRepo/issues/1234/labels').reply(201);
       await markTriggered(octokit, {
         owner: 'testOwner',
         repo: 'testRepo',
@@ -289,9 +237,7 @@ describe('release-trigger', () => {
 
   describe('markFailed', () => {
     it('should add a label to a pull request', async () => {
-      const scope = nock('https://api.github.com/')
-        .post('/repos/testOwner/testRepo/issues/1234/labels')
-        .reply(201);
+      const scope = nock('https://api.github.com/').post('/repos/testOwner/testRepo/issues/1234/labels').reply(201);
       await markTriggered(octokit, {
         owner: 'testOwner',
         repo: 'testRepo',
@@ -304,13 +250,9 @@ describe('release-trigger', () => {
   describe('cleanupPublished', () => {
     it('should remove tagged and triggered labels', async () => {
       const scope = nock('https://api.github.com/')
-        .delete(
-          '/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20tagged'
-        )
+        .delete('/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20tagged')
         .reply(200)
-        .delete(
-          '/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20triggered'
-        )
+        .delete('/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20triggered')
         .reply(200);
       await cleanupPublished(octokit, {
         owner: 'testOwner',
@@ -322,13 +264,9 @@ describe('release-trigger', () => {
 
     it('should not crash if one label does not exit', async () => {
       const scope = nock('https://api.github.com/')
-        .delete(
-          '/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20tagged'
-        )
+        .delete('/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20tagged')
         .reply(404)
-        .delete(
-          '/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20triggered'
-        )
+        .delete('/repos/testOwner/testRepo/issues/1234/labels/autorelease%3A%20triggered')
         .reply(200);
       await cleanupPublished(octokit, {
         owner: 'testOwner',
@@ -341,14 +279,13 @@ describe('release-trigger', () => {
 
   describe('parseJobName', () => {
     it('should parse emitted output', () => {
-      const output = `Processing chore(master): release java-function-invoker 1.2.0: https://github.com/GoogleCloudPlatform/functions-framework-java/pull/154
-      Triggering functions-framework/java/java-function-invoker/release using 4a4e471d05c93a95c5bb84dadd71ab7ae92352f0
-      `;
+      const output =
+        'Processing chore(master): release java-function-invoker 1.2.0: ' +
+        'https://github.com/GoogleCloudPlatform/functions-framework-java/pull/154\n' +
+        'Triggering functions-framework/java/java-function-invoker/release ' +
+        'using 4a4e471d05c93a95c5bb84dadd71ab7ae92352f0\n';
       const jobName = releaseTriggerModule.parseJobName(output);
-      assert.strictEqual(
-        jobName,
-        'functions-framework/java/java-function-invoker/release'
-      );
+      assert.strictEqual(jobName, 'functions-framework/java/java-function-invoker/release');
     });
   });
 });

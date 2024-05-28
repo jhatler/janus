@@ -12,24 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// eslint-disable-next-line node/no-extraneous-import
 import {Probot} from 'probot';
-// eslint-disable-next-line node/no-extraneous-import
 import {Octokit} from '@octokit/rest';
-import {
-  getAuthenticatedOctokit,
-  getContextLogger,
-  GCFLogger,
-  addOrUpdateIssueComment,
-} from 'gcf-utils';
+import {getAuthenticatedOctokit, getContextLogger, GCFLogger, addOrUpdateIssueComment} from 'gcf-utils';
 import {DatastoreLock} from '@google-automations/datastore-lock';
 import {ConfigChecker, getConfig} from '@google-automations/bot-config-utils';
 import schema from './config-schema.json';
-import {
-  ConfigurationOptions,
-  WELL_KNOWN_CONFIGURATION_FILE,
-  DEFAULT_CONFIGURATION,
-} from './config-constants';
+import {ConfigurationOptions, WELL_KNOWN_CONFIGURATION_FILE, DEFAULT_CONFIGURATION} from './config-constants';
 import {
   findPendingReleasePullRequests,
   triggerKokoroJob,
@@ -58,22 +47,12 @@ const TRIGGER_LOCK_ACQUIRE_TIMEOUT_MS = 120 * 1000;
  * @param f The function to execute while holding the lock.
  * @returns the value returned by f().
  */
-async function withTriggerLock<R>(
-  targetUrl: string,
-  f: () => Promise<R>
-): Promise<R> {
-  const lock = new DatastoreLock(
-    TRIGGER_LOCK_ID,
-    targetUrl,
-    TRIGGER_LOCK_DURATION_MS,
-    TRIGGER_LOCK_ACQUIRE_TIMEOUT_MS
-  );
+async function withTriggerLock<R>(targetUrl: string, f: () => Promise<R>): Promise<R> {
+  const lock = new DatastoreLock(TRIGGER_LOCK_ID, targetUrl, TRIGGER_LOCK_DURATION_MS, TRIGGER_LOCK_ACQUIRE_TIMEOUT_MS);
   const acquired = await lock.acquire();
   if (!acquired) {
     // throw an error and expect gcf-utils infrastructure to retry
-    throw new Error(
-      `Failed to acquire lock in ${TRIGGER_LOCK_ACQUIRE_TIMEOUT_MS}ms for ${targetUrl}`
-    );
+    throw new Error(`Failed to acquire lock in ${TRIGGER_LOCK_ACQUIRE_TIMEOUT_MS}ms for ${targetUrl}`);
   }
   try {
     return await f();
@@ -114,14 +93,7 @@ async function doTriggerWithLock(
 
     // double-check that the pull request is triggerable
     if (isReleasePullRequest(pullRequest)) {
-      await doTrigger(
-        octokit,
-        pullRequest,
-        token,
-        logger,
-        installationId,
-        multiScmName
-      );
+      await doTrigger(octokit, pullRequest, token, logger, installationId, multiScmName);
     } else {
       logger.warn(`Skipping triggering release PR: ${pullRequest.html_url}`);
     }
@@ -159,15 +131,10 @@ async function doTrigger(
       multiScmName,
     });
     if (jobName) {
-      const commentBody = `Triggered job: ${jobName} (${new Date().toISOString()})\n\nTo trigger again, remove the ${TRIGGERED_LABEL} label (in a few minutes).`;
-      await addOrUpdateIssueComment(
-        octokit,
-        owner,
-        repo,
-        number,
-        installationId,
-        commentBody
-      );
+      const commentBody =
+        `Triggered job: ${jobName} (${new Date().toISOString()})\n\n` +
+        `To trigger again, remove the ${TRIGGERED_LABEL} label (in a few minutes).`;
+      await addOrUpdateIssueComment(octokit, owner, repo, number, installationId, commentBody);
     }
   } catch (e) {
     logger.metric('release.trigger_failed', {
@@ -185,15 +152,10 @@ async function doTrigger(
       logger
     );
     if (e instanceof TriggerError) {
-      const commentBody = `Release triggering failed:\n\nstdout:\n \`\`\`\n${e.stdout}\n\`\`\`\n\nstderr: \`\`\`\n${e.stderr}\n\`\`\``;
-      await addOrUpdateIssueComment(
-        octokit,
-        owner,
-        repo,
-        number,
-        installationId,
-        commentBody
-      );
+      const commentBody =
+        `Release triggering failed:\n\nstdout:\n \`\`\`\n${e.stdout}\n\`\`\`\n\n` +
+        `stderr: \`\`\`\n${e.stderr}\n\`\`\``;
+      await addOrUpdateIssueComment(octokit, owner, repo, number, installationId, commentBody);
     }
   } finally {
     logger.metric('release.triggered', {
@@ -230,10 +192,7 @@ export = (app: Probot) => {
     if (context.payload.installation?.id) {
       octokit = await getAuthenticatedOctokit(context.payload.installation.id);
     } else {
-      throw new Error(
-        'Installation ID not provided in release.published event.' +
-          ' We cannot authenticate Octokit.'
-      );
+      throw new Error('Installation ID not provided in release.published event.' + ' We cannot authenticate Octokit.');
     }
     const remoteConfiguration = await getConfig<ConfigurationOptions>(
       octokit,
@@ -267,16 +226,12 @@ export = (app: Probot) => {
       token: string;
     };
     if (releasePullRequests.length === 0) {
-      logger.warn(
-        `Failed to find any pending pull requests for ${owner}/${repo}`
-      );
+      logger.warn(`Failed to find any pending pull requests for ${owner}/${repo}`);
       /// Has this repo been configured to trigger without pull requests?
       if (configuration.triggerWithoutPullRequest) {
         const lang = configuration.lang;
         if (!lang) {
-          logger.error(
-            'In the configuration, `lang` must be set when `triggerWithoutPullRequest` is true.'
-          );
+          logger.error('In the configuration, `lang` must be set when `triggerWithoutPullRequest` is true.');
           return;
         }
         const releaseUrl = context.payload.release.html_url;
@@ -336,8 +291,7 @@ export = (app: Probot) => {
       octokit = await getAuthenticatedOctokit(context.payload.installation.id);
     } else {
       throw new Error(
-        'Installation ID not provided in pull_request.labeled event.' +
-          ' We cannot authenticate Octokit.'
+        'Installation ID not provided in pull_request.labeled event.' + ' We cannot authenticate Octokit.'
       );
     }
     const remoteConfiguration = await getConfig<ConfigurationOptions>(
@@ -394,8 +348,7 @@ export = (app: Probot) => {
       octokit = await getAuthenticatedOctokit(context.payload.installation.id);
     } else {
       throw new Error(
-        'Installation ID not provided in pull_request.unlabeled event.' +
-          ' We cannot authenticate Octokit.'
+        'Installation ID not provided in pull_request.unlabeled event.' + ' We cannot authenticate Octokit.'
       );
     }
     const remoteConfiguration = await getConfig<ConfigurationOptions>(
@@ -460,14 +413,10 @@ export = (app: Probot) => {
       octokit = await getAuthenticatedOctokit(context.payload.installation.id);
     } else {
       throw new Error(
-        `Installation ID not provided in ${context.payload.action} event.` +
-          ' We cannot authenticate Octokit.'
+        `Installation ID not provided in ${context.payload.action} event.` + ' We cannot authenticate Octokit.'
       );
     }
-    const configChecker = new ConfigChecker<ConfigurationOptions>(
-      schema,
-      WELL_KNOWN_CONFIGURATION_FILE
-    );
+    const configChecker = new ConfigChecker<ConfigurationOptions>(schema, WELL_KNOWN_CONFIGURATION_FILE);
     await configChecker.validateConfigChanges(
       octokit,
       owner,
@@ -494,8 +443,7 @@ export = (app: Probot) => {
       octokit = await getAuthenticatedOctokit(context.payload.installation.id);
     } else {
       throw new Error(
-        'Installation ID not provided in schedule.repository event.' +
-          ' We cannot authenticate Octokit.'
+        'Installation ID not provided in schedule.repository event.' + ' We cannot authenticate Octokit.'
       );
     }
     const remoteConfiguration = await getConfig<ConfigurationOptions>(
