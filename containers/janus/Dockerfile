@@ -2,7 +2,7 @@
 #checkov:skip=CKV_DOCKER_2:Not applicable
 
 # Build stage
-FROM mcr.microsoft.com/devcontainers/typescript-node:22-bookworm as build
+FROM mcr.microsoft.com/devcontainers/typescript-node:18-bookworm as build
 ARG TARGETARCH
 
 LABEL org.label-schema.schema-version="1.0"

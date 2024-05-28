@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-    "image": "ghcr.io/jhatler/janus:v0.1.4", /* x-release-please-version */
+    "image": "ghcr.io/jhatler/janus:v0.1", /* x-release-please-version */
     "features": {
         "ghcr.io/devcontainers/features/sshd:1": {
             "version": "latest"
@@ -21,7 +21,7 @@
             "version": "latest"
         },
         "ghcr.io/devcontainers/features/node:1": {
-            "version": "22"
+            "version": "18"
         },
         "ghcr.io/devcontainers/features/go:1": {
             "version": "latest"

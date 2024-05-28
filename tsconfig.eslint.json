@@ -1,6 +1,6 @@
 {
   "extends": [
-    "@tsconfig/node22/tsconfig.json"
+    "@tsconfig/node18/tsconfig.json"
   ],
   "include": [
     "packages/*/src/**/*",
