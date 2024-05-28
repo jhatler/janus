@@ -1,4 +1,6 @@
-# Changelog
+# Janus Codespace Changelog
+<!--- @generated --->
+
 
 ## [0.1.3](https://github.com/jhatler/janus/compare/devcontainer-v0.1.2...devcontainer-v0.1.3) (2024-05-27)
 
@@ -32,6 +34,3 @@
 ### Bug Fixes
 
 * Standardize on node user in containers ([b57058d](https://github.com/jhatler/janus/commit/b57058da4fecc47aa6659b56973ac30324c9aeb1)), closes [#14](https://github.com/jhatler/janus/issues/14)
-
-<!--- @generated --->
-## Janus Devcontainer Changelog

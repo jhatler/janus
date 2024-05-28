@@ -1,4 +1,6 @@
-# Changelog
+# Janus devcontainer Changelog
+<!--- @generated --->
+
 
 ## [0.1.3](https://github.com/jhatler/janus/compare/devcontainer-janus-v0.1.2...devcontainer-janus-v0.1.3) (2024-05-27)
 
@@ -33,5 +35,3 @@
 
 * Standardize on node user in containers ([b57058d](https://github.com/jhatler/janus/commit/b57058da4fecc47aa6659b56973ac30324c9aeb1)), closes [#14](https://github.com/jhatler/janus/issues/14)
 
-<!--- @generated --->
-## Janus Devcontainer Changelog
