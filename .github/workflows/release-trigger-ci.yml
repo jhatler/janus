@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 18
           cache: 'npm'
 
       - name: Cache Dependencies
@@ -33,7 +33,7 @@ jobs:
           path: |
             node_modules
             packages/release-trigger/node_modules
-          key: ${{ runner.os }}-npm-v3-${{ hashFiles('package-lock.json,packages/release-trigger/package-lock.json') }}
+          key: ${{ runner.os }}-npm-v4-${{ hashFiles('package-lock.json,packages/release-trigger/package-lock.json') }}
 
       - name: Install release-trigger Dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
@@ -55,7 +55,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 18
           cache: 'npm'
 
       - name: Cache Dependencies
@@ -64,7 +64,7 @@ jobs:
           path: |
             node_modules
             packages/release-trigger/node_modules
-          key: ${{ runner.os }}-npm-v3-${{ hashFiles('package-lock.json,packages/release-trigger/package-lock.json') }}
+          key: ${{ runner.os }}-npm-v4-${{ hashFiles('package-lock.json,packages/release-trigger/package-lock.json') }}
 
       - name: Run Tests
         run: npm test
