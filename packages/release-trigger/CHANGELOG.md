@@ -1,4 +1,6 @@
-# Changelog
+# release-trigger Janus Fork Changelog
+<!--- @generated --->
+
 
 ## [1.1.0](https://github.com/jhatler/janus/compare/release-trigger (Janus Fork)-v1.0.0...release-trigger (Janus Fork)-v1.1.0) (2024-05-28)
 
