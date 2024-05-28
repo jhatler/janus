@@ -4,5 +4,6 @@
   "containers/janus": "0.1.3",
   "devcontainers/janus": "0.1.3",
   "packages/janus.js": "0.1.0",
-  "lib/pyjanus": "0.1.0"
+  "lib/pyjanus": "0.1.0",
+  "packages/release-trigger": "1.0.0"
 }

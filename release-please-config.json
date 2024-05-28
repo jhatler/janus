@@ -93,6 +93,10 @@
             "release-type": "node",
             "package-name": "Janus.js"
         },
+        "packages/release-trigger": {
+            "release-type": "node",
+            "package-name": "release-trigger (Janus Fork)"
+        },
         "lib/pyjanus": {
             "release-type": "python",
             "package-name": "pyJanus"

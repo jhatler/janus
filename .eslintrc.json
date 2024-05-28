@@ -25,7 +25,10 @@
         "!.eslintrc.json",
         "!.release-please-manifest.json",
         "!.devcontainer",
-        "!.vscode"
+        "!.vscode",
+        "!packages/release-trigger/.prettierrc.js",
+        "!packages/release-trigger/.c8rc.json",
+        "!.jscpd.json"
     ],
     "overrides": [
         {
@@ -41,6 +44,5 @@
             }
         }
     ],
-    "rules": {
-    }
+    "rules": {}
 }
