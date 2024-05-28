@@ -2,6 +2,18 @@
 <!--- @generated --->
 
 
+## [0.1.4](https://github.com/jhatler/janus/compare/janus-v0.1.3...janus-v0.1.4) (2024-05-28)
+
+
+### Features
+
+* Import release-trigger package ([#50](https://github.com/jhatler/janus/issues/50)) ([0b6b782](https://github.com/jhatler/janus/commit/0b6b782313ee2638661873cc62433d351c9e50c1))
+
+
+### Bug Fixes
+
+* Correct CHANGELOG headers ([#51](https://github.com/jhatler/janus/issues/51)) ([58c7891](https://github.com/jhatler/janus/commit/58c7891e84343fa91c16c3309174c3a8e1a8229f)), closes [#47](https://github.com/jhatler/janus/issues/47)
+
 ## [0.1.3](https://github.com/jhatler/janus/compare/janus-v0.1.2...janus-v0.1.3) (2024-05-27)
 
 

@@ -2,6 +2,13 @@
 <!--- @generated --->
 
 
+## [0.1.4](https://github.com/jhatler/janus/compare/devcontainer-janus-v0.1.3...devcontainer-janus-v0.1.4) (2024-05-28)
+
+
+### Bug Fixes
+
+* Correct CHANGELOG headers ([#51](https://github.com/jhatler/janus/issues/51)) ([58c7891](https://github.com/jhatler/janus/commit/58c7891e84343fa91c16c3309174c3a8e1a8229f)), closes [#47](https://github.com/jhatler/janus/issues/47)
+
 ## [0.1.3](https://github.com/jhatler/janus/compare/devcontainer-janus-v0.1.2...devcontainer-janus-v0.1.3) (2024-05-27)
 
 
@@ -34,4 +41,3 @@
 ### Bug Fixes
 
 * Standardize on node user in containers ([b57058d](https://github.com/jhatler/janus/commit/b57058da4fecc47aa6659b56973ac30324c9aeb1)), closes [#14](https://github.com/jhatler/janus/issues/14)
-

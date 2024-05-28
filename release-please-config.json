@@ -95,7 +95,7 @@
         },
         "packages/release-trigger": {
             "release-type": "node",
-            "package-name": "release-trigger (Janus Fork)"
+            "package-name": "release-trigger"
         },
         "lib/pyjanus": {
             "release-type": "python",
