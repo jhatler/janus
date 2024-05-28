@@ -1,4 +1,6 @@
-# Changelog
+# Just Another Neural Utility System Changelog
+<!--- @generated --->
+
 
 ## [0.1.3](https://github.com/jhatler/janus/compare/janus-v0.1.2...janus-v0.1.3) (2024-05-27)
 
@@ -45,6 +47,3 @@
 * Correct release type for release-please ([c3cb8fc](https://github.com/jhatler/janus/commit/c3cb8fc128bb581f9c0065e74cac1e242bbdd4e0)), closes [#11](https://github.com/jhatler/janus/issues/11)
 * Force generic updater in release-please ([564771c](https://github.com/jhatler/janus/commit/564771c6fbb1ed9351a8de4bdaf1fec598fdd9c7)), closes [#27](https://github.com/jhatler/janus/issues/27)
 * Standardize on node user in containers ([b57058d](https://github.com/jhatler/janus/commit/b57058da4fecc47aa6659b56973ac30324c9aeb1)), closes [#14](https://github.com/jhatler/janus/issues/14)
-
-<!--- @generated --->
-## Just Another Neural Utility System - Root Changelog
