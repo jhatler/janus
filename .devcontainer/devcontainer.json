@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-    "image": "ghcr.io/jhatler/janus-devcontainer:v0.1", /* x-release-please-version */
+    "image": "ghcr.io/jhatler/janus-devcontainer:v0.1.5-janusjsv01152gf0e9592.52.f0e9592", /* x-release-please-version */
     "remoteUser": "node",
     "containerUser": "node",
     "postCreateCommand": "docker pull ghcr.io/super-linter/super-linter:v6.5.1"
