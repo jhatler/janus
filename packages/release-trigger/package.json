@@ -30,6 +30,7 @@
   "dependencies": {
     "@google-automations/bot-config-utils": "^6.1.0",
     "@google-automations/datastore-lock": "^4.0.0",
+    "@octokit/core": "^4.1.0",
     "gcf-utils": "^14.2.1",
     "jsonwebtoken": "^9.0.0"
   },
