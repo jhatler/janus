@@ -76,8 +76,8 @@ runs:
         DOCKER_BUILDKIT: 1
         BUILDKIT_INLINE_CACHE: 1
       with:
-        cache-from: type=registry,ref=${{ inputs.repository }}
-        cache-to: type=inline
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         context: ${{ inputs.context }}
         push: ${{ inputs.push }}
         tags: |
