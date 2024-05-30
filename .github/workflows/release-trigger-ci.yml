@@ -38,8 +38,11 @@ jobs:
       - name: Install release-trigger Dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
         shell: bash
-        working-directory: packages/release-trigger
-        run: npm ci
+        run: |
+          sudo npm install -g npm@9.9.3
+          rm -f package-lock.json package.json
+          cd packages/release-trigger
+          npm install
 
   test:
     name: Test & Lint release-trigger
