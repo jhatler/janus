@@ -9,6 +9,9 @@ on:
       - '!devcontainers/janus/CHANGELOG.md'
       - '.devcontainer/**'
       - '!.devcontainer/CHANGELOG.md'
+      - '.github/workflows/containers.yml'
+      - '.github/actions/container/**'
+      - '.github/actions/devcontainer/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -57,6 +60,7 @@ jobs:
           context: "{{defaultContext}}:containers/janus"
           platforms: linux/amd64,linux/arm64
           push: true
+          sign: true
           repository: ghcr.io/jhatler/janus
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -107,6 +111,7 @@ jobs:
           workspace: ${{ github.workspace }}/devcontainers/janus
           platforms: linux/amd64,linux/arm64
           push: true
+          sign: true
           repository: ghcr.io/jhatler/janus-devcontainer
           registry: ghcr.io
           username: ${{ github.repository_owner }}

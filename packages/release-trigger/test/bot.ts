@@ -22,6 +22,9 @@ import * as sinon from 'sinon';
 import * as botConfigModule from '@google-automations/bot-config-utils';
 import * as releaseTriggerModule from '../src/release-trigger';
 import * as gcfUtils from 'gcf-utils';
+// issue-utils directly exports addOrUpdateIssueComment from this internal source file
+// and somehow sinon can't stub the method directly from issue-utils
+import * as issueUtils from '@google-automations/issue-utils/build/src/issue-comments';
 import {TriggerError} from '../src/release-trigger';
 import {DatastoreLock} from '@google-automations/datastore-lock';
 
@@ -147,7 +150,7 @@ describe('bot', () => {
         .stub(releaseTriggerModule, 'triggerKokoroJob')
         .resolves({stdout: '', stderr: '', jobName: 'my-job-name'});
       const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
-      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
+      const commentStub = sandbox.stub(issueUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'release',
@@ -240,7 +243,7 @@ describe('bot', () => {
         .rejects(new TriggerError(new Error(), 'some command', 'some stdout', 'some stderr'));
       const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
       const markFailedStub = sandbox.stub(releaseTriggerModule, 'markFailed').resolves();
-      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
+      const commentStub = sandbox.stub(issueUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'release',
@@ -415,7 +418,7 @@ describe('bot', () => {
         .rejects(new TriggerError(new Error(), 'some command', 'some stdout', 'some stderr'));
       const markTriggeredStub = sandbox.stub(releaseTriggerModule, 'markTriggered').resolves();
       const markFailedStub = sandbox.stub(releaseTriggerModule, 'markFailed').resolves();
-      const commentStub = sandbox.stub(gcfUtils, 'addOrUpdateIssueComment').resolves();
+      const commentStub = sandbox.stub(issueUtils, 'addOrUpdateIssueComment').resolves();
 
       await probot.receive({
         name: 'pull_request',
