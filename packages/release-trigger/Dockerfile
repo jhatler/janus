@@ -17,9 +17,7 @@
 
 # Use a multi-stage docker build to limit production dependencies.
 
-# Use the Yoshi Node.js 14 image - it has python3 installed
-# https://github.com/googleapis/testing-infra-docker/tree/master/node/14-user
-FROM gcr.io/cloud-devrel-kokoro-resources/node:18-user AS BUILD
+FROM node:22-bookworm AS BUILD
 
 WORKDIR /home/node
 
@@ -36,9 +34,22 @@ COPY . ./
 
 RUN npm run compile
 
-FROM gcr.io/cloud-devrel-kokoro-resources/node:18-user
+FROM node:22-bookworm
+
+SHELL ["/bin/bash", "-o", "pipefail", "-e", "-c"]
+ENV SHELL=/bin/bash
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /home/node
+
+# hadolint ignore=DL3003
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      python3-pip=23.0.1+dfsg-1 \
+ && apt-get autoremove --purge -y \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && find /var/cache/apt -type f -print0 | xargs -0 rm -f
 
 COPY package*.json ./
 COPY --from=BUILD /home/node/build build
