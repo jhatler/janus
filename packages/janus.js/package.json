@@ -19,13 +19,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.0",
     "@types/node": "^20.12.12",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
-    "eslint": "^9.0.0",
-    "eslint-plugin-jsonc": "^2.16.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   }
 }
