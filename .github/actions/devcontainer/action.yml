@@ -43,12 +43,20 @@ inputs:
     description: 'Cleanup images after build?'
     required: true
     default: true
+  sign:
+    description: 'Sign images?'
+    required: false
+    default: false
 
 runs:
   using: "composite"
   steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
+
+    - name: Install cosign
+      if: inputs.sign != 'false'
+      uses: sigstore/cosign-installer@v3.5.0
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -143,6 +151,19 @@ runs:
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
         docker push ${{ inputs.repository }}:v${{ inputs.semver_major }}
+
+    - name: Sign the published images
+      if: inputs.sign == 'true' && inputs.push == 'true'
+      shell: bash
+      env:
+        TAGS: |
+          ${{ inputs.repository }}:latest
+          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
+          ${{ inputs.repository }}:v${{ inputs.semver_major }}
+        DIGEST: ${{ steps.tag.outputs.digest }}
+      run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
 
     # jscpd:ignore-start
     - name: Attest
