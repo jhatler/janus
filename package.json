@@ -6,14 +6,18 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "//": [
+    "tests break with minimatch error when @typescript-eslint updated beyond ~6.15",
+    "eslint ^9 is required @typescript-eslint@~6.15.0 to work"
+  ],
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
-    "@typescript-eslint/eslint-plugin": "<6.16.0",
-    "@typescript-eslint/parser": "<6.16.0",
-    "eslint": "<9.0.0",
-    "eslint-plugin-jsonc": "<2.16.0",
-    "prettier": "<3.2.0",
-    "typescript": "<5.2.0"
+    "@typescript-eslint/eslint-plugin": "~6.15.0",
+    "@typescript-eslint/parser": "~6.15.0",
+    "eslint": "~8.56.0",
+    "eslint-plugin-jsonc": "~2.16.0",
+    "prettier": "~3.1.0",
+    "typescript": "~5.2.0"
   },
   "workspaces": [
     "packages/*"
