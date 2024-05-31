@@ -38,9 +38,5 @@ RUN wget --version \
  && npm --version \
  && tsc --version
 
-# Create testing timestamp
-RUN date -u +'%Y-%m-%dT%H:%M:%SZ' > /.build-date
-
 # Final stage
-FROM build as final
-COPY --from=testing /.build-date /.build-date
+FROM testing as final

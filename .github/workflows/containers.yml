@@ -58,7 +58,7 @@ jobs:
         uses: ./.github/actions/container
         with:
           context: "{{defaultContext}}:containers/janus"
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           sign: true
           repository: ghcr.io/jhatler/janus
@@ -109,7 +109,7 @@ jobs:
         uses: ./.github/actions/devcontainer
         with:
           workspace: ${{ github.workspace }}/devcontainers/janus
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           sign: true
           repository: ghcr.io/jhatler/janus-devcontainer
