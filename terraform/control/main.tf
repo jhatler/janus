@@ -1,6 +1,6 @@
 # Initial stack to test integrations
 resource "spacelift_stack" "hello-world" {
-  administrative    = false
+  administrative    = true
   autodeploy        = true
   branch            = "main"
   description       = "Hello World Stack"
