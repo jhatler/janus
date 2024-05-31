@@ -122,8 +122,8 @@ runs:
       run: |
         devcontainer build \
           --workspace-folder ${{ inputs.workspace }} \
-          --cache-from ${{ inputs.repository }} \
-          --cache-to type=inline \
+          --cache-from type=gha \
+          --cache-to type=gha,mode=max \
           --platform ${{ inputs.platforms }} \
           --image-name ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }} \
           --output type=image,name=${{ inputs.repository }}:${{ steps.git.outputs.short_sha }},push=${{ inputs.push }}
