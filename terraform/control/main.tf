@@ -5,7 +5,7 @@ resource "spacelift_stack" "hello-world" {
   branch            = "main"
   description       = "Hello World Stack"
   name              = "Hello World"
-  project_root      = "terraform/stacks/hello-world"
+  project_root      = "terraform/stacks/hello_world"
   repository        = "janus"
   terraform_version = "1.5.7"
 }

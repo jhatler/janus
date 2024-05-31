@@ -5,5 +5,10 @@
   "devcontainers/janus": "0.1.4",
   "packages/janus.js": "0.1.1",
   "lib/pyjanus": "0.1.1",
-  "packages/release-trigger": "1.1.0"
+  "packages/release-trigger": "1.1.0",
+  "terraform": "0.0.0",
+  "terraform/control": "0.0.0",
+  "terraform/modules": "0.0.0",
+  "terraform/stacks": "0.0.0",
+  "terraform/stacks/hello-world": "0.0.0"
 }
