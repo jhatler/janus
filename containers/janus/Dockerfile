@@ -1,12 +1,13 @@
 #checkov:skip=CKV_DOCKER_3:Handled by devcontainer
 #checkov:skip=CKV_DOCKER_2:Not applicable
-
-# Build stage
 FROM mcr.microsoft.com/devcontainers/typescript-node:22-bookworm as build
 ARG TARGETARCH
 
 LABEL org.label-schema.schema-version="1.0"
 LABEL maintainer="Jaremy Hatler <hatler.jaremy@gmail.com>"
+LABEL org.opencontainers.image.source="https://github.com/jhatler/janus"
+LABEL org.opencontainers.image.description="Just Another Nueral Utility System"
+LABEL org.opencontainers.image.licenses="MIT"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-c"]
 ENV SHELL=/bin/bash
@@ -38,9 +39,5 @@ RUN wget --version \
  && npm --version \
  && tsc --version
 
-# Create testing timestamp
-RUN date -u +'%Y-%m-%dT%H:%M:%SZ' > /.build-date
-
 # Final stage
-FROM build as final
-COPY --from=testing /.build-date /.build-date
+FROM testing as final
