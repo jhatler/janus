@@ -130,5 +130,5 @@ jobs:
         shell: bash
         run: |
           devcontainer up --workspace-folder .
-          devcontainer exec --workspace-folder . /usr/local/share/nvm/versions/node/v22.2.0/bin/devcontainer --version
+          devcontainer exec --workspace-folder . --skip-post-attach /usr/local/share/nvm/versions/node/v22.2.0/bin/devcontainer --version
   # jscpd:ignore-end
