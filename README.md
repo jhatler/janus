@@ -1,7 +1,6 @@
 <!-- Copyright (C) 2024 Jaremy Hatler -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Just Another Neural Utility System
-![GitHub License](https://img.shields.io/github/license/jhatler/janus)
 
 <!-- editorconfig-checker-disable -->
 [![GitHub License](https://img.shields.io/github/license/jhatler/janus)](LICENSE)
