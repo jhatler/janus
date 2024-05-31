@@ -17,7 +17,13 @@ jobs:
   tfsec:
     name: Run tfsec sarif report
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        include:
+          - working_directory: terraform/control
+            sarif_file: tfsec-control.sarif
+          - tfpath: terraform/stacks/hello-world
+            sarif_file: tfsec-hello-world.sarif
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
@@ -25,9 +31,10 @@ jobs:
       - name: Run tfsec
         uses: aquasecurity/tfsec-sarif-action@v0.1.4
         with:
-          sarif_file: tfsec.sarif
+          working_directory: ${{ matrix.working_directory }}
+          sarif_file: ${{ matrix.sarif_file }}
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: tfsec.sarif
+          sarif_file: ${{ matrix.sarif_file }}
