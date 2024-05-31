@@ -4,6 +4,10 @@ updates:
     directory: "/containers/janus/"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/packages/release-trigger/"
+    schedule:
+      interval: "weekly"
   - package-ecosystem: "devcontainers"
     directory: "/devcontainers/janus/"
     schedule:
@@ -14,5 +18,13 @@ updates:
       interval: "weekly"
   - package-ecosystem: "pip"
     directory: "/lib/pyjanus/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/terraform/control/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/terraform/stacks/hello-world/"
     schedule:
       interval: "weekly"
