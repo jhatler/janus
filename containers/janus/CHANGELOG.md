@@ -2,6 +2,18 @@
 <!--- @generated --->
 
 
+## [0.1.5](https://github.com/jhatler/janus/compare/container-janus-v0.1.4...container-janus-v0.1.5) (2024-05-31)
+
+
+### Bug Fixes
+
+* Improve caching for container builds ([#155](https://github.com/jhatler/janus/issues/155)) ([951d667](https://github.com/jhatler/janus/commit/951d667916a751bd726f0e4c234a568ecb50c621)), closes [#153](https://github.com/jhatler/janus/issues/153)
+
+
+### Miscellaneous Chores
+
+* **deps:** Update dependency @types/sinon to v10.0.20 ([#69](https://github.com/jhatler/janus/issues/69)) ([4754d30](https://github.com/jhatler/janus/commit/4754d304a80c7f2de2a5015fbcb74f6edfb69843))
+
 ## [0.1.4](https://github.com/jhatler/janus/compare/container-janus-v0.1.3...container-janus-v0.1.4) (2024-05-28)
 
 
