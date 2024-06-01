@@ -3,11 +3,11 @@
 FROM mcr.microsoft.com/devcontainers/typescript-node:22-bookworm as build
 ARG TARGETARCH
 
-LABEL org.label-schema.schema-version="1.0"
-LABEL maintainer="Jaremy Hatler <hatler.jaremy@gmail.com>"
-LABEL org.opencontainers.image.source="https://github.com/jhatler/janus"
+LABEL org.opencontainers.image.authors="Jaremy Hatler <hatler.jaremy@gmail.com>"
 LABEL org.opencontainers.image.description="Just Another Nueral Utility System"
 LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/jhatler/janus/tree/main/containers/janus"
+LABEL org.opencontainers.image.source="https://github.com/jhatler/janus"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-c"]
 ENV SHELL=/bin/bash
