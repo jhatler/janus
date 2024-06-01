@@ -2,6 +2,18 @@
 <!--- @generated --->
 
 
+## [0.1.5](https://github.com/jhatler/janus/compare/devcontainer-v0.1.4...devcontainer-v0.1.5) (2024-05-31)
+
+
+### Features
+
+* Use GitHub Action cache in container actions ([#129](https://github.com/jhatler/janus/issues/129)) ([6a1ff6a](https://github.com/jhatler/janus/commit/6a1ff6a5be75d080bc7ec97760fc0a62ff410c1e)), closes [#128](https://github.com/jhatler/janus/issues/128)
+
+
+### Miscellaneous Chores
+
+* **deps:** Update dependency @types/sinon to v10.0.20 ([#69](https://github.com/jhatler/janus/issues/69)) ([4754d30](https://github.com/jhatler/janus/commit/4754d304a80c7f2de2a5015fbcb74f6edfb69843))
+
 ## [0.1.4](https://github.com/jhatler/janus/compare/devcontainer-v0.1.3...devcontainer-v0.1.4) (2024-05-28)
 
 

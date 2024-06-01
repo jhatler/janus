@@ -6,7 +6,8 @@
   "ignore": [
     "**/__snapshots__/**",
     "**/node_modules/**",
-    "**/packages/release-trigger/**/*"
+    "**/packages/release-trigger/**/*",
+    "**/CHANGELOG.md"
   ],
   "absolute": true
 }

@@ -1,14 +1,14 @@
 {
-  ".": "0.1.4",
-  ".devcontainer": "0.1.4",
-  "containers/janus": "0.1.4",
-  "devcontainers/janus": "0.1.4",
-  "packages/janus.js": "0.1.1",
-  "lib/pyjanus": "0.1.1",
-  "packages/release-trigger": "1.1.0",
-  "terraform": "0.0.0",
-  "terraform/control": "0.0.0",
-  "terraform/modules": "0.0.0",
-  "terraform/stacks": "0.0.0",
-  "terraform/stacks/hello_world": "0.0.0"
+  ".": "0.1.5",
+  ".devcontainer": "0.1.5",
+  "containers/janus": "0.1.5",
+  "devcontainers/janus": "0.1.5",
+  "packages/janus.js": "0.1.2",
+  "lib/pyjanus": "0.1.2",
+  "packages/release-trigger": "1.2.0",
+  "terraform": "0.1.0",
+  "terraform/control": "0.1.0",
+  "terraform/modules": "0.1.0",
+  "terraform/stacks": "0.1.0",
+  "terraform/stacks/hello_world": "0.1.0"
 }
