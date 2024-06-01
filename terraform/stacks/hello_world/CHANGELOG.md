@@ -1,4 +1,6 @@
-# Changelog
+# hello_world Stack Changelog
+<!--- @generated --->
+
 
 ## 0.1.0 (2024-05-31)
 
