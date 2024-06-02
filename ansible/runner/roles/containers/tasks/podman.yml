@@ -1,0 +1,9 @@
+---
+- name: Cache podman packages
+  notify: Install podman packages
+  ansible.builtin.copy:
+    dest: /tmp/.ansible_containers_podman_packages
+    content: "{{ containers_podman_packages }}"
+    owner: root
+    group: root
+    mode: "0644"

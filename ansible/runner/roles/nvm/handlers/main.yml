@@ -1,0 +1,46 @@
+---
+- name: Install nvm
+  become: true
+  become_user: "{{ nvm_user }}"
+  notify:
+    - Ensure NVM_DIR is set
+    - Ensure NVM is loaded
+  ansible.builtin.shell:
+    creates: "{{ nvm_dir }}/nvm.sh"
+    executable: /bin/bash
+    cmd: |
+      set -e
+      set -o pipefail
+      umask 0002
+
+      export PROFILE=/dev/null
+      export NVM_DIR={{ nvm_dir }}
+
+      chmod -R g+rws $NVM_DIR
+
+      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh | bash
+
+      . $NVM_DIR/nvm.sh
+      nvm install {{ nvm_node_version }}
+      nvm alias default {{ nvm_node_version }}
+      nvm clear-cache
+
+- name: Ensure NVM_DIR is set
+  ansible.builtin.lineinfile:
+    dest: /etc/profile.d/nvm.sh
+    line: "export NVM_DIR={{ nvm_dir }}"
+    create: true
+    state: present
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure NVM is loaded
+  ansible.builtin.lineinfile:
+    dest: /etc/profile.d/nvm.sh
+    line: "[ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh"
+    create: true
+    state: present
+    owner: root
+    group: root
+    mode: "0644"

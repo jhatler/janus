@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Use this document to run Ansible Playbooks on Systems Manager managed instances. For more information, see https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html.",
+  "parameters": {
+    "SourceRepo": {
+      "description": "Specify the source git repository.",
+      "type": "String"
+    },
+    "SourceRef": {
+      "description": "Specify the source ref to checkout from the repository.",
+      "type": "String"
+    },
+    "AnsibleRoot": {
+      "description": "(Optional) Specify the root directory of the Ansible Playbook.",
+      "type": "String",
+      "default": "."
+    },
+    "PlaybookFile": {
+      "type": "String",
+      "description": "(Optional) The Playbook file to run (including relative path). If the main Playbook file is located in the ./automation directory, then specify automation/playbook.yml.",
+      "default": "hello-world-playbook.yml",
+      "allowedPattern": "[(a-z_A-Z0-9\\-\\.)\\/]+(.yml|.yaml)$"
+    },
+    "ExtraVariables": {
+      "type": "String",
+      "description": "(Optional) Additional variables to pass to Ansible at runtime. Enter key/value pairs separated by a space. For example: color=red flavor=cherry",
+      "default": "SSM=True",
+      "displayType": "textarea",
+      "allowedPattern": "^$|^\\w+\\=(([^\\s|:();&]+)|('[^|:();&]+'))(\\s+\\w+\\=(([^\\s|:();&]+)|('[^|:();&]+')))*$"
+    },
+    "ExtraArgs": {
+      "type": "String",
+      "description": "(Optional) Additional arguments to pass to Ansible at runtime. Enter all arguments separated by a space. For example: '-t foo -l bar'",
+      "default": "",
+      "displayType": "textarea"
+    },
+    "Check": {
+      "type": "String",
+      "description": "(Optional) Use this parameter to run a check of the Ansible execution. The system doesn’t make any changes to your systems. Instead, any module that supports check mode reports the changes it would make rather than making them. Modules that don’t support check mode take no action and don’t report changes that would be made.",
+      "allowedValues": [
+        "True",
+        "False"
+      ],
+      "default": "False"
+    },
+    "Verbose": {
+      "type": "String",
+      "description": "(Optional) Set the verbosity level for logging Playbook executions. Specify -v for low verbosity, -vv or –vvv for medium verbosity, and -vvvv for debug level.",
+      "allowedValues": [
+        "",
+        "-v",
+        "-vv",
+        "-vvv",
+        "-vvvv"
+      ],
+      "default": "-v"
+    },
+    "TimeoutSeconds": {
+      "type": "String",
+      "description": "(Optional) The time in seconds for a command to be completed before it is considered to have failed.",
+      "default": "3600"
+    }
+  },
+  "mainSteps": [
+    {
+      "action": "aws:runShellScript",
+      "name": "runShellScript",
+      "inputs": {
+        "timeoutSeconds": "{{ TimeoutSeconds }}",
+        "runCommand": [
+          "#!/bin/bash",
+          "set -ex -o pipefail",
+          "RepoName=\"$(basename {{SourceRepo}} .git)\"",
+          "if [ ! -d /usr/local/src/${RepoName} ] ; then",
+          "   mkdir -p /usr/local/src/${RepoName}",
+          "fi",
+          "cd /usr/local/src/${RepoName}",
+          "if [ -d \".git\" ] ; then",
+          "   echo \"Updating the repository from {{SourceRepo}}\"",
+          "   git fetch origin",
+          "   git reset --hard origin/{{SourceRef}}",
+          "else",
+          "   echo \"Cloning the repository from {{SourceRepo}}\"",
+          "   git init",
+          "   git remote add origin {{SourceRepo}}",
+          "   git fetch origin",
+          "   git reset --hard origin/{{SourceRef}}",
+          "fi",
+          "if [ ! -d \"{{AnsibleRoot}}\" ] ; then",
+          "   echo \"The specified Ansible root directory doesn't exist in the downloaded bundle. Please review the relative path.\" >&2",
+          "   exit 1",
+          "fi",
+          "cd {{AnsibleRoot}}",
+          "PlaybookFile=\"{{PlaybookFile}}\"",
+          "if [ ! -f  \"${PlaybookFile}\" ] ; then",
+          "   echo \"The specified Playbook file doesn't exist in the downloaded bundle. Please review the relative path and file name.\" >&2",
+          "   exit 2",
+          "fi",
+          "if  [[ \"{{Check}}\" == True ]] ; then",
+          "   echo \"Checking Ansible in `pwd`\"",
+          "   ansible-playbook --check -e \"{{ExtraVariables}}\" \"{{ExtraArgs}}\" \"{{Verbose}}\" \"${PlaybookFile}\"",
+          "else",
+          "   echo \"Running Ansible in `pwd`\"",
+          "   ansible-playbook -e \"{{ExtraVariables}}\" \"{{ExtraArgs}}\" \"{{Verbose}}\" \"${PlaybookFile}\"",
+          "fi"
+        ]
+      }
+    }
+  ]
+}

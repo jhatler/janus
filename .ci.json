@@ -1,0 +1,9 @@
+{
+    "ci": {
+        "needed": false,
+        "matrix": {}
+    },
+    "post": {
+        "needed": false
+    }
+}

@@ -1,0 +1,22 @@
+---
+actions_runner_node_version: 22.2.0
+actions_runner_name: runner
+actions_runner_user: code
+actions_runner_group: code
+actions_runner_user_home: /home/code
+actions_runner_nvm_dir: "{{ actions_runner_user_home }}/.nvm"
+actions_runner_go_path: "{{ actions_runner_user_home }}/go"
+actions_runner_user_sudo_nopasswd: true
+actions_runner_prevent_service_start: false
+actions_runner_overlayfs:
+  enabled: true
+  create: true
+  check: true
+  lower: "{{ actions_runner_user_home }}"
+  work: "/mnt/{{ actions_runner_user }}/work"
+  upper: "/mnt/{{ actions_runner_user }}/upper"
+  merged: "{{ actions_runner_user_home }}"
+actions_runner_overlayfs_opts: "\
+  lowerdir={{ actions_runner_overlayfs.lower }},\
+  workdir={{ actions_runner_overlayfs.work }},\
+  upperdir={{ actions_runner_overlayfs.upper }}"

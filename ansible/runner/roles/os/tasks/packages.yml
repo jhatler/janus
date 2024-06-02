@@ -1,0 +1,9 @@
+---
+- name: Cache admin utilities
+  notify: Install admin utilities
+  ansible.builtin.copy:
+    dest: /tmp/.ansible_os_admin_utils
+    content: "{{ os_admin_utils }}"
+    owner: root
+    group: root
+    mode: "0644"

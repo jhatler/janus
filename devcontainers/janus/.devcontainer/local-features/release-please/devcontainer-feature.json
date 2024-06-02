@@ -1,8 +1,0 @@
-{
-	"$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainerFeature.schema.json",
-    "id": "release-please",
-    "name": "release-please",
-	"installsAfter": [
-		"ghcr.io/devcontainers/features/node"
-	]
-}
