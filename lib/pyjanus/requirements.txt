@@ -1,6 +1,6 @@
 appdirs==1.4.4
 ffmpeg-python==0.2.0
-openai==1.32.0
+openai==1.33.0
 codaio==0.6.12
 boto3==1.34.122
 google-api-python-client==2.132.0
