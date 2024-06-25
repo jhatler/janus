@@ -22,7 +22,7 @@ jobs:
         include:
           - working_directory: terraform/control
             sarif_file: tfsec-control.sarif
-          - tfpath: terraform/stacks/hello-world
+          - tfpath: terraform/stacks/hello_world
             sarif_file: tfsec-hello-world.sarif
     steps:
       - name: Clone repo
