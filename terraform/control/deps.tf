@@ -5,6 +5,6 @@ resource "spacelift_stack_dependency" "network__admin" {
 
 resource "spacelift_stack_dependency_reference" "network_s3_access_logs_bucket_id" {
   stack_dependency_id = spacelift_stack_dependency.network__admin.id
-  output_name         = "s3_access_logs_bucket_id"
-  input_name          = "s3_access_logs_bucket_id"
+  output_name         = "TF_VAR_s3_access_logs_bucket_id"
+  input_name          = "TF_VAR_s3_access_logs_bucket_id"
 }
