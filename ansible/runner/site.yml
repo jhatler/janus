@@ -1,0 +1,36 @@
+---
+- name: Setup system
+  hosts: "{{ target_hosts | default('tag_class_runner') }}"
+  tags:
+    - system
+  become: true
+  tasks:
+    - name: Configure OS
+      ansible.builtin.include_role:
+        name: os
+
+    - name: Create Runner Group
+      ansible.builtin.group:
+        name: "{{ actions_runner_user }}"
+        gid: 1000
+        state: present
+
+    - name: Create Runner User
+      ansible.builtin.user:
+        name: "{{ actions_runner_user }}"
+        group: "{{ actions_runner_group }}"
+        uid: 1000
+        comment: "GitHub Actions Runner"
+        shell: /bin/bash
+        home: "{{ actions_runner_user_home }}"
+        createhome: true
+
+- name: Install Dependencies
+  hosts: "{{ target_hosts | default('tag_class_runner') }}"
+  tags:
+    - deps
+  become: true
+  tasks:
+    - name: Install AWS CLI
+      ansible.builtin.include_role:
+        name: aws_cli

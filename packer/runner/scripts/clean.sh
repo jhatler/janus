@@ -24,6 +24,9 @@ rm -f /var/lib/systemd/random-seed /etc/hostname
 # Prevent known host or key issues
 rm -f /etc/ssh/ssh_host_* /root/.ssh/authorized_keys
 
+# Clean AWS SSM Agent
+rm -rf /var/lib/amazon/ssm
+
 # Delete the setup files
 rm -rf /setup
 

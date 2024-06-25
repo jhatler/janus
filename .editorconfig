@@ -26,6 +26,14 @@ max_line_length = 72
 [*.md]
 max_line_length = unset
 
+# YAML files
+[*.yml]
+max_line_length = 160
+
+# YAML files
+[*.yaml]
+max_line_length = 160
+
 # json files
 [*.json]
 max_line_length = unset

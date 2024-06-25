@@ -1,0 +1,21 @@
+---
+os_admin_utils:
+  - acl
+  - binfmt-support
+  - git
+  - gnupg
+  - jq
+  - qemu-user
+  - qemu-user-static
+  - qemu-utils
+  - unzip
+  - uuid
+os_i386_debs:
+  - http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_i386.deb
+  - http://security.ubuntu.com/ubuntu/pool/main/g/glibc/libc6_2.35-0ubuntu3.8_i386.deb
+  - http://archive.ubuntu.com/ubuntu/pool/main/libx/libxcrypt/libcrypt1_4.4.27-1_i386.deb
+  - http://security.ubuntu.com/ubuntu/pool/main/g/gcc-12/libgcc-s1_12.3.0-1ubuntu1~22.04_i386.deb
+  - http://security.ubuntu.com/ubuntu/pool/main/g/gcc-12/gcc-12-base_12.3.0-1ubuntu1~22.04_i386.deb
+os_i386_packages:
+  - libc6-i386
+  - libx32stdc++6

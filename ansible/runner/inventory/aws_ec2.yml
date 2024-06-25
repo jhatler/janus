@@ -1,0 +1,19 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-2
+keyed_groups:
+  - key: 'security_groups|json_query("[].group_name")|regex_replace(" ", "")|regex_replace("-","_")|lower'
+    prefix: "security_groups"
+  - prefix: tag
+    key: tags
+  - prefix: key
+    key: key_name
+  - prefix: aws_region
+    key: placement.region
+  - prefix: aws_az
+    key: placement.availability_zone
+hostnames:
+  - "private-dns-name"
+compose:
+  ansible_host: "public_ip_address"
