@@ -1,11 +1,19 @@
-# Initial stack to test integrations
-resource "spacelift_stack" "hello-world" {
-  administrative    = true
-  autodeploy        = true
+data "spacelift_account" "current" {}
+
+# This is the control stack we are currently in
+resource "spacelift_stack" "control" {
+  administrative        = true
+  autodeploy            = true
+  protect_from_deletion = true
+
+  github_action_deploy = false
+
+  enable_well_known_secret_masking = true
+
   branch            = "main"
-  description       = "Hello World Stack"
-  name              = "Hello World"
-  project_root      = "terraform/stacks/hello_world"
+  description       = "Control Stack"
+  name              = "Control"
+  project_root      = "terraform/control"
   repository        = "janus"
   terraform_version = "1.5.7"
 }
