@@ -11,6 +11,12 @@ locals {
       description  = "Shared Network for all Stacks"
       project_root = "terraform/stacks/network"
       id           = "network"
+    },
+    {
+      name         = "Crypto"
+      description  = "Shared Cryptography for all Stacks"
+      project_root = "terraform/stacks/crypto"
+      id           = "crypto"
     }
   ]
 }

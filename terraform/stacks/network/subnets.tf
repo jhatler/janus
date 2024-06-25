@@ -8,7 +8,7 @@ data "aws_availability_zones" "available" {
 resource "aws_subnet" "admin" {
   vpc_id = aws_vpc.primary.id
 
-  cidr_block        = "10.24.0.0/22"
+  cidr_block        = "${var.class_b_prefix}.0.0/22"
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
@@ -16,109 +16,44 @@ resource "aws_subnet" "admin" {
   }
 }
 
-resource "aws_subnet" "public_edge_a" {
+resource "aws_subnet" "public_edge" {
+  count = length(data.aws_availability_zones.available.names)
+
   vpc_id = aws_vpc.primary.id
 
-  cidr_block        = "10.24.16.0/22"
-  availability_zone = data.aws_availability_zones.available.names[0]
+  cidr_block        = "${var.class_b_prefix}.${count.index * 4 + 16}.0/22"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "Public Edge A"
+    Name = "Public Edge ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
   }
 }
-
-resource "aws_subnet" "public_edge_b" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.20.0/22"
-  availability_zone = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "Public Edge B"
-  }
-}
-
-resource "aws_subnet" "public_edge_c" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.24.0/22"
-  availability_zone = data.aws_availability_zones.available.names[2]
-
-  tags = {
-    Name = "Public Edge C"
-  }
-}
-
 
 ##
-## DMZ Subnets
+## NAT Subnets
 ##
-resource "aws_subnet" "dmz_a" {
+resource "aws_subnet" "dmz" {
+  count = length(data.aws_availability_zones.available.names)
+
   vpc_id = aws_vpc.primary.id
 
-  cidr_block        = "10.24.80.0/22"
-  availability_zone = data.aws_availability_zones.available.names[0]
+  cidr_block        = "${var.class_b_prefix}.${count.index * 4 + 80}.0/22"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "DMZ A"
+    Name = "DMZ ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
   }
 }
 
-resource "aws_subnet" "dmz_b" {
+resource "aws_subnet" "internal" {
+  count = length(data.aws_availability_zones.available.names)
+
   vpc_id = aws_vpc.primary.id
 
-  cidr_block        = "10.24.84.0/22"
-  availability_zone = data.aws_availability_zones.available.names[1]
+  cidr_block        = "${var.class_b_prefix}.${count.index * 4 + 160}.0/22"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "DMZ B"
-  }
-}
-
-resource "aws_subnet" "dmz_c" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.88.0/22"
-  availability_zone = data.aws_availability_zones.available.names[2]
-
-  tags = {
-    Name = "DMZ C"
-  }
-}
-
-
-##
-## Public Subnets
-##
-resource "aws_subnet" "internal_a" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.160.0/22"
-  availability_zone = data.aws_availability_zones.available.names[0]
-
-  tags = {
-    Name = "Internal A"
-  }
-}
-
-resource "aws_subnet" "internal_b" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.164.0/22"
-  availability_zone = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "Internal B"
-  }
-}
-
-resource "aws_subnet" "internal_c" {
-  vpc_id = aws_vpc.primary.id
-
-  cidr_block        = "10.24.168.0/22"
-  availability_zone = data.aws_availability_zones.available.names[2]
-
-  tags = {
-    Name = "Internal C"
+    Name = "Internal ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
   }
 }

@@ -1,4 +1,8 @@
-# Key to encrypt flows
+##
+## KMS resources for the network stack
+##
+
+# Key to encrypt VPC flows
 resource "aws_kms_key" "vpc_flow" {
   description = "Used to encrypt captured VPC Flows"
 

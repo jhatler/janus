@@ -2,7 +2,7 @@
 ## VPC and Misc. Resources
 ##
 resource "aws_vpc" "primary" {
-  cidr_block       = "10.24.0.0/16"
+  cidr_block       = "${var.class_b_prefix}.0.0/16"
   instance_tenancy = "default"
 
   enable_dns_support   = true
@@ -22,14 +22,14 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_flow_log" "primary_cloudwatch" {
-  iam_role_arn    = aws_iam_role.vpc_flow.arn
+  iam_role_arn    = var.vpc_flow_role_arn
   log_destination = aws_cloudwatch_log_group.vpc_flow.arn
   traffic_type    = "ALL"
   vpc_id          = aws_vpc.primary.id
 }
 
 resource "aws_flow_log" "primary_s3" {
-  iam_role_arn         = aws_iam_role.vpc_flow.arn
+  iam_role_arn         = var.vpc_flow_role_arn
   log_destination      = aws_s3_bucket.vpc_flow.arn
   log_destination_type = "s3"
   traffic_type         = "ALL"
