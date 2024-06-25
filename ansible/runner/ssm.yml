@@ -1,0 +1,5 @@
+---
+- name: SSM Drift Control
+  vars:
+    target_hosts: "{{ (lookup('ansible.builtin.file', '/var/lib/cloud/data/set-hostname') | from_json)['fqdn'] }}"
+  ansible.builtin.import_playbook: site.yml

@@ -11,6 +11,7 @@
     "eslint ^9 is required @typescript-eslint@~6.15.0 to work"
   ],
   "devDependencies": {
+    "@devcontainers/cli": "0.62.0",
     "@tsconfig/node22": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "~6.15.0",
     "@typescript-eslint/parser": "~6.15.0",

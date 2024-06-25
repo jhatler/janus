@@ -1,0 +1,432 @@
+---
+  8.04:
+    amis: []
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:hardy-20121003-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:hardy-20121003-i386
+    urls:
+      - http://cloud-images.ubuntu.com/releases/hardy/release-20121003/ubuntu-8.04.4-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/hardy/release-20121003/ubuntu-8.04.4-server-cloudimg-i386.tar.gz
+  10.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-lucid-10.04-amd64-server-20150427
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:lucid-20150427-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:lucid-20150427-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/lucid/release-20150427/ubuntu-10.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/lucid/release-20150427/ubuntu-10.04-server-cloudimg-i386.tar.gz
+  10.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-maverick-10.10-amd64-server-20120410
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:maverick-20120410-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:maverick-20120410-i386
+    urls:
+      - http://cloud-images.ubuntu.com/releases/maverick/release-20120410/ubuntu-10.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/maverick/release-20120410/ubuntu-10.10-server-cloudimg-i386.tar.gz
+  11.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-natty-11.04-amd64-server-20121028
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:natty-20121028-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:natty-20121028-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/natty/release-20121028/ubuntu-11.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/natty/release-20121028/ubuntu-11.04-server-cloudimg-i386.tar.gz
+  11.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-oneiric-11.10-amd64-server-20130509
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:oneiric-20130509-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:oneiric-20130509-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/oneiric/release-20130509/ubuntu-11.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/oneiric/release-20130509/ubuntu-11.10-server-cloudimg-i386.tar.gz
+  12.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-precise-12.04-amd64-server-20170502
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:precise-20170502-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:precise-20170502-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/precise/release-20170502/ubuntu-12.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/precise/release-20170502/ubuntu-12.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/precise/release-20170502/ubuntu-12.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/precise/release-20170502/ubuntu-12.04-server-cloudimg-i386.tar.gz
+  12.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-quantal-12.10-amd64-server-20140409
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:quantal-20140409-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:quantal-20140409-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/quantal/release-20140409/ubuntu-12.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/quantal/release-20140409/ubuntu-12.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/quantal/release-20140409/ubuntu-12.10-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/quantal/release-20140409/ubuntu-12.10-server-cloudimg-i386.tar.gz
+  13.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-raring-13.04-amd64-server-20140111
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:raring-20140111-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:raring-20140111-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/raring/release-20140111/ubuntu-13.04-server-cloudimg-amd64-root.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/raring/release-20140111/ubuntu-13.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/raring/release-20140111/ubuntu-13.04-server-cloudimg-i386-root.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/raring/release-20140111/ubuntu-13.04-server-cloudimg-i386.tar.gz
+  13.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-saucy-13.10-amd64-server-20140709
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:saucy-20140709-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:saucy-20140709-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/saucy/release-20140709/ubuntu-13.10-server-cloudimg-amd64-root.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/saucy/release-20140709/ubuntu-13.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/saucy/release-20140709/ubuntu-13.10-server-cloudimg-i386-root.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/saucy/release-20140709/ubuntu-13.10-server-cloudimg-i386.tar.gz
+  14.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-trusty-14.04-amd64-server-20191107
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-trusty-14.04-arm64-server-20191107
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:trusty-20191107-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:trusty-20191107-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:trusty-20191107-i386
+    urls:
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/trusty/release-20191107/ubuntu-14.04-server-cloudimg-i386.tar.gz
+  14.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-utopic-14.10-amd64-server-20150723
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-utopic-14.10-arm64-server-20150723
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:utopic-20150723-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:utopic-20150723-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:utopic-20150723-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/utopic/release-20150723/ubuntu-14.10-server-cloudimg-i386.tar.gz
+  15.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-vivid-15.04-amd64-server-20160203
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-vivid-15.04-arm64-server-20160203
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:vivid-20160203-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:vivid-20160203-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:vivid-20160203-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/vivid/release-20160203/ubuntu-15.04-server-cloudimg-i386.tar.gz
+  15.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-wily-15.10-amd64-server-20160715
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-wily-15.10-arm64-server-20160715
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:wily-20160715-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:wily-20160715-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:wily-20160715-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images-archive.ubuntu.com/releases/wily/release-20160715/ubuntu-15.10-server-cloudimg-i386.tar.gz
+  16.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-xenial-16.04-amd64-minimal-20210929
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-xenial-16.04-amd64-server-20211001
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-xenial-16.04-arm64-server-20211001
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:xenial-minimal-20210929-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:xenial-20211001-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:xenial-20211001-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:xenial-20211001-i386
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/xenial/release-20210929/ubuntu-16.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/xenial/release-20210929/ubuntu-16.04-minimal-cloudimg-amd64-uefi1.img
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/xenial/release-20211001/ubuntu-16.04-server-cloudimg-i386.tar.gz
+  16.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-yakkety-16.10-amd64-server-20170719
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-yakkety-16.10-arm64-server-20170719
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:yakkety-20170719-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:yakkety-20170719-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:yakkety-20170719-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/yakkety/release-20170719/ubuntu-16.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/yakkety/release-20170719/ubuntu-16.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/yakkety/release-20170719/ubuntu-16.10-server-cloudimg-i386.tar.gz
+  17.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-zesty-17.04-amd64-server-20171208
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-zesty-17.04-arm64-server-20171208
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:zesty-20171208-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:zesty-20171208-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:zesty-20171208-i386
+    urls:
+      - http://cloud-images-archive.ubuntu.com/releases/zesty/release-20171208/ubuntu-17.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/zesty/release-20171208/ubuntu-17.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images-archive.ubuntu.com/releases/zesty/release-20171208/ubuntu-17.04-server-cloudimg-i386.tar.gz
+  17.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-artful-17.10-amd64-server-20180706
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-artful-17.10-arm64-server-20180706
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:artful-20180706-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:artful-20180706-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:artful-20180706-i386
+    urls:
+      - http://cloud-images.ubuntu.com/releases/artful/release-20180706/ubuntu-17.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/artful/release-20180706/ubuntu-17.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/artful/release-20180706/ubuntu-17.10-server-cloudimg-i386.tar.gz
+  18.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-bionic-18.04-amd64-minimal-20230602
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-bionic-18.04-amd64-server-20230607
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-bionic-18.04-arm64-server-20230607
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:bionic-minimal-20230602-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:bionic-20230607-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:bionic-20230607-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:bionic-20230607-i386
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/bionic/release-20230602/ubuntu-18.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/bionic/release-20230602/ubuntu-18.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/bionic/release-20230607/ubuntu-18.04-server-cloudimg-i386.tar.gz
+  18.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-cosmic-18.10-amd64-minimal-20190628
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-cosmic-18.10-amd64-server-20190628
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-cosmic-18.10-arm64-server-20190628
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:cosmic-minimal-20190628-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:cosmic-20190628-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:cosmic-20190628-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:cosmic-20190628-i386
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/cosmic/release-20190628/ubuntu-18.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/cosmic/release-20190628/ubuntu-18.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/cosmic/release-20190628/ubuntu-18.10-server-cloudimg-i386.tar.gz
+  19.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-disco-19.04-amd64-minimal-20200115
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-disco-19.04-amd64-server-20200109
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-disco-19.04-arm64-server-20200109
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:disco-minimal-20200115-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:disco-20200109-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:disco-20200109-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:disco-20200109-i386
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/disco/release-20200115/ubuntu-19.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/disco/release-20200115/ubuntu-19.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/disco/release-20200109/ubuntu-19.04-server-cloudimg-i386.tar.gz
+  19.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-eoan-19.10-amd64-minimal-20200716
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-eoan-19.10-amd64-server-20200717
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-eoan-19.10-arm64-server-20200717
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:eoan-minimal-20200716-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:eoan-20200717-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:eoan-20200717-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:eoan-20200717-i386
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/eoan/release-20200716/ubuntu-19.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/eoan/release-20200716/ubuntu-19.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-arm64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-i386-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/eoan/release-20200717/ubuntu-19.10-server-cloudimg-i386.tar.gz
+  20.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-focal-20.04-amd64-minimal-20240614
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-focal-20.04-amd64-server-20240612
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-focal-20.04-arm64-server-20240612
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:focal-minimal-20240614-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:focal-20240612-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:focal-20240612-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/focal/release-20240614/ubuntu-20.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/focal/release-20240614/ubuntu-20.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/focal/release-20240612/ubuntu-20.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/focal/release-20240612/ubuntu-20.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/focal/release-20240612/ubuntu-20.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/focal/release-20240612/ubuntu-20.04-server-cloudimg-arm64.tar.gz
+  20.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-groovy-20.10-amd64-minimal-20210720
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-groovy-20.10-amd64-server-20210720
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-groovy-20.10-arm64-server-20210720
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:groovy-minimal-20210720-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:groovy-20210720-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:groovy-20210720-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/groovy/release-20210720/ubuntu-20.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/groovy/release-20210720/ubuntu-20.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/groovy/release-20210720/ubuntu-20.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/groovy/release-20210720/ubuntu-20.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/groovy/release-20210720/ubuntu-20.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/groovy/release-20210720/ubuntu-20.10-server-cloudimg-arm64.tar.gz
+  21.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-hirsute-21.04-amd64-minimal-20220119
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-hirsute-21.04-amd64-server-20220118
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-hirsute-21.04-arm64-server-20220118
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:hirsute-minimal-20220119-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:hirsute-20220118-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:hirsute-20220118-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/hirsute/release-20220119/ubuntu-21.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/hirsute/release-20220119/ubuntu-21.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/hirsute/release-20220118/ubuntu-21.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/hirsute/release-20220118/ubuntu-21.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/hirsute/release-20220118/ubuntu-21.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/hirsute/release-20220118/ubuntu-21.04-server-cloudimg-arm64.tar.gz
+  21.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-impish-21.10-amd64-minimal-20220706
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-impish-21.10-amd64-server-20220708
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-impish-21.10-arm64-server-20220708
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:impish-minimal-20220706-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:impish-20220708-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:impish-20220708-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/impish/release-20220706/ubuntu-21.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/impish/release-20220706/ubuntu-21.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/impish/release-20220708/ubuntu-21.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/impish/release-20220708/ubuntu-21.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/impish/release-20220708/ubuntu-21.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/impish/release-20220708/ubuntu-21.10-server-cloudimg-arm64.tar.gz
+  22.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-minimal-20240613
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-server-20240614
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-arm64-server-20240614
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:jammy-minimal-20240613-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:jammy-20240614-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:jammy-20240614-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/jammy/release-20240613/ubuntu-22.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/jammy/release-20240613/ubuntu-22.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/jammy/release-20240614/ubuntu-22.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/jammy/release-20240614/ubuntu-22.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/jammy/release-20240614/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/jammy/release-20240614/ubuntu-22.04-server-cloudimg-arm64.tar.gz
+  22.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-kinetic-22.10-amd64-minimal-20230714
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-kinetic-22.10-amd64-server-20230716
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-kinetic-22.10-arm64-server-20230716
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:kinetic-minimal-20230714-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:kinetic-20230716-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:kinetic-20230716-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/kinetic/release-20230714/ubuntu-22.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/kinetic/release-20230714/ubuntu-22.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/kinetic/release-20230716/ubuntu-22.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/kinetic/release-20230716/ubuntu-22.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/kinetic/release-20230716/ubuntu-22.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/kinetic/release-20230716/ubuntu-22.10-server-cloudimg-arm64.tar.gz
+  23.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-lunar-23.04-amd64-minimal-20230420
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-lunar-23.04-amd64-server-20240115
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-lunar-23.04-arm64-minimal-20240115
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:lunar-minimal-20230420-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:lunar-20240115-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:lunar-20240115-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/lunar/release-20230420/ubuntu-23.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/lunar/release-20230420/ubuntu-23.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/releases/lunar/release-20240115/ubuntu-23.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/lunar/release-20240115/ubuntu-23.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/lunar/release-20240115/ubuntu-23.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/lunar/release-20240115/ubuntu-23.04-server-cloudimg-arm64.tar.gz
+  23.10:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-mantic-23.10-amd64-minimal-20240529
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-mantic-23.10-arm64-minimal-20240529
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-mantic-23.10-amd64-server-20240606
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-mantic-23.10-arm64-server-20240606
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:mantic-minimal-20240529-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:mantic-minimal-20240529-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:mantic-20240606-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:mantic-20240606-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/mantic/release-20240529/ubuntu-23.10-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/mantic/release-20240529/ubuntu-23.10-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/minimal/releases/mantic/release-20240529/ubuntu-23.10-minimal-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/mantic/release-20240529/ubuntu-23.10-minimal-cloudimg-arm64.img
+      - http://cloud-images.ubuntu.com/releases/mantic/release-20240606/ubuntu-23.10-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/mantic/release-20240606/ubuntu-23.10-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/mantic/release-20240606/ubuntu-23.10-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/mantic/release-20240606/ubuntu-23.10-server-cloudimg-arm64.tar.gz
+  24.04:
+    amis:
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-minimal-20240608
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-minimal-20240608
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20240608
+      - ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-20240608
+    containers:
+      - ghcr.io/jhatler/ubuntu-cloudimg:noble-minimal-20240608-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:noble-minimal-20240608-arm64
+      - ghcr.io/jhatler/ubuntu-cloudimg:noble-20240608-amd64
+      - ghcr.io/jhatler/ubuntu-cloudimg:noble-20240608-arm64
+    urls:
+      - http://cloud-images.ubuntu.com/minimal/releases/noble/release-20240608/ubuntu-24.04-minimal-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/noble/release-20240608/ubuntu-24.04-minimal-cloudimg-amd64.img
+      - http://cloud-images.ubuntu.com/minimal/releases/noble/release-20240608/ubuntu-24.04-minimal-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/minimal/releases/noble/release-20240608/ubuntu-24.04-minimal-cloudimg-arm64.img
+      - http://cloud-images.ubuntu.com/releases/noble/release-20240608/ubuntu-24.04-server-cloudimg-amd64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/noble/release-20240608/ubuntu-24.04-server-cloudimg-amd64.tar.gz
+      - http://cloud-images.ubuntu.com/releases/noble/release-20240608/ubuntu-24.04-server-cloudimg-arm64-root.tar.xz
+      - http://cloud-images.ubuntu.com/releases/noble/release-20240608/ubuntu-24.04-server-cloudimg-arm64.tar.gz

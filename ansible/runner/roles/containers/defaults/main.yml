@@ -1,0 +1,6 @@
+---
+containers_mnt: /mnt
+containers_user: "{{ ansible_user }}"
+containers_enable_docker: true
+containers_enable_podman: true
+containers_prevent_service_start: false

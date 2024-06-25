@@ -1,0 +1,21 @@
+---
+- name: Ensure amd64 architecture is installed
+  ansible.builtin.lineinfile:
+    dest: /var/lib/dpkg/arch
+    line: amd64
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure i386 architecture is installed
+  notify:
+    - Install i386 packages
+    - Install i386 debs
+  ansible.builtin.lineinfile:
+    dest: /var/lib/dpkg/arch
+    line: i386
+    create: true
+    owner: root
+    group: root
+    mode: "0644"

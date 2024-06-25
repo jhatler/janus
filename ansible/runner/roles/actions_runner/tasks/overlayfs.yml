@@ -1,0 +1,26 @@
+---
+- name: OverlayFS Directories
+  when: actions_runner_overlayfs.create
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ actions_runner_user }}"
+    group: "{{ actions_runner_group }}"
+    mode: "0755"
+  loop:
+    - "{{ actions_runner_overlayfs.lower }}"
+    - "{{ actions_runner_overlayfs.work }}"
+    - "{{ actions_runner_overlayfs.upper }}"
+    - "{{ actions_runner_overlayfs.merged }}"
+
+- name: OverlayFS Mount
+  notify:
+    - Reload systemd
+    - Reconfigure runner service
+  ansible.posix.mount:
+    src: overlay
+    path: "{{ actions_runner_overlayfs.merged }}"
+    fstype: overlay
+    opts: "{{ actions_runner_overlayfs_opts }}"
+    boot: true
+    state: mounted

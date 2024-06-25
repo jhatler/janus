@@ -1,0 +1,14 @@
+---
+- name: Install devcontainer CLI
+  become: true
+  become_user: "{{ actions_runner_user }}"
+  ansible.builtin.command:
+    cmd: /bin/bash -l -c 'npm install -g @devcontainers/cli@0.62.0'
+    creates: "{{ actions_runner_nvm_dir }}/versions/node/v{{ actions_runner_node_version }}/bin/devcontainer"
+
+- name: Install cosign
+  become: true
+  become_user: "{{ actions_runner_user }}"
+  ansible.builtin.command:
+    cmd: /bin/bash -l -c 'go install github.com/sigstore/cosign/v2/cmd/cosign@latest'
+    creates: "{{ actions_runner_go_path }}/bin/cosign"

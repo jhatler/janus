@@ -1,0 +1,55 @@
+---
+- name: Reload systemd
+  tags:
+    - launch
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Install Latest Runner from GitHub
+  become: true
+  become_user: "{{ actions_runner_user }}"
+  register: runner_download
+  changed_when: runner_download.rc == 0
+  failed_when: runner_download.rc != 0
+  ansible.builtin.shell:
+    creates: "{{ actions_runner_user_home }}/.runner-latest-release"
+    executable: /bin/bash
+    cmd: "{{ lookup('template', 'install-runner.sh.j2') }}"
+
+- name: Install service hook symlinks
+  ansible.builtin.file:
+    src: /usr/local/bin/actions.runner.service.hook.sh
+    dest: /usr/local/bin/actions.runner.service.{{ item }}.sh
+    owner: root
+    group: root
+    state: link
+  loop:
+    - pre
+    - post
+
+- name: Reconfigure runner service
+  tags:
+    - launch
+  ansible.builtin.systemd_service:
+    name: actions.runner.service
+    enabled: "{{ actions_runner_services_enabled }}"
+    state: "{{ actions_runner_services_state }}"
+
+- name: Reload runner
+  when: actions_runner_services_enabled and not actions_runner_prevent_service_start
+  ansible.builtin.systemd_service:
+    name: actions.runner.service
+    enabled: "{{ actions_runner_services_enabled }}"
+    state: "reloaded"
+
+- name: Install ansible packages
+  ansible.builtin.apt:
+    name: "{{ actions_runner_ansible_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Install ansible pip packages
+  ansible.builtin.pip:
+    name: "{{ actions_runner_ansible_pip }}"
+    state: present

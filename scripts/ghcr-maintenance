@@ -1,0 +1,126 @@
+#!/bin/bash
+
+set -ex -o pipefail
+
+function _get_versions() {
+    gh api "users/$1/packages/container/$2/versions" --paginate --slurp
+}
+
+function _get_tags() {
+    jq -r '.[] | .[] | .metadata.container.tags[]' "$1"
+}
+
+function _get_ids() {
+    jq -r '.[] | .[] | .id' "$1"
+}
+
+function _get_name_by_tag() {
+    jq -r '
+        .[]
+        | .[]
+          | select(.metadata.container.tags | index("'"$1"'"))
+          | .name
+    ' "$2"
+}
+
+function _get_id_by_tag() {
+    jq -r '
+        .[]
+        | .[]
+          | select(.metadata.container.tags | index("'"$1"'"))
+          | .id
+    ' "$2"
+}
+
+function _should_skip_tag() {
+    _skip_regex=(
+        "^bootstrap-?(arm64|amd64)?$"
+        "^(dev)cache-.*$"
+    )
+
+    for _skip in "${_skip_regex[@]}"; do
+        if grep -qE "$_skip" <<< "$1"; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+function _should_skip_id() {
+    local _id
+    _id="$1"; shift
+
+    while (($#)); do
+        [ "$_id" = "$1" ] && return 0
+        shift
+    done
+
+    return 1
+}
+
+function prune() {
+    local _skip_name _skip_attest_name _skip_sig_name _attest_tag _sig_tag _id _user _package _versions
+    declare -a _skip_ids
+    declare -a _tags
+
+    _user="${1%%/*}"
+    _package="${1#*/}"
+
+    _versions=$(mktemp)
+
+    _get_versions "$_user" "$_package" > "$_versions"
+
+    _tags=( $(_get_tags "$_versions") )
+    _skip_ids=()
+
+    for _tag in "${_tags[@]}" ; do
+        if _should_skip_tag "$_tag" ; then
+            _skip_ids+=( "$( _get_id_by_tag "$_tag" "$_versions" )" )
+            _skip_name="$( _get_name_by_tag "$_tag" "$_versions" )"
+
+            _attest_tag="$(echo $_skip_name | tr ':' '-')"
+            _sig_tag="$_attest_tag.sig"
+
+            _skip_attest_name="$( _get_name_by_tag "$_attest_tag" "$_versions" )"
+            _skip_sig_name="$( _get_name_by_tag "$_sig_tag" "$_versions" )"
+
+            [ -n "$_skip_attest_name" ] && _skip_ids+=( "$( _get_id_by_tag "$_attest_tag" "$_versions" )" )
+            [ -n "$_skip_sig_name" ] && _skip_ids+=( "$( _get_id_by_tag "$_sig_tag" "$_versions" )" )
+        fi
+    done
+
+    if [ "$(nproc)" -gt 4 ]; then
+        _nproc=8
+    else
+        _nproc=$(( $(nproc) * 2 ))
+    fi
+
+    _idx=$_nproc
+    for _id in $(_get_ids "$_versions"); do
+        if [ "$_idx" -eq 0 ]; then
+            wait
+            _idx=$_nproc
+        fi
+
+        if _should_skip_id "$_id" "${_skip_ids[@]}"; then
+            echo "Skipping $_id"
+            continue
+        fi
+
+        gh api "users/$_user/packages/container/$_package/versions/$_id" --method DELETE &
+        _idx=$((idx-1))
+    done
+
+    rm -f "$_versions"
+}
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+    if [ -z "$1" ]; then
+        prune jhatler/janus
+    else
+        subcommand="$1"
+        shift
+        "$subcommand" "$@"
+    fi
+fi

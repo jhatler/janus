@@ -1,0 +1,20 @@
+---
+- name: Configure user profile
+  ansible.builtin.copy:
+    src: profile
+    dest: "{{ actions_runner_user_home }}/.profile"
+    owner: "{{ actions_runner_user }}"
+    group: "{{ actions_runner_group }}"
+    mode: "0644"
+    backup: false
+
+- name: Configure user sudoers
+  when: actions_runner_user_sudo_nopasswd
+  ansible.builtin.lineinfile:
+    create: true
+    dest: /etc/sudoers.d/{{ actions_runner_user }}
+    line: "{{ actions_runner_user }} ALL=(ALL:ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+    owner: root
+    group: root
+    mode: "0440"

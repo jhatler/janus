@@ -15,7 +15,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "test": "true"
   },
   "dependencies": {},
   "devDependencies": {

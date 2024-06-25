@@ -22,8 +22,16 @@ max_line_length = 72
 [TAG_EDITMSG]
 max_line_length = 72
 
+# Dockerfiles
+[Dockerfile]
+max_line_length = unset
+
 # Markdown files
 [*.md]
+max_line_length = unset
+
+# example files
+[*.example]
 max_line_length = unset
 
 # json files

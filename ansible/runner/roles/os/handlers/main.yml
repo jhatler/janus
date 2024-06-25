@@ -1,0 +1,22 @@
+---
+- name: Install admin utilities
+  ansible.builtin.apt:
+    name: "{{ os_admin_utils }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Install i386 packages
+  ansible.builtin.apt:
+    name: "{{ os_i386_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Install i386 debs
+  ansible.builtin.apt:
+    deb: "{{ item }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+  loop: "{{ os_i386_debs }}"

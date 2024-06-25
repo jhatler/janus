@@ -1,0 +1,5 @@
+---
+- name: Build AMI
+  ansible.builtin.import_playbook: site.yml
+  vars:
+    target_hosts: default

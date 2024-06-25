@@ -1,0 +1,48 @@
+---
+name: "Packer Builds"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+#  schedule:
+#    - cron: '39 7 * * 6'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  runner:
+    name: runner-${{ matrix.arch }}
+    runs-on: aws:ec2launchtemplate:runner-arm64
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            prefix: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-arm64-server-*'
+          - arch: amd64
+            prefix: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-server-*'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create AMI
+        shell: bash
+        id: ami-publish
+        env:
+          PKR_VAR_source_ami_prefix: ${{ matrix.prefix }}
+          PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.xlarge' || 'c7i.xlarge' }}
+          PKR_VAR_aws_region: us-east-2
+          PKR_VAR_iam_instance_profile: runner-controlled
+          PKR_VAR_ami_name: runner-${{ matrix.arch }}
+          PKR_VAR_runner_name: runner
+        working-directory: packer/runner
+        run: |
+          /usr/bin/env packer init ami.pkr.hcl
+          /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl

@@ -1,14 +1,28 @@
 name: 'Docker Semver Publisher'
 description: |
-  Sets up Docker and Builds the specified Container. Requires registry
-  credentials for usage in order to leverage caching.
-  Can optionally push image with Semver and SHA Tags
+  Sets up Docker and Builds the specified Container or Devcontainer. Registry
+  credentials are neede for pushing, attesting, and signing images. QEMU is
+  optional for cross-platform builds.
 
-# jscpd:ignore-start
 inputs:
+  build-args:
+    description: "List of build-time variables"
+    required: false
+  cache-from:
+    description: "Source of cache for the build"
+    required: false
+    default: 'type=gha'
+  cache-to:
+    description: "Destination of cache for the build"
+    required: false
+    default: 'type=gha,mode=max'
   context:
-    description: 'Docker Build Context'
+    description: 'Build Context (local supported, others may work)'
     required: true
+  type:
+    description: 'Type of Build (auto, container, devcontainer)'
+    required: false
+    default: 'auto'
   platforms:
     description: 'Platforms to Build'
     required: true
@@ -20,33 +34,45 @@ inputs:
   repository:
     description: 'Image Repository to use for caching and pushing'
     required: true
-  semver_major:
-    description: 'Major version to use for pushed semver tags'
-    required: false
-  semver_minor:
-    description: 'Minor version to use for pushed semver tags'
-    required: false
-  semver_patch:
-    description: 'Patch version to use for pushed semver tags'
-    required: false
-  registry:
-    description: 'OCI Registry to use for caching and pushing'
-    required: true
   username:
     description: 'OCI Registry Username'
     required: true
   password:
     description: 'OCI Registry Password'
     required: true
-  sign:
-    description: 'Sign images?'
+  attest:
+    description: 'Attest the published images?'
+    required: false
+    default: true
+  sbom:
+    description: 'Generate SBOM for the published images?'
     required: false
     default: false
+  sign:
+    description: 'Sign the published images?'
+    required: false
+    default: true
+  qemu:
+    description: 'Install QEMU for cross-platform builds?'
+    required: false
+    default: false
+  annotations:
+    description: "List of annotation to set to the image"
+    required: false
+    default: ''
+  labels:
+    description: "List of metadata for an image"
+    required: false
+    default: ''
+  tags:
+    description: "List of tags, the first will be used as the image version for generated OCI label and version output."
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: Set up QEMU
+      if: inputs.qemu == 'true'
       uses: docker/setup-qemu-action@v3
 
     - name: Install cosign
@@ -56,56 +82,150 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
+    - name: Determine version
+      id: version
+      shell: bash
+      run: |
+        echo "value=$( echo "${{ inputs.tags }}" | head -n1 )" | tee -a "$GITHUB_OUTPUT"
+
+    - name: Detect Registry
+      id: registry
+      shell: bash
+      run: |
+        case "${{ inputs.repository }}" in
+          ghcr.io/*)
+            echo "value=ghcr.io" | tee -a "$GITHUB_OUTPUT"
+            ;;
+          public.ecr.aws/*)
+            echo "value=public.ecr.aws" | tee -a "$GITHUB_OUTPUT"
+            ;;
+          *)
+            echo "Assuming Docker Hub"
+            echo "value=docker.io" | tee -a "$GITHUB_OUTPUT"
+            ;;
+        esac
+
     - name: Login to Container Registry
       uses: docker/login-action@v3
       with:
-        registry: ${{ inputs.registry }}
+        registry: ${{ steps.registry.outputs.value }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
 
-    - name: Set short git commit SHA
-      id: git
+    - name: Determine build type
+      id: build-type
       shell: bash
-      run: echo "short_sha=$(git rev-parse --short ${{ github.sha }})" >> "$GITHUB_OUTPUT"
-    # jscpd:ignore-end
+      run: |
+        if [[ "${{ inputs.type }}" == "auto" ]]; then
+          if [[ ! -d "${{ inputs.context }}" ]]; then
+            echo "Context directory not found: ${{ inputs.context }}" >&2
+            echo "Build type must be specified when context is not found" >&2
+            exit 1
+          fi
+
+          if [[ -f "${{ inputs.context }}"/.devcontainer.json ]]; then
+            echo "value=devcontainer" | tee -a "$GITHUB_OUTPUT"
+          elif [[ -f "${{ inputs.context }}"/.devcontainer/devcontainer.json ]]; then
+            echo "value=devcontainer" | tee -a "$GITHUB_OUTPUT"
+          elif [[ -f "${{ inputs.context }}"/Dockerfile ]]; then
+            echo "value=container" | tee -a "$GITHUB_OUTPUT"
+          elif [[ -f "${{ inputs.context }}"/Containerfile ]]; then
+            echo "value=container" | tee -a "$GITHUB_OUTPUT"
+          else
+            echo "Context directory not recognized: ${{ inputs.context }}" >&2
+            echo "Build type must be specified when context is not recognized" >&2
+            exit 1
+          fi
+        else
+          echo "value=${{ inputs.type }}" | tee -a "$GITHUB_OUTPUT"
+        fi
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      if: steps.build-type.outputs.value == 'devcontainer'
+      with:
+        node-version: '18.x'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@microsoft'
+
+    - name: Install devcontainers CLI
+      shell: bash
+      id: tgz
+      if: steps.build-type.outputs.value == 'devcontainer'
+      run: |
+        npm install -g @devcontainers/cli@0.62.0
 
     - name: Build container
-      id: build
+      id: build-container
+      if: steps.build-type.outputs.value == 'container'
       uses: docker/build-push-action@v5
       env:
         DOCKER_BUILDKIT: 1
         BUILDKIT_INLINE_CACHE: 1
       with:
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        build-args: ${{ inputs.build-args }}
+        cache-from: ${{ inputs.cache-from }}
+        cache-to: ${{ inputs.cache-to }}
         context: ${{ inputs.context }}
         push: ${{ inputs.push }}
-        tags: |
-          ${{ inputs.repository }}:latest
-          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}
+        sbom: ${{ inputs.sbom }}
+        tags: ${{ inputs.tags }}
         platforms: ${{ inputs.platforms }}
+        annotations: ${{ inputs.annotations }}
+        labels: ${{ inputs.labels }}
+
+    - name: Build devcontainer
+      id: build-devcontainer
+      if: steps.build-type.outputs.value == 'devcontainer'
+      shell: bash
+      run: |
+        devcontainer build \
+          --workspace-folder ${{ inputs.workspace }} \
+          --cache-from ${{ inputs.cache-from }} \
+          --cache-to ${{ inputs.cache-to }} \
+          --platform ${{ inputs.platforms }} \
+          --image-name ${{ steps.version.outputs.value }} \
+          --output type=image,name=${{ steps.version.outputs.value }},push=${{ inputs.push }}
+
+    - name: Push Additional Tags to Devcontainer
+      id: tag-devcontainer
+      if: steps.build-type.outputs.value == 'devcontainer' && inputs.push == 'true'
+      shell: bash
+      run: |
+        docker pull ${{ steps.version.outputs.value }}
+
+        for _tag in $( echo "${{ inputs.tags }}" ); do
+          if [[ "$_tag" == "${{ steps.version.outputs.value }}" ]]; then
+            continue
+          fi
+
+          docker tag ${{ steps.version.outputs.value }} $_ful_tagl_tag
+          docker push $_tag
+        done
+
+        echo "digest=$(docker inspect -f '{{index .RepoDigests 0}}' ${{ steps.version.outputs.value }} | cut -f2 -d@)" | tee -a "$GITHUB_OUTPUT"
+
+    - name: Determine Digest
+      id: digest
+      if: inputs.attest == 'true' || inputs.sign == 'true'
+      shell: bash
+      run: |
+        if [[ "${{ steps.build-type.outputs.value }}" == 'container' ]]; then
+          echo "value=${{ steps.build-container.outputs.digest }}" | tee -a "$GITHUB_OUTPUT"
+        else
+          echo "value=${{ steps.tag-devcontainer.outputs.digest }}" | tee -a "$GITHUB_OUTPUT"
+        fi
 
     - name: Sign the published images
-      if: inputs.sign == 'true' && inputs.push == 'true'
+      if: inputs.push == 'true' && inputs.sign == 'true'
       shell: bash
-      env:
-        TAGS: |
-          ${{ inputs.repository }}:latest
-          ${{ inputs.repository }}:${{ steps.git.outputs.short_sha }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}.${{ inputs.semver_patch }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}.${{ inputs.semver_minor }}
-          ${{ inputs.repository }}:v${{ inputs.semver_major }}
-        DIGEST: ${{ steps.build.outputs.digest }}
-      run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+      run: echo "${{ inputs.tags }}" | xargs -I {} cosign sign --yes {}@${{ steps.digest.outputs.value }}
 
     - name: Attest
       uses: actions/attest-build-provenance@v1
       id: attest
+      if: inputs.push == 'true' && inputs.attest == 'true'
       with:
         subject-name: ${{ inputs.repository }}
-        subject-digest: ${{ steps.build.outputs.digest }}
+        subject-digest: ${{ steps.digest.outputs.value }}
         push-to-registry: ${{ inputs.push }}
-    # jscpd:ignore-end
