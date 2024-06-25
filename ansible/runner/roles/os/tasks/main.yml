@@ -1,0 +1,7 @@
+---
+- name: Install common packages
+  ansible.builtin.import_tasks: packages.yml
+
+- name: Install i386 Support
+  when: ansible_architecture == 'x86_64'
+  ansible.builtin.import_tasks: i386.yml

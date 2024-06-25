@@ -107,9 +107,25 @@ build {
     destination = "/setup"
   }
 
+  # ensure that the ansible apt module doesn't fail due to missing metadata
+  # see ansible#79206 for more information
   provisioner "shell" {
     inline = [
-      "echo 'Waiting for cloud-init...'; cloud-init status --wait"
+      "echo 'Waiting for cloud-init...'; cloud-init status --wait",
+      "sudo rm -rf /var/lib/apt/lists/*",
+      "sudo touch -d '1970-01-01 0:00:00' /var/lib/apt/lists"
+    ]
+  }
+
+  provisioner "ansible" {
+    playbook_file = "../../ansible/runner/packer.yml"
+
+    # use_proxy fails with the ansible provisioner in some cases
+    use_proxy = false
+
+    groups = [
+      "tag_class_runner",
+      "aws_ec2"
     ]
   }
 

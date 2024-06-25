@@ -1,0 +1,19 @@
+---
+- name: Cache CLI dependencies
+  notify: Install CLI dependencies
+  ansible.builtin.copy:
+    dest: /tmp/.ansible_aws_cli_dependencies
+    content: "{{ aws_cli_dependencies }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure aws-cli exists
+  notify:
+    - Install CLI from zip
+  ansible.builtin.file:
+    state: directory
+    path: /usr/local/aws-cli
+    owner: root
+    group: root
+    mode: "0755"

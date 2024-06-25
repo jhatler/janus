@@ -1,0 +1,23 @@
+---
+aws_cli_install:
+  key: /usr/local/src/aws-cli-team.asc
+  keyring: /usr/local/src/aws-cli-team.gpg
+  url: "https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_machine }}.zip"
+  sig: "https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_machine }}.zip.sig"
+  dest: "/usr/local/src/awscli-exe-linux-{{ ansible_machine }}.zip"
+  sigdest: "/usr/local/src/awscli-exe-linux-{{ ansible_machine }}.zip.sig"
+
+aws_cli_dependencies:
+  - unzip
+  - gpgv
+  - gnupg
+  - groff
+  - less
+
+aws_cli_plugin_architecture_lookup:
+  x86_64: 64bit
+  aarch64: arm64
+  i386: 32bit
+aws_cli_plugin_architecture: "{{ aws_cli_plugin_architecture_lookup[ansible_architecture] }}"
+
+aws_cli_plugin_ssm: "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_{{ aws_cli_plugin_architecture }}/session-manager-plugin.deb"

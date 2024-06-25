@@ -1,0 +1,103 @@
+---
+- name: Install CLI dependencies
+  ansible.builtin.apt:
+    name: "{{ aws_cli_dependencies }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Install CLI from zip
+  notify:
+    - Download CLI zip signature
+  ansible.builtin.get_url:
+    # checkov:skip=CKV2_ANSIBLE_2:HTTPS url is defined as a variable
+    url: "{{ aws_cli_install.url }}"
+    dest: "{{ aws_cli_install.dest }}"
+    mode: "0644"
+    timeout: 300
+    validate_certs: true
+
+- name: Download CLI zip signature
+  notify: Download AWS CLI Team GPG key
+  ansible.builtin.get_url:
+    # checkov:skip=CKV2_ANSIBLE_2:HTTPS url is defined as a variable
+    url: "{{ aws_cli_install.sig }}"
+    dest: "{{ aws_cli_install.sigdest }}"
+    mode: "0644"
+    timeout: 300
+    validate_certs: true
+
+- name: Download AWS CLI Team GPG key
+  notify: Convert AWS CLI Team GPG key
+  ansible.builtin.copy:
+    src: aws-cli-team.asc
+    dest: "{{ aws_cli_install.key }}"
+    mode: "0444"
+
+- name: Convert AWS CLI Team GPG key
+  notify:
+    - Clean AWS CLI Team GPG key
+    - Verify CLI zip signature
+  ansible.builtin.command:
+    cmd: gpg -o "{{ aws_cli_install.keyring }}" --dearmor "{{ aws_cli_install.key }}"
+    creates: "{{ aws_cli_install.keyring }}"
+
+- name: Verify CLI zip signature
+  notify:
+    - Clean CLI zip signature
+    - Clean AWS CLI Team GPG keyring
+    - Extract CLI zip
+  register: aws_cli_sig_check
+  changed_when: aws_cli_sig_check.rc == 0
+  failed_when: aws_cli_sig_check.rc != 0
+  ansible.builtin.command: gpgv --keyring "{{ aws_cli_install.keyring }}" "{{ aws_cli_install.sigdest }}" "{{ aws_cli_install.dest }}"
+
+- name: Extract CLI zip
+  notify:
+    - Install CLI
+    - Clean CLI zip
+  ansible.builtin.unarchive:
+    src: "{{ aws_cli_install.dest }}"
+    dest: /usr/local/src
+    remote_src: true
+    creates: /usr/local/src/aws/install
+
+- name: Install CLI
+  notify:
+    - Clean CLI sources
+    - Install SSM Plugin
+  ansible.builtin.command:
+    cmd: /usr/local/src/aws/install
+    creates: /usr/local/bin/aws
+
+- name: Install SSM Plugin
+  ansible.builtin.apt:
+    deb: "{{ aws_cli_plugin_ssm }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Clean CLI zip
+  ansible.builtin.file:
+    path: "{{ aws_cli_install.dest }}"
+    state: absent
+
+- name: Clean CLI zip signature
+  ansible.builtin.file:
+    path: "{{ aws_cli_install.sigdest }}"
+    state: absent
+
+- name: Clean AWS CLI Team GPG key
+  ansible.builtin.file:
+    path: "{{ aws_cli_install.key }}"
+    state: absent
+
+- name: Clean AWS CLI Team GPG keyring
+  ansible.builtin.file:
+    path: "{{ aws_cli_install.keyring }}"
+    state: absent
+
+- name: Clean CLI sources
+  ansible.builtin.file:
+    path: /usr/local/src/aws
+    state: absent
