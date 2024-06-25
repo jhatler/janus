@@ -72,16 +72,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "s3_access_logs" {
 
     status = "Enabled"
 
-    noncurrent_version_transition {
-      noncurrent_days = 7
-      storage_class   = "STANDARD_IA"
-    }
-
-    noncurrent_version_transition {
-      noncurrent_days = 14
-      storage_class   = "GLACIER"
-    }
-
     noncurrent_version_expiration {
       noncurrent_days = 30
     }
