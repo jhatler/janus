@@ -10,10 +10,16 @@ resource "spacelift_stack" "control" {
 
   enable_well_known_secret_masking = true
 
+  labels = [
+    "admin",
+    "aikido",
+    "infracost"
+  ]
+
   branch            = "main"
   description       = "Control Stack"
   name              = "Control"
   project_root      = "terraform/control"
-  repository        = "janus"
+  repository        = var.control_repository
   terraform_version = "1.5.7"
 }

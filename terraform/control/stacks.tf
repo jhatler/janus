@@ -12,20 +12,26 @@ locals {
 resource "spacelift_stack" "children" {
   for_each = { for stack in local.stacks_to_create : stack.name => stack }
 
-  administrative = true
+  administrative = false
   autodeploy     = true
 
   github_action_deploy = false
 
   enable_well_known_secret_masking = true
 
+  repository = var.control_repository
+
   branch            = "main"
-  repository        = "janus"
   terraform_version = "1.5.7"
 
   description  = each.value.description
   name         = each.value.name
   project_root = each.value.project_root
+
+  labels = [
+    "infracost",
+    "aikido"
+  ]
 }
 
 # Generate the External IDs required for creating our AssumeRole policy
