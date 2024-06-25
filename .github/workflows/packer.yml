@@ -1,0 +1,59 @@
+---
+name: "Packer Builds"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'packer/**'
+      - '.github/workflows/packer.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packer/**'
+      - '.github/workflows/packer.yml'
+  schedule:
+    - cron: '0 0 */14 * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  runner:
+    name: runner-${{ matrix.arch }}
+    runs-on: aws:ec2launchtemplate:runner-arm64
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            source: 'ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*'
+            owner: amazon
+          - arch: amd64
+            source: 'ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*'
+            owner: amazon
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create AMI
+        shell: bash
+        id: ami-publish
+        env:
+          PKR_VAR_source_ami_prefix: ${{ matrix.source }}
+          PKR_VAR_source_ami_owner: ${{ matrix.owner }}
+          PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.large' || 'c7i.large' }}
+          PKR_VAR_aws_region: us-east-2
+          PKR_VAR_iam_instance_profile: runner-controlled
+          PKR_VAR_ami_name: runner-${{ matrix.arch }}
+          PKR_VAR_runner_name: runner
+        working-directory: packer/runner
+        run: |
+          /usr/bin/env packer init ami.pkr.hcl
+          /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl
