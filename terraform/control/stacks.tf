@@ -42,6 +42,10 @@ data "spacelift_aws_integration_attachment_external_id" "integration" {
   stack_id       = each.value.id
   read           = true
   write          = true
+
+  depends_on = [
+    spacelift_stack.children
+  ]
 }
 
 resource "spacelift_aws_integration_attachment" "integration" {
@@ -54,6 +58,7 @@ resource "spacelift_aws_integration_attachment" "integration" {
 
   # The role needs to exist before we attach since we test role assumption during attachment.
   depends_on = [
+    spacelift_stack.children,
     aws_iam_role.integration
   ]
 }
