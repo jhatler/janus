@@ -25,6 +25,10 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
-    directory: "/terraform/stacks/hello-world/"
+    directory: "/terraform/stacks/hello_world/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/terraform/stacks/network/"
     schedule:
       interval: "weekly"

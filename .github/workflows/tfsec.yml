@@ -24,6 +24,8 @@ jobs:
             sarif_file: tfsec-control.sarif
           - tfpath: terraform/stacks/hello_world
             sarif_file: tfsec-hello-world.sarif
+          - tfpath: terraform/stacks/network
+            sarif_file: tfsec-hello-world.sarif
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
