@@ -11,6 +11,12 @@ locals {
       description  = "Central Administrative & Security Resources"
       project_root = "terraform/stacks/admin"
       id           = "admin"
+    },
+    {
+      name         = "Network"
+      description  = "Shared Network for all Stacks"
+      project_root = "terraform/stacks/network"
+      id           = "network"
     }
   ]
 }
@@ -37,6 +43,20 @@ resource "spacelift_stack" "children" {
   labels = [
     "infracost",
     "aikido"
+  ]
+}
+
+# Make all children dependent on the Control stack
+resource "spacelift_stack_dependency" "integration__control" {
+  for_each = { for stack in local.stacks_to_create : stack.name => stack }
+
+  stack_id            = each.value.id
+  depends_on_stack_id = spacelift_stack.control.id
+
+  # The children need to exist before their dependencies can be defined
+  depends_on = [
+    spacelift_stack.children,
+    spacelift_stack.control
   ]
 }
 
