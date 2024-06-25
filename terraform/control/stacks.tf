@@ -5,6 +5,12 @@ locals {
       description  = "Hello World Stack"
       project_root = "terraform/stacks/hello_world"
       id           = "hello-world"
+    },
+    {
+      name         = "Admin"
+      description  = "Central Administrative & Security Resources"
+      project_root = "terraform/stacks/admin"
+      id           = "admin"
     }
   ]
 }
