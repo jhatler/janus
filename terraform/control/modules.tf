@@ -15,6 +15,10 @@ resource "spacelift_module" "github_oidc" {
   branch             = "main"
   repository         = var.control_repository
 
+  labels = [
+    "module"
+  ]
+
   name         = each.key
   description  = each.value.description
   project_root = each.value.project_root

@@ -25,10 +25,14 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
-    directory: "/terraform/stacks/hello_world/"
+    directory: "/terraform/stacks/network/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
-    directory: "/terraform/stacks/network/"
+    directory: "/terraform/stacks/admin/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/terraform/modules/github_oidc/"
     schedule:
       interval: "weekly"
