@@ -132,10 +132,6 @@
         "terraform/stacks": {
             "release-type": "simple",
             "package-name": "tf-stacks"
-        },
-        "terraform/stacks/hello_world": {
-            "release-type": "simple",
-            "package-name": "tf-stack-hello_world"
         }
     }
 }

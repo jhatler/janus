@@ -9,6 +9,5 @@
   "terraform": "0.1.0",
   "terraform/control": "0.1.0",
   "terraform/modules": "0.1.0",
-  "terraform/stacks": "0.1.0",
-  "terraform/stacks/hello_world": "0.1.0"
+  "terraform/stacks": "0.1.0"
 }
