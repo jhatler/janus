@@ -1,12 +1,6 @@
 locals {
   stacks_to_create = [
     {
-      name         = "Hello World"
-      description  = "Hello World Stack"
-      project_root = "terraform/stacks/hello_world"
-      id           = "hello-world"
-    },
-    {
       name         = "Admin"
       description  = "Central Administrative & Security Resources"
       project_root = "terraform/stacks/admin"
@@ -86,5 +80,31 @@ resource "spacelift_aws_integration_attachment" "integration" {
   depends_on = [
     spacelift_stack.children,
     aws_iam_role.integration
+  ]
+}
+
+# Pass through the control owner and repository to chilren
+resource "spacelift_environment_variable" "integration_control_owner" {
+  for_each = { for stack in local.stacks_to_create : stack.name => stack }
+
+  stack_id   = each.value.id
+  name       = "TF_VAR_control_owner"
+  value      = var.control_owner
+  write_only = false
+
+  depends_on = [
+    spacelift_stack.children
+  ]
+}
+resource "spacelift_environment_variable" "integration_control_repository" {
+  for_each = { for stack in local.stacks_to_create : stack.name => stack }
+
+  stack_id   = each.value.id
+  name       = "TF_VAR_control_repository"
+  value      = var.control_repository
+  write_only = false
+
+  depends_on = [
+    spacelift_stack.children
   ]
 }

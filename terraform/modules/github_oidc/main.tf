@@ -1,16 +1,4 @@
-# Per: https://github.com/aws-actions/configure-aws-credentials/blob/bd0758102444af2a09b9e47a2c93d0f091c1252d/README.md
-#   Note that the thumbprint below has been set to all F's because the thumbprint is not used
-#   when authenticating token.actions.githubusercontent.com. This is a special case used only
-#   when GitHub's OIDC is authenticating to IAM. IAM uses its library of trusted CAs to authenticate.
-resource "aws_iam_openid_connect_provider" "gh" {
-  url = "https://token.actions.githubusercontent.com"
-
-  client_id_list = [
-    "sts.amazonaws.com",
-  ]
-
-  thumbprint_list = ["ffffffffffffffffffffffffffffffffffffffff"]
-}
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "gh_oidc" {
   name = "gh-oidc-${var.github_owner}--${var.github_repository}"
@@ -23,7 +11,7 @@ resource "aws_iam_role" "gh_oidc" {
         Effect = "Allow"
         Sid    = "AllowGitHubOIDC"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.gh.arn
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
         }
         Condition = {
           StringEquals = {

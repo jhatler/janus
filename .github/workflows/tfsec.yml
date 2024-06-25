@@ -22,10 +22,12 @@ jobs:
         include:
           - working_directory: terraform/control
             sarif_file: tfsec-control.sarif
-          - tfpath: terraform/stacks/hello_world
-            sarif_file: tfsec-hello-world.sarif
           - tfpath: terraform/stacks/network
-            sarif_file: tfsec-hello-world.sarif
+            sarif_file: tfsec-network.sarif
+          - tfpath: terraform/stacks/admin
+            sarif_file: tfsec-admin.sarif
+          - tfpath: terraform/module/github_oidc
+            sarif_file: tfsec-module-github_oidc.sarif
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
