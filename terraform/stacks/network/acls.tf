@@ -14,16 +14,20 @@ resource "aws_network_acl" "public_edge" {
   #checkov:skip=CKV2_AWS_1: ACLs used for network segmentation, so this is not applicable
   vpc_id = aws_vpc.primary.id
 
-  subnet_ids = [
-    aws_subnet.admin.id,
-    aws_subnet.public_edge_a.id,
-    aws_subnet.public_edge_b.id,
-    aws_subnet.public_edge_c.id
-  ]
-
   tags = {
     Name = "Public Edge"
   }
+}
+
+resource "aws_network_acl_association" "admin" {
+  network_acl_id = aws_network_acl.public_edge.id
+  subnet_id      = aws_subnet.admin.id
+}
+
+resource "aws_network_acl_association" "public_edge" {
+  count          = length(aws_subnet.public_edge[*].id)
+  network_acl_id = aws_network_acl.public_edge.id
+  subnet_id      = aws_subnet.public_edge[count.index].id
 }
 
 resource "aws_network_acl_rule" "public_edge_egress" {
@@ -79,15 +83,15 @@ resource "aws_network_acl" "dmz" {
   #checkov:skip=CKV2_AWS_1: ACLs used for network segmentation, so this is not applicable
   vpc_id = aws_vpc.primary.id
 
-  subnet_ids = [
-    aws_subnet.dmz_a.id,
-    aws_subnet.dmz_b.id,
-    aws_subnet.dmz_c.id
-  ]
-
   tags = {
     Name = "DMZ"
   }
+}
+
+resource "aws_network_acl_association" "dmz" {
+  count          = length(aws_subnet.dmz[*].id)
+  network_acl_id = aws_network_acl.dmz.id
+  subnet_id      = aws_subnet.dmz[count.index].id
 }
 
 resource "aws_network_acl_rule" "dmz_egress" {
@@ -208,15 +212,15 @@ resource "aws_network_acl" "internal" {
   #checkov:skip=CKV2_AWS_1: ACLs used for network segmentation, so this is not applicable
   vpc_id = aws_vpc.primary.id
 
-  subnet_ids = [
-    aws_subnet.internal_a.id,
-    aws_subnet.internal_b.id,
-    aws_subnet.internal_c.id
-  ]
-
   tags = {
     Name = "Internal"
   }
+}
+
+resource "aws_network_acl_association" "internal" {
+  count          = length(aws_subnet.internal[*].id)
+  network_acl_id = aws_network_acl.internal.id
+  subnet_id      = aws_subnet.internal[count.index].id
 }
 
 resource "aws_network_acl_rule" "internal_egress" {

@@ -25,7 +25,7 @@ resource "aws_subnet" "public_edge" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "Public Edge ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
+    Name = "Public Edge ${upper(substr(data.aws_availability_zones.available.names[count.index], -1, 1))}"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_subnet" "dmz" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "DMZ ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
+    Name = "DMZ ${upper(substr(data.aws_availability_zones.available.names[count.index], -1, 1))}"
   }
 }
 
@@ -54,6 +54,6 @@ resource "aws_subnet" "internal" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "Internal ${upper(substr(data.aws_availability_zones.available.names[count.index], -1))}"
+    Name = "Internal ${upper(substr(data.aws_availability_zones.available.names[count.index], -1, 1))}"
   }
 }
