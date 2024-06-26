@@ -23,6 +23,12 @@ locals {
       description  = "Shared CI Runners for all Stacks"
       project_root = "terraform/stacks/runners"
       id           = "runners"
+    },
+    {
+      name         = "Webhooks"
+      description  = "API Gateway Endpoints for Webhook Automation"
+      project_root = "terraform/stacks/webhooks"
+      id           = "webhooks"
     }
   ]
 }

@@ -26,6 +26,9 @@ max_line_length = 72
 [*.tf]
 max_line_length = unset
 
+[*.tftpl]
+max_line_length = unset
+
 # Markdown files
 [*.md]
 max_line_length = unset
