@@ -24,3 +24,21 @@ resource "aws_iam_role" "apigateway_logs" {
     data.aws_iam_policy.AmazonAPIGatewayPushToCloudWatchLogs.arn
   ]
 }
+
+data "aws_iam_policy_document" "apigateway_logs_attach" {
+  statement {
+    effect = "Allow"
+    sid    = "AllowFlowLogsRolePass"
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [aws_iam_role.apigateway_logs.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "apigateway_logs_attach" {
+  name   = "apigateway-logs-attach"
+  role   = var.stack_role_id
+  policy = data.aws_iam_policy_document.apigateway_logs_attach.json
+}
