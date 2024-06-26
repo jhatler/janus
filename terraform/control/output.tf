@@ -9,3 +9,9 @@ output "TF_VAR_stack_role_id" {
   description = "The ID of the stack role."
   sensitive   = true
 }
+
+output "TF_VAR_runner_admin_pat" {
+  value       = var.runner_admin_pat
+  description = "The personal access token for runner admin."
+  sensitive   = true
+}
