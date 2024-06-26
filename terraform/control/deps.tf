@@ -52,3 +52,9 @@ resource "spacelift_stack_dependency_reference" "auth_stack_role_id" {
   output_name         = "TF_VAR_stack_role_id"
   input_name          = "TF_VAR_stack_role_id"
 }
+
+resource "spacelift_stack_dependency_reference" "runners_runner_admin_pat" {
+  stack_dependency_id = spacelift_stack_dependency.integration__control["Runners"].id
+  output_name         = "TF_VAR_runner_admin_pat"
+  input_name          = "TF_VAR_runner_admin_pat"
+}

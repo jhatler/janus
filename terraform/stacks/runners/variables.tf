@@ -10,10 +10,9 @@ variable "control_owner" {
   description = "The owner of the GitHub repository for the control repository."
 }
 
-# tflint-ignore: terraform_unused_declarations
-variable "class_b_prefix" {
+variable "runners_kms_key_arn" {
   type        = string
-  description = "The class B prefix for the VPC (e.g. 10.0)."
+  description = "The ARN of the KMS key used for CI Runners"
   sensitive   = true
 }
 
