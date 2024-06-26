@@ -22,7 +22,7 @@ resource "aws_s3_bucket" "s3_access_logs" {
 }
 
 # Log to itself
-resource "aws_s3_bucket_logging" "example" {
+resource "aws_s3_bucket_logging" "s3_access_logs" {
   bucket = aws_s3_bucket.s3_access_logs.id
 
   target_bucket = aws_s3_bucket.s3_access_logs.id
@@ -39,6 +39,10 @@ resource "aws_s3_bucket_versioning" "s3_access_logs" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "s3_access_logs" {
   bucket = aws_s3_bucket.s3_access_logs.id
+
+  depends_on = [
+    aws_s3_bucket_versioning.s3_access_logs
+  ]
 
   rule {
     id = "s3-access"
