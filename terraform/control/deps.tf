@@ -28,6 +28,42 @@ resource "spacelift_stack_dependency" "runners__crypto" {
   depends_on_stack_id = spacelift_stack.children["Crypto"].id
 }
 
+resource "spacelift_stack_dependency" "runners__network" {
+  stack_id            = spacelift_stack.children["Runners"].id
+  depends_on_stack_id = spacelift_stack.children["Network"].id
+}
+
+resource "spacelift_stack_dependency" "runners__webhooks" {
+  stack_id            = spacelift_stack.children["Runners"].id
+  depends_on_stack_id = spacelift_stack.children["Webhooks"].id
+}
+
+resource "spacelift_stack_dependency" "webhooks__auth" {
+  stack_id            = spacelift_stack.children["Webhooks"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
+resource "spacelift_stack_dependency" "webhooks__admin" {
+  stack_id            = spacelift_stack.children["Webhooks"].id
+  depends_on_stack_id = spacelift_stack.children["Admin"].id
+}
+
+resource "spacelift_stack_dependency" "webhooks__crypto" {
+  stack_id            = spacelift_stack.children["Webhooks"].id
+  depends_on_stack_id = spacelift_stack.children["Crypto"].id
+}
+
+resource "spacelift_stack_dependency" "webhooks__network" {
+  stack_id            = spacelift_stack.children["Webhooks"].id
+  depends_on_stack_id = spacelift_stack.children["Network"].id
+}
+
+resource "spacelift_stack_dependency_reference" "admin_apigateway_logs_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.admin__auth.id
+  output_name         = "TF_VAR_apigateway_logs_role_arn"
+  input_name          = "TF_VAR_apigateway_logs_role_arn"
+}
+
 resource "spacelift_stack_dependency_reference" "network_s3_access_logs_bucket_id" {
   stack_dependency_id = spacelift_stack_dependency.network__admin.id
   output_name         = "TF_VAR_s3_access_logs_bucket_id"
@@ -68,4 +104,16 @@ resource "spacelift_stack_dependency_reference" "runners_runners_kms_key_arn" {
   stack_dependency_id = spacelift_stack_dependency.runners__crypto.id
   output_name         = "TF_VAR_runners_kms_key_arn"
   input_name          = "TF_VAR_runners_kms_key_arn"
+}
+
+resource "spacelift_stack_dependency_reference" "webhooks_github_webhook_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.webhooks__auth.id
+  output_name         = "TF_VAR_github_webhook_role_arn"
+  input_name          = "TF_VAR_github_webhook_role_arn"
+}
+
+resource "spacelift_stack_dependency_reference" "webhooks_github_webhook_lambda_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.webhooks__auth.id
+  output_name         = "TF_VAR_github_webhook_lambda_role_arn"
+  input_name          = "TF_VAR_github_webhook_lambda_role_arn"
 }
