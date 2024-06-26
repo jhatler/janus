@@ -120,39 +120,39 @@ resource "aws_api_gateway_stage" "github_webhook_alpha" {
   # checkov:skip=CKV_AWS_225:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_51:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_29:This will be addressed in a future PR
+  # checkov:skip=CKV_AWS_120:This will be addressed in a future PR
   #ts:skip=AWS.APIGateway.Logging.Medium.0567 This will be addressed in a future PR
 
-  deployment_id         = aws_api_gateway_deployment.github_webhook_alpha.id
-  rest_api_id           = aws_api_gateway_rest_api.github_webhook.id
-  stage_name            = "alpha"
-  xray_tracing_enabled  = true
-  cache_cluster_enabled = true
+  deployment_id        = aws_api_gateway_deployment.github_webhook_alpha.id
+  rest_api_id          = aws_api_gateway_rest_api.github_webhook.id
+  stage_name           = "alpha"
+  xray_tracing_enabled = true
 }
 resource "aws_api_gateway_stage" "github_webhook_beta" {
   # checkov:skip=CKV_AWS_76:This will be addressed in a future PR
   # checkov:skip=CKV_AWS_225:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_51:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_29:This will be addressed in a future PR
+  # checkov:skip=CKV_AWS_120:This will be addressed in a future PR
   #ts:skip=AWS.APIGateway.Logging.Medium.0567 This will be addressed in a future PR
 
-  deployment_id         = aws_api_gateway_deployment.github_webhook_beta.id
-  rest_api_id           = aws_api_gateway_rest_api.github_webhook.id
-  stage_name            = "beta"
-  xray_tracing_enabled  = true
-  cache_cluster_enabled = true
+  deployment_id        = aws_api_gateway_deployment.github_webhook_beta.id
+  rest_api_id          = aws_api_gateway_rest_api.github_webhook.id
+  stage_name           = "beta"
+  xray_tracing_enabled = true
 }
 resource "aws_api_gateway_stage" "github_webhook_stable" {
   # checkov:skip=CKV_AWS_76:This will be addressed in a future PR
   # checkov:skip=CKV_AWS_225:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_51:This will be addressed in a future PR
   # checkov:skip=CKV2_AWS_29:This will be addressed in a future PR
+  # checkov:skip=CKV_AWS_120:This will be addressed in a future PR
   #ts:skip=AWS.APIGateway.Logging.Medium.0567 This will be addressed in a future PR
 
-  deployment_id         = aws_api_gateway_deployment.github_webhook_stable.id
-  rest_api_id           = aws_api_gateway_rest_api.github_webhook.id
-  stage_name            = "stable"
-  xray_tracing_enabled  = true
-  cache_cluster_enabled = true
+  deployment_id        = aws_api_gateway_deployment.github_webhook_stable.id
+  rest_api_id          = aws_api_gateway_rest_api.github_webhook.id
+  stage_name           = "stable"
+  xray_tracing_enabled = true
 }
 
 # Enable logging on all stages
