@@ -79,3 +79,21 @@ resource "aws_iam_role_policy" "vpc_flow" {
   role   = aws_iam_role.vpc_flow.id
   policy = data.aws_iam_policy_document.vpc_flow.json
 }
+
+data "aws_iam_policy_document" "vpc_flow_attach" {
+  statement {
+    effect = "Allow"
+    sid    = "AllowFlowLogsRolePass"
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [aws_iam_role.vpc_flow.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "vpc_flow_attach" {
+  name   = "vpc-flow-attach"
+  role   = var.stack_role_id
+  policy = data.aws_iam_policy_document.vpc_flow_attach.json
+}
