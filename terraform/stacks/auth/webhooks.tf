@@ -26,6 +26,24 @@ resource "aws_iam_role_policy_attachment" "github_webhook_sqs_push" {
   policy_arn = aws_iam_policy.github_webhook_sqs_push.arn
 }
 
+data "aws_iam_policy_document" "github_webhook_attach" {
+  statement {
+    effect = "Allow"
+    sid    = "AllowFlowLogsRolePass"
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [aws_iam_role.github_webhook.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "github_webhook_attach" {
+  name   = "github-webhook-attach"
+  role   = var.stack_role_id
+  policy = data.aws_iam_policy_document.github_webhook_attach.json
+}
+
 # Policy for webhook lambda and GitHub Actions Workflows to access EC2
 data "aws_iam_policy_document" "github_ec2" {
   # checkov:skip=CKV_AWS_111:This will be addressed in a future PR
@@ -167,4 +185,22 @@ resource "aws_iam_role_policy_attachment" "github_webhook_lambda" {
 resource "aws_iam_role_policy_attachment" "github_webhook_lambda_oidc" {
   role       = aws_iam_role.github_webhook_lambda.name
   policy_arn = aws_iam_policy.github_ec2.arn
+}
+
+data "aws_iam_policy_document" "github_webhook_lambda_attach" {
+  statement {
+    effect = "Allow"
+    sid    = "AllowFlowLogsRolePass"
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [aws_iam_role.github_webhook_lambda.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "github_webhook_lambda_attach" {
+  name   = "github-webhook-lambda-attach"
+  role   = var.stack_role_id
+  policy = data.aws_iam_policy_document.github_webhook_lambda_attach.json
 }
