@@ -47,8 +47,8 @@ resource "spacelift_stack_dependency_reference" "network_class_b_prefix" {
   input_name          = "TF_VAR_class_b_prefix"
 }
 
-resource "spacelift_stack_dependency_reference" "network_stack_role_id" {
-  stack_dependency_id = spacelift_stack_dependency.network__auth.id
+resource "spacelift_stack_dependency_reference" "auth_stack_role_id" {
+  stack_dependency_id = spacelift_stack_dependency.auth__control.id
   output_name         = "TF_VAR_stack_role_id"
   input_name          = "TF_VAR_stack_role_id"
 }
