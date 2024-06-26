@@ -5,7 +5,7 @@ output "TF_VAR_class_b_prefix" {
 }
 
 output "TF_VAR_stack_role_id" {
-  value       = aws_iam_role.integration.arn
+  value       = aws_iam_role.integration.id
   description = "The ID of the stack role."
   sensitive   = true
 }
