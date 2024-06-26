@@ -72,11 +72,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "vpc_flow" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "vpc_flow" {
+  #checkov:skip=CKV2_AWS_67: Rotation is configured in a different stack
   bucket = aws_s3_bucket.vpc_flow.id
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.vpc_flow.arn
+      kms_master_key_id = var.vpc_flow_kms_key_arn
       sse_algorithm     = "aws:kms"
     }
   }

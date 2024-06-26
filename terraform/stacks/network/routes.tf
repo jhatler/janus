@@ -48,58 +48,33 @@ resource "aws_route" "nat_gw" {
 
 # Main Table
 resource "aws_main_route_table_association" "primary" {
-  vpc_id         = aws_vpc.primary.id
   route_table_id = aws_route_table.nat.id
+  vpc_id         = aws_vpc.primary.id
 }
-
 
 # Per-Subnet Associations
 resource "aws_route_table_association" "admin" {
+  route_table_id = aws_route_table.ig.id
   subnet_id      = aws_subnet.admin.id
+}
+
+resource "aws_route_table_association" "public_edge" {
+  count = length(aws_subnet.public_edge[*].id)
+
   route_table_id = aws_route_table.ig.id
+  subnet_id      = aws_subnet.public_edge[count.index].id
 }
 
-resource "aws_route_table_association" "public_edge_a" {
-  subnet_id      = aws_subnet.public_edge_a.id
+resource "aws_route_table_association" "dmz" {
+  count = length(aws_subnet.dmz[*].id)
+
   route_table_id = aws_route_table.ig.id
+  subnet_id      = aws_subnet.dmz[count.index].id
 }
 
-resource "aws_route_table_association" "public_edge_b" {
-  subnet_id      = aws_subnet.public_edge_b.id
+resource "aws_route_table_association" "internal" {
+  count = length(aws_subnet.internal[*].id)
+
   route_table_id = aws_route_table.ig.id
-}
-
-resource "aws_route_table_association" "public_edge_c" {
-  subnet_id      = aws_subnet.public_edge_c.id
-  route_table_id = aws_route_table.ig.id
-}
-
-resource "aws_route_table_association" "dmz_a" {
-  subnet_id      = aws_subnet.dmz_a.id
-  route_table_id = aws_route_table.nat.id
-}
-
-resource "aws_route_table_association" "dmz_b" {
-  subnet_id      = aws_subnet.dmz_b.id
-  route_table_id = aws_route_table.nat.id
-}
-
-resource "aws_route_table_association" "dmz_c" {
-  subnet_id      = aws_subnet.dmz_c.id
-  route_table_id = aws_route_table.nat.id
-}
-
-resource "aws_route_table_association" "internal_a" {
-  subnet_id      = aws_subnet.internal_a.id
-  route_table_id = aws_route_table.nat.id
-}
-
-resource "aws_route_table_association" "internal_b" {
-  subnet_id      = aws_subnet.internal_b.id
-  route_table_id = aws_route_table.nat.id
-}
-
-resource "aws_route_table_association" "internal_c" {
-  subnet_id      = aws_subnet.internal_c.id
-  route_table_id = aws_route_table.nat.id
+  subnet_id      = aws_subnet.internal[count.index].id
 }

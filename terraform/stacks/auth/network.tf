@@ -1,9 +1,12 @@
+##
+## IAM resources for the network stack
+##
 
 # Flow Logging
 data "aws_iam_policy_document" "vpc_flow" {
   statement {
     effect = "Allow"
-
+    sid    = "Allow_FlowLogs_CloudWatch_LogGroups"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -31,6 +34,8 @@ data "aws_iam_policy_document" "vpc_flow" {
 
   statement {
     effect = "Allow"
+    sid    = "Allow_FlowLogs_S3_Archive"
+
     actions = [
       "s3:GetObject",
       "s3:PutObject",
