@@ -1,11 +1,11 @@
-resource "aws_ssm_parameter" "runner_admin_token" {
+resource "aws_ssm_parameter" "runners_admin_token" {
   name   = "/github/actions/runners/admin-token"
   type   = "SecureString"
-  value  = var.runner_admin_pat
+  value  = var.runners_admin_pat
   key_id = var.runners_kms_key_arn
 }
 
-resource "aws_ssm_parameter" "runner_cooloff" {
+resource "aws_ssm_parameter" "runners_cooloff" {
   name   = "/github/actions/runners/cooloff"
   type   = "SecureString"
   value  = "10"

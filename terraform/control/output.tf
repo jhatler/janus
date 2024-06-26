@@ -10,8 +10,8 @@ output "TF_VAR_stack_role_id" {
   sensitive   = true
 }
 
-output "TF_VAR_runner_admin_pat" {
-  value       = var.runner_admin_pat
+output "TF_VAR_runners_admin_pat" {
+  value       = var.runners_admin_pat
   description = "The personal access token for runner admin."
   sensitive   = true
 }
