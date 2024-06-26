@@ -68,13 +68,13 @@ resource "aws_route_table_association" "public_edge" {
 resource "aws_route_table_association" "dmz" {
   count = length(aws_subnet.dmz[*].id)
 
-  route_table_id = aws_route_table.ig.id
+  route_table_id = aws_route_table.nat.id
   subnet_id      = aws_subnet.dmz[count.index].id
 }
 
 resource "aws_route_table_association" "internal" {
   count = length(aws_subnet.internal[*].id)
 
-  route_table_id = aws_route_table.ig.id
+  route_table_id = aws_route_table.nat.id
   subnet_id      = aws_subnet.internal[count.index].id
 }
