@@ -9,3 +9,9 @@ variable "control_owner" {
   type        = string
   description = "The owner of the GitHub repository for the control repository."
 }
+
+variable "stack_role_id" {
+  type        = string
+  description = "The ID of the stack role."
+  sensitive   = true
+}

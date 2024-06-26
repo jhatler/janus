@@ -29,7 +29,6 @@ resource "aws_flow_log" "primary_cloudwatch" {
 }
 
 resource "aws_flow_log" "primary_s3" {
-  iam_role_arn         = var.vpc_flow_role_arn
   log_destination      = aws_s3_bucket.vpc_flow.arn
   log_destination_type = "s3"
   traffic_type         = "ALL"
