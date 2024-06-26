@@ -17,7 +17,7 @@ variable "class_b_prefix" {
   sensitive   = true
 }
 
-variable "runner_admin_pat" {
+variable "runners_admin_pat" {
   type        = string
   description = "The personal access token for runner admin."
   sensitive   = true

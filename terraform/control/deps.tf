@@ -23,6 +23,11 @@ resource "spacelift_stack_dependency" "network__crypto" {
   depends_on_stack_id = spacelift_stack.children["Crypto"].id
 }
 
+resource "spacelift_stack_dependency" "runners__crypto" {
+  stack_id            = spacelift_stack.children["Runners"].id
+  depends_on_stack_id = spacelift_stack.children["Crypto"].id
+}
+
 resource "spacelift_stack_dependency_reference" "network_s3_access_logs_bucket_id" {
   stack_dependency_id = spacelift_stack_dependency.network__admin.id
   output_name         = "TF_VAR_s3_access_logs_bucket_id"
@@ -55,6 +60,12 @@ resource "spacelift_stack_dependency_reference" "auth_stack_role_id" {
 
 resource "spacelift_stack_dependency_reference" "runners_runner_admin_pat" {
   stack_dependency_id = spacelift_stack_dependency.integration__control["Runners"].id
-  output_name         = "TF_VAR_runner_admin_pat"
-  input_name          = "TF_VAR_runner_admin_pat"
+  output_name         = "TF_VAR_runners_admin_pat"
+  input_name          = "TF_VAR_runners_admin_pat"
+}
+
+resource "spacelift_stack_dependency_reference" "runners_runners_kms_key_arn" {
+  stack_dependency_id = spacelift_stack_dependency.runners__crypto.id
+  output_name         = "TF_VAR_runners_kms_key_arn"
+  input_name          = "TF_VAR_runners_kms_key_arn"
 }
