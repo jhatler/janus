@@ -6,7 +6,7 @@
 data "aws_iam_policy_document" "vpc_flow" {
   statement {
     effect = "Allow"
-    sid    = "Allow_FlowLogs_CloudWatch_LogGroups"
+    sid    = "AllowFlowLogsCloudWatchLogGroups"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -34,8 +34,7 @@ data "aws_iam_policy_document" "vpc_flow" {
 
   statement {
     effect = "Allow"
-    sid    = "Allow_FlowLogs_S3_Archive"
-
+    sid    = "AllowFlowLogsS3Archive"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
