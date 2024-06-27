@@ -29,6 +29,12 @@ locals {
       description  = "API Gateway Endpoints for Webhook Automation"
       project_root = "terraform/stacks/webhooks"
       id           = "webhooks"
+    },
+    {
+      name         = "SSM"
+      description  = "AWS Systems Manager Automation"
+      project_root = "terraform/stacks/ssm"
+      id           = "ssm"
     }
   ]
 }

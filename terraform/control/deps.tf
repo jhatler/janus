@@ -58,6 +58,21 @@ resource "spacelift_stack_dependency" "webhooks__network" {
   depends_on_stack_id = spacelift_stack.children["Network"].id
 }
 
+resource "spacelift_stack_dependency" "ssm__auth" {
+  stack_id            = spacelift_stack.children["SSM"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
+resource "spacelift_stack_dependency" "ssm__admin" {
+  stack_id            = spacelift_stack.children["SSM"].id
+  depends_on_stack_id = spacelift_stack.children["Admin"].id
+}
+
+resource "spacelift_stack_dependency" "ssm__crypto" {
+  stack_id            = spacelift_stack.children["SSM"].id
+  depends_on_stack_id = spacelift_stack.children["Crypto"].id
+}
+
 resource "spacelift_stack_dependency_reference" "admin_apigateway_logs_role_arn" {
   stack_dependency_id = spacelift_stack_dependency.admin__auth.id
   output_name         = "TF_VAR_apigateway_logs_role_arn"
@@ -125,5 +140,19 @@ resource "spacelift_stack_dependency_reference" "webhooks_github_webhook_lambda_
   stack_dependency_id = spacelift_stack_dependency.webhooks__auth.id
   output_name         = "TF_VAR_github_webhook_lambda_role_arn"
   input_name          = "TF_VAR_github_webhook_lambda_role_arn"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "ssm_ssm_session_manager_kms_key_arn" {
+  stack_dependency_id = spacelift_stack_dependency.ssm__crypto.id
+  output_name         = "TF_VAR_ssm_session_manager_kms_key_arn"
+  input_name          = "TF_VAR_ssm_session_manager_kms_key_arn"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "ssm_s3_access_logs_bucket_id" {
+  stack_dependency_id = spacelift_stack_dependency.ssm__admin.id
+  output_name         = "TF_VAR_s3_access_logs_bucket_id"
+  input_name          = "TF_VAR_s3_access_logs_bucket_id"
   trigger_always      = true
 }
