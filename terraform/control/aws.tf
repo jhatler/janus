@@ -87,8 +87,23 @@ resource "aws_iam_role" "auth" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      jsondecode(data.spacelift_aws_integration_attachment_external_id.auth.assume_role_policy_statement),
-    ]
+      {
+        Effect = "Allow",
+        "Principal" = {
+          "AWS" : data.spacelift_account.current.aws_account_id
+        },
+        "Action" = "sts:AssumeRole",
+        "Condition" = {
+          "StringEquals" = {
+            # Allow the external ID for any of the stacks to assume our role
+            "sts:ExternalId" = flatten([
+              [for i in data.spacelift_aws_integration_attachment_external_id.control_modules : i.external_id],
+              data.spacelift_aws_integration_attachment_external_id.auth.external_id
+            ])
+          }
+        }
+      }
+    ],
   })
 }
 
@@ -123,6 +138,13 @@ resource "spacelift_aws_integration" "integration" {
   generate_credentials_in_worker = false
 }
 
+locals {
+  integration_external_ids = tomap(merge(
+    # more mappings can be added here if needed
+    { for k, v in data.spacelift_aws_integration_attachment_external_id.integration : k => v.external_id },
+  ))
+}
+
 resource "aws_iam_role" "integration" {
   name = local.stack_role_name
 
@@ -138,10 +160,7 @@ resource "aws_iam_role" "integration" {
         "Condition" = {
           "StringEquals" = {
             # Allow the external ID for any of the stacks to assume our role
-            "sts:ExternalId" = flatten([
-              [for i in values(data.spacelift_aws_integration_attachment_external_id.integration) : i.external_id],
-              [for i in values(data.spacelift_aws_integration_attachment_external_id.control_modules) : i.external_id]
-            ])
+            "sts:ExternalId" = values(local.integration_external_ids)
           }
         }
       }
