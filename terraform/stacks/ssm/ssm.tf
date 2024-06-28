@@ -3,6 +3,7 @@ data "aws_ssm_document" "run_shell" {
   name = "SSM-SessionManagerRunShell"
 }
 
+# tflint-ignore: terraform_unused_declarations
 resource "aws_ssm_document" "apply_ansible_playbooks" {
   name          = "ApplyAnsiblePlaybooks"
   document_type = "Command"

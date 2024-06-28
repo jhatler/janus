@@ -1,3 +1,13 @@
+# tflint-ignore: terraform_unused_declarations
+data "aws_ssm_document" "run_shell" {
+  name = "SSM-SessionManagerRunShell"
+}
+
+# tflint-ignore: terraform_unused_declarations
+data "aws_ssm_document" "apply_ansible_playbooks" {
+  name = "ApplyAnsiblePlaybooks"
+}
+
 data "aws_iam_policy_document" "ssm_agent" {
   statement {
     sid    = "AllowAssociationLoggingAndAnsibleSSMConnections"
@@ -39,6 +49,48 @@ data "aws_iam_policy_document" "ssm_agent" {
       "logs:PutLogEvents"
     ]
     resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:ssm-session-manager"]
+  }
+
+  statement {
+    sid    = "AllowRunShellDocumentAccess"
+    effect = "Allow"
+    actions = [
+      "ssm:StartSession"
+    ]
+    resources = [
+      data.aws_ssm_document.run_shell.arn
+    ]
+  }
+
+
+  statement {
+    sid    = "AllowCrossRunnerSessions"
+    effect = "Allow"
+    actions = [
+      "ssm:StartSession"
+    ]
+    resources = [
+      "arn:aws:ec2:us-east-2:${data.aws_caller_identity.current.account_id}:instance/*"
+    ]
+  }
+
+  statement {
+    sid    = "AllowSessionDescribe"
+    effect = "Allow"
+    actions = [
+      "ssm:DescribeSessions"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "AllowSessionManagement"
+    effect = "Allow"
+    actions = [
+      "ssm:ResumeSession",
+      "ssm:TerminateSession"
+    ]
+    resources = ["arn:aws:ssm:*:*:session/*"]
   }
 }
 
