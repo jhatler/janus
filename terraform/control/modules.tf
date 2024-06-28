@@ -3,7 +3,8 @@ locals {
     {
       name         = "github-oidc"
       description  = "Configures GitHub access to IAM Role via OIDC"
-      project_root = "terraform/modules/github_oidc"
+      project_root = "terraform/modules/github_oidc",
+      id           = "terraform-aws-github-oidc"
     }
   ]
 }
@@ -44,7 +45,7 @@ data "spacelift_aws_integration_attachment_external_id" "control_modules" {
   for_each = { for module in local.modules_to_create : module.name => module }
 
   integration_id = spacelift_aws_integration.control.id
-  module_id      = each.value.name
+  module_id      = each.value.id
   read           = true
   write          = true
 
