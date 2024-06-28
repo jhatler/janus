@@ -138,9 +138,10 @@ resource "aws_iam_role" "integration" {
         "Condition" = {
           "StringEquals" = {
             # Allow the external ID for any of the stacks to assume our role
-            "sts:ExternalId" = [
-              for i in values(data.spacelift_aws_integration_attachment_external_id.integration) : i.external_id
-            ],
+            "sts:ExternalId" = flatten([
+              [for i in values(data.spacelift_aws_integration_attachment_external_id.integration) : i.external_id],
+              [for i in values(data.spacelift_aws_integration_attachment_external_id.control_modules) : i.external_id]
+            ])
           }
         }
       }

@@ -1,4 +1,9 @@
 version: 2
+registries:
+  spacelift-private-registry:
+    type: terraform-registry
+    url: https://app.spacelift.io
+    token: ${{ secrets.SPACELIFT_TOKEN }}
 updates:
   - package-ecosystem: "docker"
     directory: "/containers/janus/"
@@ -21,18 +26,26 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
+    registries:
+      - spacelift-private-registry
     directory: "/terraform/control/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
+    registries:
+      - spacelift-private-registry
     directory: "/terraform/stacks/network/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
+    registries:
+      - spacelift-private-registry
     directory: "/terraform/stacks/admin/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
+    registries:
+      - spacelift-private-registry
     directory: "/terraform/modules/github_oidc/"
     schedule:
       interval: "weekly"

@@ -21,3 +21,15 @@ variable "runners_admin_pat" {
   description = "The personal access token for runner admin."
   sensitive   = true
 }
+
+variable "ssm_session_manager_bucket" {
+  type        = string
+  description = "The name of the S3 bucket used for AWS Session Manager (SSM) Session Manager."
+  sensitive   = true
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "The ID of the VPC."
+  sensitive   = true
+}

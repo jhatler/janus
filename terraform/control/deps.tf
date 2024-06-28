@@ -38,6 +38,11 @@ resource "spacelift_stack_dependency" "runners__webhooks" {
   depends_on_stack_id = spacelift_stack.children["Webhooks"].id
 }
 
+resource "spacelift_stack_dependency" "runners__ssm" {
+  stack_id            = spacelift_stack.children["Runners"].id
+  depends_on_stack_id = spacelift_stack.children["SSM"].id
+}
+
 resource "spacelift_stack_dependency" "webhooks__auth" {
   stack_id            = spacelift_stack.children["Webhooks"].id
   depends_on_stack_id = spacelift_stack.auth.id
@@ -129,6 +134,13 @@ resource "spacelift_stack_dependency_reference" "runners_runners_kms_key_arn" {
   trigger_always      = true
 }
 
+resource "spacelift_stack_dependency_reference" "runners_vpc_id" {
+  stack_dependency_id = spacelift_stack_dependency.runners__network.id
+  output_name         = "TF_VAR_vpc_id"
+  input_name          = "TF_VAR_vpc_id"
+  trigger_always      = true
+}
+
 resource "spacelift_stack_dependency_reference" "webhooks_github_webhook_role_arn" {
   stack_dependency_id = spacelift_stack_dependency.webhooks__auth.id
   output_name         = "TF_VAR_github_webhook_role_arn"
@@ -154,5 +166,12 @@ resource "spacelift_stack_dependency_reference" "ssm_s3_access_logs_bucket_id" {
   stack_dependency_id = spacelift_stack_dependency.ssm__admin.id
   output_name         = "TF_VAR_s3_access_logs_bucket_id"
   input_name          = "TF_VAR_s3_access_logs_bucket_id"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "runners_ssm_session_manager_bucket" {
+  stack_dependency_id = spacelift_stack_dependency.runners__ssm.id
+  output_name         = "TF_VAR_ssm_session_manager_bucket"
+  input_name          = "TF_VAR_ssm_session_manager_bucket"
   trigger_always      = true
 }
