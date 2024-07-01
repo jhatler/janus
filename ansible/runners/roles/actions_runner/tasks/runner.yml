@@ -1,0 +1,9 @@
+---
+- name: Create runner path file
+  become: true
+  become_user: "{{ actions_runner_user }}"
+  notify:
+    - Install Latest Runner from GitHub
+  ansible.builtin.command:
+    cmd: "/bin/bash -l -c 'source /etc/profile; printenv PATH > {{ actions_runner_user_home }}/.path'"
+    creates: "{{ actions_runner_user_home }}/.path"

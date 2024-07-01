@@ -1,0 +1,115 @@
+#!/bin/bash
+
+set -ex -o pipefail
+
+##
+## AWS Functions
+##
+
+function _ec2_instance_id() {
+        cat /var/lib/cloud/data/instance-id
+}
+
+function _ec2_add_tag() {
+        aws ec2 create-tags \
+                --resources "$(_ec2_instance_id)" \
+                --tags "Key=${1},Value=${2}"
+}
+
+function _ssm_param() {
+        aws ssm get-parameter --name "$1" --with-decryption | jq -r .Parameter.Value
+}
+
+##
+## Docker Functions
+##
+
+function _docker_buildx_drivers() {
+        docker buildx ls --format json | jq -r '.Name' | uniq
+}
+
+function _docker_buildx_init_driver() {
+        if [[ "$(_docker_buildx_drivers)" =~ $1 ]]; then
+                echo "Docker buildx driver $1 already initialized for: $(id -un)" >&2
+                return 0
+        fi
+
+        docker buildx create --bootstrap --driver "$1" --name "$1" --node "$1" --use
+        docker buildx inspect --bootstrap
+
+        echo "Docker buildx driver $1 initialized for: $(id -un)" >&2
+}
+
+##
+## GitHub Action Runner Functions
+##
+
+function _actions_runner_admin_token() {
+        _ssm_param "/github/actions/runners/admin-token"
+}
+
+function _actions_runner_api() {
+        curl -L \
+                -X "${1}" \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $(_actions_runner_admin_token)" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/repos/{{ actions_runner_org }}/{{ actions_runner_repo }}/actions/runners/${2}"
+}
+
+function _actions_runner_registration_token() {
+        _actions_runner_api POST "registration-token" | jq -r .token
+}
+
+function _actions_runner_remove_token() {
+        _actions_runner_api POST "remove-token" | jq -r .token
+}
+
+function _actions_runner_init() {
+        if [ -f "{{ actions_runner_user_home }}/.runner-uuid" ]; then
+                echo "ERROR: GitHub Actions Runner already initialized!" >&2
+                exit 1
+        fi
+
+        uuid >"{{ actions_runner_user_home }}/.runner-uuid"
+
+        _ec2_add_tag "{{ actions_runner_name }}.uuid" "$(<"{{ actions_runner_user_home }}/.runner-uuid")"
+
+        ./config.sh \
+                --unattended \
+                --url "https://github.com/{{ actions_runner_org }}/{{ actions_runner_repo }}" \
+                --token "$(_actions_runner_registration_token)" \
+                --name "{{ actions_runner_name }}-$(<"{{ actions_runner_user_home }}/.runner-uuid")" \
+                --labels "{{ actions_runner_labels }}" \
+                --ephemeral \
+                --work "{{ actions_runner_user_home }}"
+}
+
+function _actions_runner_destroy() {
+        if [ ! -f "{{ actions_runner_user_home }}/.runner-uuid" ]; then
+                echo "ERROR: GitHub Actions Runner already destroyed!" >&2
+                exit 1
+        fi
+
+        ./config.sh remove --token "$(_actions_runner_remove_token)"
+
+        _ec2_add_tag "{{ actions_runner_name }}.uuid" ""
+
+        rm -f "{{ actions_runner_user_home }}/.runner-uuid"
+}
+
+##
+## Entry
+##
+
+if [[ "$0" =~ actions.runner.service.pre.sh$ ]]; then
+        _docker_buildx_init_driver docker-container &
+        _actions_runner_init &
+        wait
+elif [[ "$0" =~ actions.runner.service.post.sh$ ]]; then
+        _actions_runner_destroy
+        sudo systemctl poweroff
+fi
+actions.runner.job.completed.sh
+
+exit 0

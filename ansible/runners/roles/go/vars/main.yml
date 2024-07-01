@@ -1,0 +1,16 @@
+---
+go_architecture_lookup:
+  { "x86_64": "amd64", "aarch64": "arm64", "i386": "386" }
+go_architecture: "{{ go_architecture_lookup[ansible_architecture] }}"
+go_versions:
+  1.22.4:
+    version: 1.22.4
+    checksums:
+      amd64: sha256:ba79d4526102575196273416239cca418a651e049c2b099f3159db85e7bade7d
+      arm64: sha256:a8e177c354d2e4a1b61020aca3562e27ea3e8f8247eca3170e3fa1e0c2f9e771
+      386: sha256:47a2a8d249a91eb8605c33bceec63aedda0441a43eac47b4721e3975ff916cec
+go_version: 1.22.4
+go_tar: "go{{ go_version }}.linux-{{ go_architecture }}.tar.gz"
+go_url: "https://go.dev/dl/{{ go_tar }}"
+go_src: "/usr/local/src/{{ go_tar }}"
+go_checksum: "{{ go_versions[go_version].checksums[go_architecture] }}"

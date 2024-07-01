@@ -1,0 +1,20 @@
+[Unit]
+Description=GitHub Actions Runner
+After=network.target
+Requires=docker.service
+
+[Service]
+Environment="ACTIONS_RUNNER_HOOK_JOB_STARTED=/usr/local/bin/actions.runner.job.started.sh"
+Environment="ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/usr/local/bin/actions.runner.job.completed.sh"
+ExecStartPre=/usr/local/bin/actions.runner.service.pre.sh
+ExecStart=/usr/local/bin/actions.runner.service.watchdog.sh
+ExecReload=/bin/kill -USR1 $MAINPID
+ExecStopPost=/usr/local/bin/actions.runner.service.post.sh
+User={{ actions_runner_user }}
+WorkingDirectory={{ actions_runner_user_home }}
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=5min
+
+[Install]
+WantedBy=multi-user.target

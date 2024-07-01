@@ -1,0 +1,31 @@
+---
+ansible_become: true
+ansible_python_interpreter: /usr/bin/python3.10
+
+dpkg_architecture_lookup:
+  x86_64: amd64
+  aarch64: arm64
+  i386: i386
+dpkg_architecture: "{{ dpkg_architecture_lookup[ansible_architecture] }}"
+
+node_version: 22.2.0
+
+# TODO: Look these up via SSM Parameter Store
+actions_runner_org: jhatler
+actions_runner_repo: janus
+actions_runner_user: code
+actions_runner_group: code
+actions_runner_user_home: "/__w"
+
+actions_runner_node_version: "{{ node_version }}"
+actions_runner_nvm_dir: "/usr/local/nvm"
+actions_runner_go_path: "/usr/local/go"
+
+containers_user: "{{ actions_runner_user }}"
+
+go_user: "{{ actions_runner_user }}"
+go_path: "{{ actions_runner_go_path }}"
+
+nvm_user: "{{ actions_runner_user }}"
+nvm_node_version: "{{ node_version }}"
+nvm_dir: "{{ actions_runner_nvm_dir }}"

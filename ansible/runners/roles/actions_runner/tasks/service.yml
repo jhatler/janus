@@ -1,0 +1,55 @@
+---
+- name: Install job hooks
+  notify:
+    - Reload runner
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'actions.runner.job.hook.sh.j2', template_vars={'hook': item}) }}"
+    dest: /usr/local/bin/actions.runner.job.{{ item }}.sh
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - started
+    - completed
+
+- name: Install service hook
+  notify:
+    - Install service hook symlinks
+    - Reload runner
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'actions.runner.service.hook.sh.j2') }}"
+    dest: /usr/local/bin/actions.runner.service.hook.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install watchdog
+  notify:
+    - Reload runner
+  ansible.builtin.copy:
+    src: actions.runner.service.watchdog.sh
+    dest: /usr/local/bin/actions.runner.service.watchdog.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install service
+  notify:
+    - Reload systemd
+    - Reconfigure runner service
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'actions.runner.service.j2') }}"
+    dest: /etc/systemd/system/actions.runner.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure cooloff
+  tags:
+    - launch
+  ansible.builtin.copy:
+    content: "{{ lookup('amazon.aws.aws_ssm', '/github/actions/runners/cooloff', region='us-east-2') }}"
+    dest: "{{ actions_runner_user_home }}/.runner-cooloff"
+    owner: "{{ actions_runner_user }}"
+    group: "{{ actions_runner_group }}"
+    mode: "0440"

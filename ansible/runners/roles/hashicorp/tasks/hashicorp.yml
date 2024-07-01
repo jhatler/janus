@@ -1,0 +1,12 @@
+---
+- name: Install Hashicorp Apt Repository
+  notify:
+    - Install Hashicorp packages
+  ansible.builtin.deb822_repository:
+    name: hashicorp
+    types: deb
+    uris: "{{ hashicorp_apt_uri }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: main
+    architectures: "{{ dpkg_architecture }}"
+    signed_by: "{{ hashicorp_apt_key }}"

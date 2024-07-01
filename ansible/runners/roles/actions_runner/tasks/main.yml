@@ -1,0 +1,15 @@
+---
+- name: Configure user
+  ansible.builtin.include_tasks: user.yml
+
+- name: Install tools
+  ansible.builtin.import_tasks: tools.yml
+
+- name: Install ansible
+  ansible.builtin.import_tasks: ansible.yml
+
+- name: Install runner
+  ansible.builtin.import_tasks: runner.yml
+
+- name: Setup runner service
+  ansible.builtin.import_tasks: service.yml

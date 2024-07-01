@@ -1,4 +1,3 @@
-
 data "aws_iam_policy_document" "gh_oidc_runners" {
   statement {
     effect = "Allow"

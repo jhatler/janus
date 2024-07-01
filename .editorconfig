@@ -74,3 +74,7 @@ max_line_length = unset
 # github action files
 [.github/actions/*/action.yml]
 max_line_length = unset
+
+# jinja files can be long
+[*.j2]
+max_line_length = unset

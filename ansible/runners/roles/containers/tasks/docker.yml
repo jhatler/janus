@@ -1,0 +1,71 @@
+---
+- name: Docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Ensure user in docker group
+  ansible.builtin.user:
+    name: "{{ containers_user }}"
+    groups: docker
+    append: true
+
+- name: Install Docker Apt Repository
+  notify:
+    - Install Docker packages
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "{{ containers_docker_apt_uri }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: "{{ dpkg_architecture }}"
+    signed_by: "{{ containers_docker_apt_key }}"
+
+- name: Ensure dockerd root exists
+  tags:
+    - launch
+  notify:
+    - Configure docker services
+  ansible.builtin.file:
+    state: directory
+    path: "{{ containers_mnt }}/docker"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Ensure containerd root exists
+  tags:
+    - launch
+  notify:
+    - Configure docker services
+  ansible.builtin.file:
+    state: directory
+    path: "{{ containers_mnt }}/containerd"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Ensure default dockerd root is removed
+  ansible.builtin.file:
+    state: directory
+    path: "/var/lib/docker"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Ensure default containerd root is removed
+  ansible.builtin.file:
+    state: directory
+    path: "/var/lib/containerd"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Ensure systemd containers root is removed
+  ansible.builtin.file:
+    state: directory
+    path: "/var/lib/containers"
+    owner: root
+    group: root
+    mode: "0750"

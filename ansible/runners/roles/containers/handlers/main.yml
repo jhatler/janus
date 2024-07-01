@@ -1,0 +1,44 @@
+---
+- name: Install Docker packages
+  notify:
+    - Configure dockerd
+    - Configure containerd
+    - Configure docker services
+  ansible.builtin.apt:
+    name: "{{ containers_docker_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 0
+
+- name: Configure dockerd
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'daemon.json.j2') }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure containerd
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'config.toml') }}"
+    dest: /etc/containerd/config.toml
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure docker services
+  tags:
+    - launch
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: "{{ containers_services_enabled }}"
+    state: "{{ containers_services_state }}"
+    no_block: true
+  loop: "{{ containers_docker_units }}"
+
+- name: Install podman packages
+  ansible.builtin.apt:
+    name: "{{ containers_podman_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 300

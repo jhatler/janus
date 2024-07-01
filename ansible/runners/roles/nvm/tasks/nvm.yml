@@ -1,0 +1,22 @@
+---
+- name: NVM group
+  ansible.builtin.group:
+    name: nvm
+    state: present
+    system: true
+
+- name: NVM user
+  ansible.builtin.user:
+    name: "{{ nvm_user }}"
+    groups: nvm
+    append: true
+
+- name: Ensure NVM_DIR exists
+  notify:
+    - Install nvm
+  ansible.builtin.file:
+    state: directory
+    path: "{{ nvm_dir }}"
+    owner: "{{ nvm_user }}"
+    group: nvm
+    mode: "2775"

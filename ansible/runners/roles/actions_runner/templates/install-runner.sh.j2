@@ -1,0 +1,25 @@
+#!/bin/bash
+set -ex -o pipefail
+
+# Get latest release URL and SHA
+curl -sSf "https://api.github.com/repos/actions/runner/releases/latest" |
+        jq -r ".assets[] | select(.name | contains(\"linux-{{ actions_runner_architecture }}\")) | .browser_download_url" \
+                >"{{ actions_runner_user_home }}/.runner-latest-release-url"
+curl -sSf "https://api.github.com/repos/actions/runner/releases/latest" |
+        jq -r ".body" | grep -F "SHA linux-{{ actions_runner_architecture }}" |
+        tr '<>' '\t' |
+        cut -f3 \
+                >"{{ actions_runner_user_home }}/.runner-latest-release-sha"
+
+# Download and verify runner
+curl -sSfL "$(cat "{{ actions_runner_user_home }}/.runner-latest-release-url")" \
+        >"{{ actions_runner_user_home }}/runner.tar.gz"
+echo "$(cat "{{ actions_runner_user_home }}/.runner-latest-release-sha")  {{ actions_runner_user_home }}/runner.tar.gz" |
+        shasum -a 256 -c
+
+rm -f "{{ actions_runner_user_home }}/.runner-latest-release-url"
+rm -f "{{ actions_runner_user_home }}/.runner-latest-release-sha"
+
+# Extract runner
+tar -xzf "{{ actions_runner_user_home }}/runner.tar.gz" -C "{{ actions_runner_user_home }}"
+rm -f "{{ actions_runner_user_home }}/runner.tar.gz"
