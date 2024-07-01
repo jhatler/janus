@@ -5,6 +5,12 @@ locals {
       description  = "Configures GitHub access to IAM Role via OIDC"
       project_root = "terraform/modules/github_oidc",
       id           = "terraform-aws-github-oidc"
+    },
+    {
+      name         = "runner-template"
+      description  = "Configures a runner template for GitHub Actions"
+      project_root = "terraform/modules/runner_template",
+      id           = "terraform-aws-runner-template"
     }
   ]
 }
