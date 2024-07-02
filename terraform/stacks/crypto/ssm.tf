@@ -8,7 +8,7 @@ resource "aws_kms_key" "ssm_session_manager" {
     Id      = "key-1"
     Statement = [
       {
-        Sid    = "Enable IAM User Permissions"
+        Sid    = "EnableIAMUserPermissions"
         Effect = "Allow"
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
@@ -17,7 +17,7 @@ resource "aws_kms_key" "ssm_session_manager" {
         Resource = "*"
       },
       {
-        Sid    = "Allow CloudWatch to use the key for SSM Session Manager logs"
+        Sid    = "AllowCloudWatchSSMSessionManagerlogs"
         Effect = "Allow"
         Principal = {
           Service = "logs.${data.aws_region.current.name}.amazonaws.com"
@@ -37,9 +37,10 @@ resource "aws_kms_key" "ssm_session_manager" {
         }
       },
       {
+        Sid    = "AllowRunners"
         Effect = "Allow"
         Principal = {
-          Service = "logs.${data.aws_region.current.name}.amazonaws.com"
+          AWS = var.runners_role_arn
         }
         Action = [
           "kms:Encrypt*",
@@ -49,11 +50,21 @@ resource "aws_kms_key" "ssm_session_manager" {
           "kms:Describe*"
         ]
         Resource = "*"
-        Condition = {
-          ArnEquals = {
-            "kms:EncryptionContext:aws:logs:arn" : "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:ssm-session-manager"
-          }
+      },
+      {
+        Sid    = "AllowSSMAgents"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.ssm_agent_role_arn
         }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
       }
     ]
   })

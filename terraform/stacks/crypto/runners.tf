@@ -19,6 +19,66 @@ resource "aws_kms_key" "runners" {
         },
         Action   = "kms:*"
         Resource = "*"
+      },
+      {
+        Sid    = "AllowRunners"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.runners_role_arn
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowRunnerControlledInstances"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.runners_controlled_role_arn
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowRunners"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.runners_role_arn
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowGitHubWebhookLambda"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.github_webhook_lambda_role_arn
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
       }
     ]
   })

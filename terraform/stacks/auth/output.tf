@@ -21,3 +21,21 @@ output "TF_VAR_github_webhook_lambda_role_arn" {
   description = "The ARN of the IAM role that the GitHub Webhook Lambda should assume."
   sensitive   = true
 }
+
+output "TF_VAR_runners_role_arn" {
+  value       = aws_iam_role.runners.arn
+  description = "The ARN of the IAM role that the GitHub Actions runners should assume."
+  sensitive   = true
+}
+
+output "TF_VAR_runners_controlled_role_arn" {
+  value       = aws_iam_role.runners_controlled.arn
+  description = "The ARN of the IAM role that the GitHub Actions runners should pass to temporary instances."
+  sensitive   = true
+}
+
+output "TF_VAR_ssm_agent_role_arn" {
+  value       = aws_iam_role.ssm_agent.arn
+  description = "The ARN of the IAM role for generic SSM agent access."
+  sensitive   = true
+}
