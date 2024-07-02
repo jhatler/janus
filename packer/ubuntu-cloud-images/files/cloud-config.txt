@@ -1,0 +1,20 @@
+#cloud-config
+system_info:
+  default_user:
+    uid: 5000
+manage_etc_hosts: true
+users:
+  - default
+package_upgrade: false
+package_update: false
+apt_pipelining: false
+apt:
+  sources_list: |
+    deb $MIRROR $RELEASE main universe multiverse restricted
+    deb-src $MIRROR $RELEASE main universe multiverse restricted
+    deb $MIRROR $RELEASE-updates main universe multiverse restricted
+    deb-src $MIRROR $RELEASE-updates main universe multiverse restricted
+    deb $MIRROR $RELEASE-backports main universe multiverse restricted
+    deb-src $MIRROR $RELEASE-backports main universe multiverse restricted
+    deb $SECURITY $RELEASE-security main universe multiverse restricted
+    deb-src $SECURITY $RELEASE-security main universe multiverse restricted

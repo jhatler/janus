@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug: ubuntu-cloud-images (setup)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/ubuntu-cloud-images",
+            "console": "integratedTerminal",
+            "args": "setup",
+            "env": {
+                "GITHUB_OUTPUT": "${workspaceFolder}/GITHUB_OUTPUT.txt"
+            },
+            "preLaunchTask": "rm -f ${workspaceFolder}/GITHUB_OUTPUT.txt ${workspaceFolder}/etags.json"
+        },
+        {
+            "name": "Debug: ubuntu-cloud-images (download)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/ubuntu-cloud-images",
+            "console": "integratedTerminal",
+            "args": [
+                "download",
+                "https://cloud-images.ubuntu.com/releases/jammy/release-20240614/ubuntu-22.04-server-cloudimg-amd64-root.tar.xz"
+            ],
+            "env": {
+                "GITHUB_OUTPUT": "${workspaceFolder}/GITHUB_OUTPUT.txt"
+            },
+            "preLaunchTask": "rm -rf ${workspaceFolder}/ubuntu-22.04-server-cloudimg-amd64-root.tar.xz ${workspaceFolder}/ubuntu-keychain"
+        }
+    ]
+}
