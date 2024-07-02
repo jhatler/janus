@@ -117,6 +117,7 @@ resource "aws_iam_role" "runners_controlled" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_ec2.json
 
   managed_policy_arns = [
+    aws_iam_policy.ssm_agent.arn,
     data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
   ]
 }
