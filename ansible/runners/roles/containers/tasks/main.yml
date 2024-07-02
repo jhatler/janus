@@ -1,0 +1,8 @@
+---
+- name: Install docker
+  when: containers_enable_docker
+  ansible.builtin.import_tasks: docker.yml
+
+- name: Install podman
+  when: containers_enable_podman
+  ansible.builtin.import_tasks: podman.yml

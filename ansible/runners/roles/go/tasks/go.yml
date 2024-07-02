@@ -1,0 +1,35 @@
+---
+- name: Go group
+  ansible.builtin.group:
+    name: go
+    state: present
+    system: true
+
+- name: Go user
+  ansible.builtin.user:
+    name: "{{ go_user }}"
+    groups: go
+    append: true
+
+- name: Ensure go directory exists
+  notify:
+    - Download source tarball
+    - Extract source tarball
+  ansible.builtin.file:
+    state: directory
+    path: "{{ go_path }}"
+    owner: "{{ go_user }}"
+    group: go
+    mode: "2775"
+
+- name: Ensure GOPATH is set
+  ansible.builtin.lineinfile:
+    dest: /etc/profile
+    line: "export GOPATH={{ go_path }}"
+    state: present
+
+- name: Ensure go is in PATH
+  ansible.builtin.lineinfile:
+    dest: /etc/profile
+    line: "export PATH=$GOPATH/bin:$PATH"
+    state: present

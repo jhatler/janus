@@ -1,0 +1,20 @@
+---
+containers_docker_apt_uri: https://download.docker.com/linux/ubuntu
+containers_docker_apt_key: "{{ containers_docker_apt_uri }}/gpg"
+containers_docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+  - docker-buildx-plugin
+containers_docker_units:
+  - docker.service
+  - docker.socket
+  - containerd.service
+containers_mnt_present: "{{ (ansible_mounts | selectattr('mount', '==', containers_mnt))[0] is defined }}"
+containers_services_state_lookup: { true: 'started', false: 'stopped' }
+containers_services_enabled: "{{ containers_mnt_present }}"
+containers_services_state: "{{ containers_services_state_lookup[not containers_prevent_service_start] }}"
+containers_podman_packages:
+  - podman
+  - buildah

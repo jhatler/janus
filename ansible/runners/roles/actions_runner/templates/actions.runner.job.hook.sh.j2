@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Remove the watchdog file
+rm -f "{{ actions_runner_user_home }}/.runner-{% if hook == 'started' %}in{% endif %}active"
+
+# clean any mounts in the runner home
+mount | grep -E 'on {{ actions_runner_user_home }}/[^ ]+ ' | cut -f3 -d' ' | xargs -I {} sudo umount {}
+
+# clean any loop devices in the runner home
+sudo losetup -l | grep "{{ actions_runner_user_home }}" | cut -f1 -d' ' | xargs -I {} sudo losetup -d {}
+
+# clean the workspace of any children
+if [ -n "$GITHUB_WORKSPACE" ]; then
+        sudo find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec sudo rm -rf {} \;
+fi
+
+# Touch the watchdog file
+touch "{{ actions_runner_user_home }}/.runner-{% if hook == 'completed' %}in{% endif %}active"
+
+exit 0

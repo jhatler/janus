@@ -1,0 +1,18 @@
+---
+actions_runner_architecture_lookup:
+  x86_64: x64
+  aarch64: arm64
+actions_runner_architecture: "{{ actions_runner_architecture_lookup[ansible_architecture] }}"
+actions_runner_label_architecture_lookup:
+  x86_64: amd64
+  aarch64: arm64
+actions_runner_label_architecture: "{{ actions_runner_label_architecture_lookup[ansible_architecture] }}"
+actions_runner_labels: "aws:ec2launchtemplate:{{ actions_runner_name }}-{{ actions_runner_label_architecture }}"
+actions_runner_services_state_lookup: { true: 'started', false: 'stopped' }
+actions_runner_services_enabled: true
+actions_runner_services_state: "{{ actions_runner_services_state_lookup[actions_runner_services_enabled and not actions_runner_prevent_service_start] }}"
+actions_runner_ansible_packages:
+  - python3-pip
+actions_runner_ansible_pip:
+  - ansible
+  - boto3

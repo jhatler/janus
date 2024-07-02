@@ -1,0 +1,13 @@
+---
+- name: Cache ansible packages
+  notify:
+    - Install ansible packages
+    - Install ansible pip packages
+  ansible.builtin.copy:
+    dest: /tmp/.ansible_actions_runner_ansible_packages
+    content: |
+      {{ actions_runner_ansible_packages }}
+      {{ actions_runner_ansible_pip }}
+    owner: root
+    group: root
+    mode: "0644"

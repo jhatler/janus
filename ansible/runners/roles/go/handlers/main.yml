@@ -1,0 +1,29 @@
+---
+- name: Clean Go tarball
+  ansible.builtin.file:
+    path: "{{ go_src }}"
+    state: absent
+
+- name: Download source tarball
+  ansible.builtin.get_url:
+    # checkov:skip=CKV2_ANSIBLE_2:HTTPS url is defined as a variable
+    url: "{{ go_url }}"
+    dest: "{{ go_src }}"
+    checksum: "{{ go_checksum }}"
+    mode: "0644"
+    timeout: 300
+    validate_certs: true
+
+- name: Extract source tarball
+  notify:
+    - Clean Go tarball
+  ansible.builtin.unarchive:
+    src: "{{ go_src }}"
+    dest: "{{ go_path }}"
+    creates: "{{ go_path }}/bin/go"
+    remote_src: true
+    owner: "{{ go_user }}"
+    extra_opts:
+      - "--strip-components=1"
+    group: go
+    mode: "g+rws"

@@ -53,7 +53,7 @@ jobs:
           PKR_VAR_iam_instance_profile: runner-controlled
           PKR_VAR_ami_name: runner-${{ matrix.arch }}
           PKR_VAR_runner_name: runner
-        working-directory: packer/runner
+        working-directory: packer/runners
         run: |
           /usr/bin/env packer init ami.pkr.hcl
           /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl

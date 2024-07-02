@@ -1,0 +1,3 @@
+---
+- name: Install Hashicorp tools
+  ansible.builtin.import_tasks: hashicorp.yml

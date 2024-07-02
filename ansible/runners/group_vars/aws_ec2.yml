@@ -1,0 +1,7 @@
+---
+ansible_aws_ssm_region: us-east-2
+ansible_aws_ssm_bucket_name: "{{ lookup('amazon.aws.aws_ssm', '/ansible/bucket', region=ansible_aws_ssm_region) }}"
+root_device: "{{ (ansible_device_links['labels'] | dict2items | selectattr('value', '==', ['cloudimg-rootfs']))[0].key | truncate(7, True, '', 0) }}"
+ebs_volumes: "{{ ansible_devices | dict2items | selectattr('value.model', '==', 'Amazon Elastic Block Store') | items2dict }}"
+data_volumes_present: "{{ ebs_volumes | length > 1 }}"
+data_volumes: "{{ ebs_volumes | dict2items | rejectattr('key', '==', root_device) | items2dict }}"

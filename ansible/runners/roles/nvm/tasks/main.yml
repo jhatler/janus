@@ -1,0 +1,3 @@
+---
+- name: Install NVM
+  ansible.builtin.import_tasks: nvm.yml
