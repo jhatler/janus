@@ -8,6 +8,11 @@ resource "spacelift_stack_dependency" "admin__auth" {
   depends_on_stack_id = spacelift_stack.auth.id
 }
 
+resource "spacelift_stack_dependency" "crypto__auth" {
+  stack_id            = spacelift_stack.children["Crypto"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
 resource "spacelift_stack_dependency" "network__auth" {
   stack_id            = spacelift_stack.children["Network"].id
   depends_on_stack_id = spacelift_stack.auth.id
@@ -175,3 +180,32 @@ resource "spacelift_stack_dependency_reference" "runners_ssm_session_manager_buc
   input_name          = "TF_VAR_ssm_session_manager_bucket"
   trigger_always      = true
 }
+
+resource "spacelift_stack_dependency_reference" "crypto_runners_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.crypto__auth.id
+  output_name         = "TF_VAR_runners_role_arn"
+  input_name          = "TF_VAR_runners_role_arn"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "crypto_runners_controlled_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.crypto__auth.id
+  output_name         = "TF_VAR_runners_controlled_role_arn"
+  input_name          = "TF_VAR_runners_controlled_role_arn"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "crypto_github_webhook_lambda_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.crypto__auth.id
+  output_name         = "TF_VAR_github_webhook_lambda_role_arn"
+  input_name          = "TF_VAR_github_webhook_lambda_role_arn"
+  trigger_always      = true
+}
+
+resource "spacelift_stack_dependency_reference" "crypto_ssm_agent_role_arn" {
+  stack_dependency_id = spacelift_stack_dependency.crypto__auth.id
+  output_name         = "TF_VAR_ssm_agent_role_arn"
+  input_name          = "TF_VAR_ssm_agent_role_arn"
+  trigger_always      = true
+}
+
