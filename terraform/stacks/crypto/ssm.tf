@@ -65,6 +65,21 @@ resource "aws_kms_key" "ssm_session_manager" {
           "kms:Describe*"
         ]
         Resource = "*"
+      },
+      {
+        Sid    = "AllowRunnerControlledInstances"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.runners_controlled_role_arn
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
       }
     ]
   })
