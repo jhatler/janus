@@ -19,11 +19,6 @@ resource "aws_network_acl" "public_edge" {
   }
 }
 
-resource "aws_network_acl_association" "admin" {
-  network_acl_id = aws_network_acl.public_edge.id
-  subnet_id      = aws_subnet.admin.id
-}
-
 resource "aws_network_acl_association" "public_edge" {
   count          = length(aws_subnet.public_edge[*].id)
   network_acl_id = aws_network_acl.public_edge.id
@@ -73,6 +68,119 @@ resource "aws_network_acl_rule" "public_edge_ingress_allow" {
   to_port     = 0
   icmp_code   = 0
   icmp_type   = 0
+}
+
+resource "aws_network_acl" "admin" {
+  #checkov:skip=CKV2_AWS_1: ACLs used for network segmentation, so this is not applicable
+  vpc_id = aws_vpc.primary.id
+
+  tags = {
+    Name = "Admin"
+  }
+}
+
+resource "aws_network_acl_association" "admin" {
+  network_acl_id = aws_network_acl.admin.id
+  subnet_id      = aws_subnet.admin.id
+}
+
+resource "aws_network_acl_rule" "admin_egress" {
+  network_acl_id = aws_network_acl.admin.id
+
+  egress = true
+
+  protocol    = "-1"
+  rule_number = 100
+  rule_action = "allow"
+  cidr_block  = "0.0.0.0/0"
+  from_port   = 0
+  to_port     = 0
+  icmp_code   = 0
+  icmp_type   = 0
+}
+
+
+resource "aws_network_acl_rule" "admin_ingress_icmp" {
+  #checkov:skip=CKV_AWS_352: DO NOT BLOCK ICMP!!! shouldiblockicmp.com
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "icmp"
+  rule_number = 100
+  rule_action = "allow"
+  cidr_block  = "0.0.0.0/0"
+  from_port   = 0
+  to_port     = 0
+  icmp_code   = -1
+  icmp_type   = -1
+}
+
+resource "aws_network_acl_rule" "admin_ingress_public_edge" {
+  #checkov:skip=CKV_AWS_352: All ports OK from public edge to Admin
+  count          = length(aws_subnet.public_edge[*].cidr_block)
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "-1"
+  rule_number = 200 + (count.index * 10)
+  rule_action = "allow"
+  cidr_block  = aws_subnet.public_edge[count.index].cidr_block
+  from_port   = 0
+  to_port     = 0
+  icmp_code   = 0
+  icmp_type   = 0
+}
+
+resource "aws_network_acl_rule" "admin_ingress_dmz" {
+  #checkov:skip=CKV_AWS_352: All ports OK from DMZ to Admin
+  count          = length(aws_subnet.dmz[*].cidr_block)
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "-1"
+  rule_number = 300 + (count.index * 10)
+  rule_action = "allow"
+  cidr_block  = aws_subnet.dmz[count.index].cidr_block
+  from_port   = 0
+  to_port     = 0
+  icmp_code   = 0
+  icmp_type   = 0
+}
+
+resource "aws_network_acl_rule" "admin_ingress_internal" {
+  #checkov:skip=CKV_AWS_352: All ports OK from internal to admin
+  count          = length(aws_subnet.internal[*].cidr_block)
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "-1"
+  rule_number = 400 + (count.index * 10)
+  rule_action = "allow"
+  cidr_block  = aws_subnet.internal[count.index].cidr_block
+  from_port   = 0
+  to_port     = 0
+  icmp_code   = 0
+  icmp_type   = 0
+}
+
+resource "aws_network_acl_rule" "admin_ingress_deny" {
+  count          = length(local.public_ingress_deny_ports)
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "6"
+  rule_number = 500 + (count.index * 10)
+  rule_action = "deny"
+  cidr_block  = "0.0.0.0/0"
+  from_port   = local.public_ingress_deny_ports[count.index]
+  to_port     = local.public_ingress_deny_ports[count.index]
+}
+
+resource "aws_network_acl_rule" "admin_ingress_ephemeral" {
+  #checkov:skip=CKV_AWS_231: Port 3389 is blocked above
+  network_acl_id = aws_network_acl.admin.id
+
+  protocol    = "6"
+  rule_number = 32766
+  rule_action = "allow"
+  cidr_block  = "0.0.0.0/0"
+  from_port   = 1024
+  to_port     = 65535
 }
 
 

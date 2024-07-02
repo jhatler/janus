@@ -43,6 +43,28 @@ resource "aws_route" "nat_gw" {
 
 
 ##
+## Admin Route Table
+##
+resource "aws_route_table" "admin" {
+  vpc_id = aws_vpc.primary.id
+
+  tags = {
+    Name = "Admin"
+  }
+}
+
+resource "aws_route" "admin_gw" {
+  route_table_id         = aws_route_table.admin.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.primary.id
+  depends_on = [
+    aws_route_table.admin,
+    aws_internet_gateway.primary
+  ]
+}
+
+
+##
 ## Route Table Associations
 ##
 
@@ -54,7 +76,7 @@ resource "aws_main_route_table_association" "primary" {
 
 # Per-Subnet Associations
 resource "aws_route_table_association" "admin" {
-  route_table_id = aws_route_table.ig.id
+  route_table_id = aws_route_table.admin.id
   subnet_id      = aws_subnet.admin.id
 }
 
