@@ -80,6 +80,19 @@ data "aws_iam_policy_document" "github_ec2" {
     ]
     resources = ["arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/*"]
   }
+
+  statement {
+    effect = "Allow"
+    sid    = "AllowRunnersRolePass"
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [
+      aws_iam_role.runners.arn,
+      aws_iam_role.runners_controlled.arn
+    ]
+  }
 }
 
 resource "aws_iam_policy" "github_ec2" {
