@@ -9,6 +9,7 @@ dmeventd
 dmsetup
 init-system-helpers
 keyboard-configuration
+libcryptsetup.*
 libcurl3(|-gnutls)
 libdevmapper.*
 libgdbm3

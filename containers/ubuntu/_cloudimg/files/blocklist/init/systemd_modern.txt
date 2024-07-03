@@ -4,6 +4,8 @@
 (lib|)systemd(|-sysv|-timesyncd|-hwe-hwdb|-networkd|-journald|-resolved|-services|-shared)
 acpid
 apt-transport-https
+bind9-host
+busybox.*
 ca-certificates
 cpio
 curl
@@ -20,9 +22,11 @@ initramfs.*
 iproute
 keyboard-configuration
 kmod
+libapparmor.*
 libarchive[0-9t]+
 libbind9.*
 libblockdev.*
+libcryptsetup.*
 libcurl3(|-gnutls)
 libdevmapper-.*
 libdns[0-9]+

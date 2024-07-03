@@ -1,17 +1,14 @@
-.*apparmor.*
-(lib|)cryptsetup.*
 (lib|)lxc.*
 (lib|)parted.*
 (lib|)python3[0-9t.]*(|-stdlib)
 accountsservice
+apparmor.*
 apport.*
 appstream
 apt-xapian-index
 at
 bcache-tools
-bind9-host
 btrfs-.*
-busybox.*
 byobu
 cgmanager
 cloud-.*
@@ -19,6 +16,7 @@ command-not-found.*
 console-setup.*
 consolekit
 cron.*
+cryptsetup.*
 dbus.*
 dconf.*
 dh-python
