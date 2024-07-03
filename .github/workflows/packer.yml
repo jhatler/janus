@@ -6,13 +6,13 @@ on:
     branches:
       - main
     paths:
-      - 'packer/**'
+      - 'packer/runners/**'
       - '.github/workflows/packer.yml'
   push:
     branches:
       - main
     paths:
-      - 'packer/**'
+      - 'packer/runners/**'
       - '.github/workflows/packer.yml'
   schedule:
     - cron: '0 0 */14 * *'
@@ -50,7 +50,7 @@ jobs:
           PKR_VAR_source_ami_owner: ${{ matrix.owner }}
           PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.large' || 'c7i.large' }}
           PKR_VAR_aws_region: us-east-2
-          PKR_VAR_iam_instance_profile: runner-controlled
+          PKR_VAR_iam_instance_profile: runners-controlled
           PKR_VAR_ami_name: runner-${{ matrix.arch }}
           PKR_VAR_runner_name: runner
         working-directory: packer/runners
