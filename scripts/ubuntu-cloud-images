@@ -1,0 +1,542 @@
+#!/usr/bin/env python3
+
+import functools
+import json
+import logging
+import os
+import re
+import requests
+import shutil
+import sys
+import tempfile
+import threading
+
+import urllib.parse as urlparse
+
+from html.parser import HTMLParser
+from types import SimpleNamespace
+
+logging.basicConfig(level=logging.INFO)
+
+UBUNTU_KEYS = [
+    '1A5D6C4C7DB87C81',
+    '3B4FE6ACC0B21F32',
+    '46181433FBB75451',
+    '7FF3F408476CF100',
+    'D94AA3F0EFE21092',
+]
+
+
+def setup_gpg():
+    if 'GNUPGHOME' in os.environ:
+        return
+    else:
+        logging.info("Setting up GPG keychain")
+        os.environ['GNUPGHOME'] = os.path.join(os.getcwd(), 'ubuntu-keychain')
+
+    if not os.path.exists(os.environ['GNUPGHOME']):
+        logging.debug(f"Creating {os.environ['GNUPGHOME']}")
+        os.makedirs(os.environ['GNUPGHOME'])
+        os.chmod(os.environ['GNUPGHOME'], 0o700)
+
+    # get kex key ids (public) that are currently in keychain
+    logging.debug("Getting keys in keychain")
+    keys = os.popen('gpg --list-keys --with-colons').read().splitlines()
+    keys = [key.split(':')[4] for key in keys if key.startswith('pub:')]
+
+    # import keys that are not in keychain
+    for key in UBUNTU_KEYS:
+        if key not in keys:
+            logging.info(f"Importing key {key}")
+            os.system(
+                f'gpg --keyid-format long --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys {key}')
+
+
+class EtagCache:
+    def __init__(self):
+        if os.path.exists("etags.json"):
+            logging.info("Loading etags from file")
+            with open("etags.json", "r") as f:
+                self.etags = json.load(f)
+        else:
+            logging.info("No etags file found")
+            self.etags = {}
+
+    def write(self):
+        logging.debug("Writing etags to file")
+        with open("etags.json", "w") as f:
+            json.dump(self.etags, f)
+
+    def register(self, image):
+        try:
+            logging.info(f"Registering etag for {image.file}")
+            self.etags[image.file] = image.etag
+            self.write()
+            return True
+        except:
+            return False
+
+    def __contains__(self, key):
+        return key in self.etags
+
+    def changed(self, image):
+        if image.file in self.etags and image.etag == self.etags[image.file]:
+            logging.info(f"No change in {image.file}")
+            return False
+        return self.register(image)
+
+
+class UbuntuResource:
+    regex = None
+
+    @classmethod
+    def match(cls, url):
+        return cls.regex.search(url)
+
+    def __init__(self, url):
+        if not self.match(url):
+            raise ValueError(f"Invalid URL: {url}")
+        self.url = url
+
+
+class UbuntuCloudImage(UbuntuResource):
+    regex = re.compile(r"/([^/]+-cloudimg)-([^-\.]+)(.*)$")
+
+    def verify_sha256sums(self):
+        logging.info(f"Dowloading SHA256SUMS for {self.file}")
+        response = requests.get(self.sha256sums, allow_redirects=True)
+        response.raise_for_status()
+        content = response.content
+
+        logging.info(f"Dowloading SHA256SUMS.gpg for {self.file}")
+        response = requests.get(self.sha256sums_gpg, allow_redirects=True)
+        response.raise_for_status()
+        signature = response.content
+
+        def write_to_fifo(fifo, content):
+            with open(fifo, 'wb') as f:
+                f.write(content)
+
+        # create threads that write to the fifos
+        threads = [
+            threading.Thread(target=write_to_fifo, args=(
+                "sha256sums.fifo", content)),
+            threading.Thread(target=write_to_fifo, args=(
+                "sha256sums.gpg.fifo", signature))
+        ]
+
+        try:
+            # Create fifos for gpg to read from
+            os.mkfifo("sha256sums.fifo")
+            os.mkfifo("sha256sums.gpg.fifo")
+
+            # start the threads
+            for t in threads:
+                t.start()
+
+            logging.info("Verifying signature of SHA256SUMS")
+            if os.system(f"gpg --verify sha256sums.gpg.fifo sha256sums.fifo") != 0:
+                raise RuntimeError("Signature verification failed")
+
+            # wait for the threads to finish
+            for t in threads:
+                t.join()
+        finally:
+            os.remove("sha256sums.fifo")
+            os.remove("sha256sums.gpg.fifo")
+
+        self.sha256sum = content.decode('utf-8').splitlines()
+        self.sha256sum = [sum for sum in self.sha256sum if self.file in sum][0]
+        self.sha256sum = self.sha256sum.split()[0]
+        logging.info(f"SHA256SUM: {self.file}: {self.sha256sum}")
+
+    def verify_image(self):
+        logging.info(f"Downloading {self.file}")
+        response = requests.get(self.url, stream=True)
+        response.raise_for_status()
+        response_size = int(response.headers.get('content-length', 0))
+
+        temp_file = tempfile.NamedTemporaryFile(delete=False).name
+        try:
+            temp_file_size = 0
+            with open(temp_file, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=4*1024*1024):
+                    f.write(chunk)
+                    temp_file_size += len(chunk)
+                    logging.info(f"Downloaded {temp_file_size} of {response_size}")
+
+            logging.info(f"Verifying {self.file}")
+            sha256sum = os.popen(f"sha256sum {temp_file}").read().split(' ')[0]
+            if sha256sum != self.sha256sum:
+                raise ValueError(f"SHA256SUM mismatch: {self.sha256sum} != {sha256sum}")
+        except Exception as e:
+            os.remove(temp_file)
+            logging.error(f"Error downloading {self.file}: {e}")
+            raise
+
+        logging.info(f"Renaming {temp_file} to {self.file}")
+        shutil.move(temp_file, self.file)
+
+    def __init__(self, url, release=None):
+        super().__init__(url)
+        self.file = urlparse.urlparse(url).path.split('/')[-1]
+        self.file_etag = None
+        self.stem, self.arch, self.ext = self.regex.search(url).groups()
+        self.version = self.stem.split('-')[1]
+        self.type = self.stem.split('-')[2]
+        self.dir = re.sub(r"/[^/]+-cloudimg-[^-\.]+.*$", "/", url)
+
+        self.release = UbuntuCloudRelease(
+            self.dir) if release is None else release
+
+        self.sha256sums = f"{self.dir}SHA256SUMS"
+        self.sha256sums_gpg = f"{self.sha256sums}.gpg"
+
+    def safe_download(self):
+        setup_gpg()
+        self.verify_sha256sums()
+        self.verify_image()
+
+    @property
+    def etag(self):
+        if self.file_etag is None:
+            logging.info(f"Getting etag for {self.file}")
+            response = requests.head(self.url, allow_redirects=True)
+            response.raise_for_status()
+            self.file_etag = response.headers['ETag'] if 'ETag' in response.headers else None
+        return self.file_etag
+
+
+@functools.total_ordering
+class UbuntuCloudRelease(UbuntuResource):
+    regex = re.compile(r"^(.*releases/)([^/]+)/.*(release-[0-9\.]+)/$")
+
+    def __init__(self, url):
+        super().__init__(url)
+        self.images = {}
+        self.stem, self.codename, self.release = self.regex.search(
+            url).groups()
+        self.id = f"{'.'.join(self.stem.split('.')[1:])}{self.codename}"
+
+    def __iter__(self):
+        return iter([image for arch in self.images.values() for image in arch.values()])
+
+    def has_image(self, arch, ext):
+        return (arch in self.images and
+                ext in self.images[arch])
+
+    def del_image(self, arch, ext):
+        if arch in self.images and ext in self.images[arch]:
+            logging.info(f"Deleting {arch}{ext} image for {self.id}")
+            del self.images[arch][ext]
+
+    def add_image(self, url):
+        img = UbuntuCloudImage(url, self)
+
+        match img.ext:
+            case '.tar.gz':
+                self.del_image(img.arch, '.img')
+                self.del_image(img.arch, '-disk1.img')
+                self.del_image(img.arch, '-uefi1.img')
+            case '-root.tar.xz':
+                self.del_image(img.arch, '-root.tar.gz')
+            case '.img':
+                if self.has_image(img.arch, '.tar.gz'):
+                    return
+            case '-disk1.img':
+                if self.has_image(img.arch, '.tar.gz'):
+                    return
+                self.del_image(img.arch, '-uefi1.img')
+            case '-uefi1.img':
+                if self.has_image(img.arch, '.tar.gz'):
+                    return
+                if self.has_image(img.arch, '-disk1.img'):
+                    return
+            case '-root.tar.gz':
+                if self.has_image(img.arch, '-root.tar.xz'):
+                    return
+
+        logging.info(f"Adding {img.arch}{img.ext} image for {self.id}")
+        if img.arch not in self.images:
+            self.images[img.arch] = {}
+        self.images[img.arch][img.ext] = img
+
+    def __eq__(self, other):
+        return ((self.stem == other.stem) and
+                (self.codename == other.codename) and
+                (self.release == other.release))
+
+    def __lt__(self, other):
+        if not (self.codename == other.codename and self.stem == other.stem):
+            print(f"self: {self.stem} {self.codename} {self.release}")
+            print(f"other: {other.stem} {other.codename} {other.release}")
+            return NotImplemented
+        return self.release < other.release
+
+
+class UbuntuCloudImageHost(HTMLParser):
+    init_urls = [
+        'http://cloud-images.ubuntu.com/releases/',
+        'http://cloud-images.ubuntu.com/minimal/',
+    ]
+
+    blocked_endings = [
+        "releases/releases/",
+        "release/",
+        "server/",
+        "unpacked/",
+        "streams/",
+        "daily/",
+        "kvm.img"
+    ]
+
+    blocked_details = [
+        "armhf",
+        "armel",
+        "azure",
+        "powerpc",
+        "ppc64el",
+        "riscv64",
+        "s390x",
+        "wsl",
+        "lxd"
+    ]
+
+    def __init__(self):
+        super().__init__()
+        self.urls = UbuntuCloudImageHost.init_urls
+
+        self.cache = EtagCache()
+        self.releases = {}
+        self.inMain = False
+        self.inPre = False
+
+        self.crawl()
+
+    def __iter__(self):
+        return iter(self.releases.values())
+
+    def images(self):
+        for release in self:
+            for image in release:
+                if self.cache.changed(image):
+                    yield image
+
+    def crawl(self):
+        for url in self.urls:
+            response = requests.get(url, allow_redirects=True)
+            response.raise_for_status()
+            self.url = response.url
+            self.feed(response.text)
+
+    def should_exclude_url(self, url):
+        try:
+            for block in self.blocked_endings:
+                if url.endswith(block):
+                    raise ValueError(f"ending({block})")
+            for block in self.blocked_details:
+                if block in url:
+                    raise ValueError(f"detail({block})")
+            if re.search(r"/[0-9\.]+/$", url):
+                raise ValueError(f"type(redirect)")
+        except ValueError as e:
+            logging.debug(f"Excluding {url} {e.args[0]}")
+            return True
+
+        return False
+
+    def handle_image(self, url):
+        for rel in self.releases.values():
+            if rel.id in url:
+                rel.add_image(url)
+                break
+
+    def parse_href(self, url):
+        if UbuntuCloudRelease.match(url):
+            release = UbuntuCloudRelease(url)
+            if release.id not in self.releases or release > self.releases[release.id]:
+                logging.debug(f"Detected newer release: {release.id}")
+                self.releases[release.id] = release
+        elif url.endswith("/"):
+            logging.info(f"Adding {url} to queue")
+            self.urls.append(url)
+        elif url.endswith(".tar.gz") or url.endswith(".tar.xz") or url.endswith(".img"):
+            self.handle_image(url)
+
+    def handle_href(self, attrs):
+        hrefs = [value for name, value in attrs if name == "href"]
+        value = hrefs[0] if hrefs else None
+        if not value or value == '/' or value.startswith("?") or value.startswith("/"):
+            logging.debug(f"Skipping {value} ({self.url})")
+            return
+
+        url = urlparse.urljoin(self.url, value)
+        if self.should_exclude_url(url):
+            return
+
+        self.parse_href(url)
+
+    def handle_endtag(self, tag):
+        if tag == "body":
+            self.inMain = False
+            self.inPre = False
+            logging.debug("Exiting div#main pre")
+            for release in self.releases.values():
+                if release.url not in self.urls:
+                    logging.info(f"Adding release {release.url} to queue")
+                    self.urls.append(release.url)
+
+    def handle_starttag(self, tag, attrs):
+        match tag:
+            case "div":
+                ids = [value for name, value in attrs if name == "id"]
+                if "main" in ids:
+                    logging.debug("Entering div#main")
+                    self.inMain = True
+            case "pre":
+                if self.inMain:
+                    logging.debug("Entering div#main pre")
+                    self.inPre = True
+            case "a":
+                if self.inPre:
+                    logging.debug("Parsing anchor href")
+                    self.handle_href(attrs)
+
+
+class CloudImageBuild:
+    @property
+    def runs_on(self):
+        match self.image.arch:
+            case "arm64":
+                return ["aws:ec2launchtemplate:runner-arm64"]
+            case _:
+                return ["aws:ec2launchtemplate:runner-amd64"]
+
+    @property
+    def instance_type(self):
+        if self.image.arch == "arm64":
+            return 'c7g.medium'
+        elif self.boot_mode == 'uefi':
+            return 'c7a.medium'
+        else:
+            return 'c7i.large'
+
+    @property
+    def ami_test_config(self):
+        if (self.version.full >= 14 and self.lts) or (self.version.full >= 23):
+            return 'cloud-config.txt'
+        if self.image.arch == "arm64":
+            return 'cloud-config-old-ports.txt'
+        return 'cloud-config-old-releases.txt'
+
+    def _build_container(self):
+        if self.version.full < 12:
+            return True
+        if not self.lts and self.version.full < 23 and self.image.arch == "arm64":
+            return False
+        if self.version.full > 16.04 and self.version.full < 18.04:
+            return True
+        if self.image.ext not in ['-root.tar.gz', '-root.tar.xz']:
+            return False
+
+        return True
+
+    def _build_ami(self):
+        if self.image.ext in ['-root.tar.gz', '-root.tar.xz']:
+            return False
+        if self.image.arch == "i386":
+            return False
+        if self.version.full < 14:
+            return False
+        if not self.lts and self.version.full < 20 and self.image.arch != "arm64":
+            return False
+        if not self.lts and self.version.full < 23 and self.image.arch == "arm64":
+            return False
+        if self.lts and self.version.full < 18 and self.image.arch == "arm64":
+            return False
+
+        return True
+
+    def matrix(self):
+        return {
+            "image": self.image.file,
+            "url": self.image.url,
+            "version": self.image.version,
+            "type": self.image.type,
+            "ext": self.image.ext,
+            "stem": f"{self.image.stem}-{self.image.arch}",
+            "release": self.image.release.release.split('-')[1],
+            "arch": self.image.arch,
+            "codename": self.image.release.codename,
+            "lts": self.lts,
+            "build": {
+                "ami": self.build.ami,
+                "container": self.build.container
+            },
+            "runs-on": self.runs_on,
+            "boot_mode": self.boot_mode,
+            "packer": {
+                "test_config": self.ami_test_config,
+                "test_instance_type": self.instance_type
+            }
+        }
+
+    def __init__(self, image):
+        self.image = image
+
+        self.version = SimpleNamespace(
+            full=float('.'.join(image.version.split('.')[0:2])),
+            major=int(image.version.split('.')[0]),
+            minor=int(image.version.split('.')[1])
+        )
+
+        self.lts = self.version.major % 2 == 0 and self.version.minor == 4
+        self.boot_mode = 'uefi' if self.version.full >= 18 or image.arch == "arm64" else 'legacy-bios'
+
+        self.build = SimpleNamespace(
+            ami=self._build_ami(),
+            container=self._build_container()
+        )
+
+
+def _write_github_output(data):
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+        for name, value in data.items():
+            f.write(f"{name}={value}\n")
+            logging.info(f"GITHUB_OUTPUT: {name}={value}")
+
+
+def download(*urls):
+    for url in urls:
+        image = UbuntuCloudImage(url)
+        logging.info(f"Downloading {image.url}")
+        image.safe_download()
+
+
+def setup():
+    host = UbuntuCloudImageHost()
+
+    builds = [CloudImageBuild(image) for image in host.images()]
+    builds = [build for build in builds if build.build.ami or build.build.container]
+    builds = sorted(builds, key=lambda x: (x.version.full, x.image.arch))
+
+    matrix = {"include": [build.matrix() for build in builds]}
+
+    _write_github_output({"matrix": json.dumps(matrix)})
+
+
+if __name__ == "__main__":
+    allowed_fns = [attr for attr in dir() if callable(
+        getattr(sys.modules[__name__], attr)) and not attr.startswith("_")]
+    usage = f"usage: {sys.argv[0]} [help|{'|'.join(allowed_fns)}]"
+
+    try:
+        fn = sys.argv[1] if sys.argv[1] in allowed_fns else "usage"
+        if fn in ["help", "usage"]:
+            print(usage)
+            exit(1 if fn == "usage" else 0)
+    except IndexError:
+        fn = "interrogate"
+
+    fn = getattr(sys.modules[__name__], fn)
+    fn(*sys.argv[2:] if len(sys.argv) > 2 else [])

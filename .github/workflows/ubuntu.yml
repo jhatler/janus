@@ -1,0 +1,285 @@
+---
+name: "Ubuntu Cloud Images"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/ubuntu-cloud-images'
+      - 'packer/ubuntu-cloud-images/**'
+      - 'containers/ubuntu/_cloudimg/**'
+      - '.github/workflows/ubuntu.yml'
+
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/ubuntu-cloud-images'
+      - 'packer/ubuntu-cloud-images/**'
+      - 'containers/ubuntu/_cloudimg/**'
+      - '.github/workflows/ubuntu.yml'
+
+  schedule:
+    - cron: '0 0 */14 * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  setup:
+    name: Matrix Setup
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setup.outputs.matrix }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache ETags
+        uses: actions/cache@v4
+        with:
+          path: 'etags.json'
+          key: ubuntu-cloudimg-etag-${{ github.head_ref || github.ref }}-${{ hashFiles('scripts/ubuntu-cloud-images', '.github/workflows/ubuntu.yml') }}
+
+      - name: Determine Scope
+        id: setup
+        shell: bash
+        run: ./scripts/ubuntu-cloud-images setup
+
+  images:
+    name: ${{ matrix.image }}
+    runs-on: ${{ matrix.runs-on }}
+    needs:
+      - setup
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: 'janus'
+
+      - name: Download and Extract Cloud Image
+        shell: bash
+        run: |
+          ./janus/scripts/ubuntu-cloud-images download "${{matrix.url}}"
+          sudo ./janus/containers/ubuntu/_cloudimg/scripts/00-extract.sh "${{matrix.image}}" "${{matrix.stem}}"
+
+      - name: SBOM Root FS
+        shell: bash
+        working-directory: src
+        run: sudo ${{github.workspace}}/janus/containers/ubuntu/_cloudimg/scripts/10-sbom-rootfs.sh "${{ matrix.stem }}"
+
+
+      - name: Repackage Normalized Root FS
+        shell: bash
+        if: matrix.build.container
+        run: sudo ${{github.workspace}}/janus/containers/ubuntu/_cloudimg/scripts/20-repackage.sh "${{ matrix.stem }}"
+
+      - name: Login to Container Registry
+        if: matrix.build.container
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Container from Cloud Image
+        shell: bash
+        id: container-publish
+        if: matrix.build.container
+        env:
+          CONTAINER_REPO: ghcr.io/${{ github.repository_owner }}/ubuntu-cloudimg
+          CONTAINER_TAG: ${{ matrix.codename }}${{ matrix.type == 'minimal' && '-minimal' || '' }}-${{ matrix.release }}-${{ matrix.arch }}
+          PLATFORM: linux/${{ matrix.arch == 'i386' && '386' || matrix.arch }}
+          FROM: ghcr.io/jhatler/scratch:sha-8ff508d-ci@sha256:dd99706086db38235266d97bfe3462d2be5938c0e48ecac7d6aee8e3ed9421b7
+          TYPE: ${{ matrix.type }}
+        run: ${{github.workspace}}/janus/containers/ubuntu/_cloudimg/scripts/30-build-container.sh "${{ matrix.stem }}"
+
+      - name: Sign published container
+        id: container-sign
+        shell: bash
+        if: matrix.build.container
+        run: |
+          _image=${{steps.container-publish.outputs.repo}}:${{steps.container-publish.outputs.tag}}
+          _digest=$(docker buildx imagetools inspect --format '{{json .Manifest}}' $_image | jq -r '.digest')
+
+          echo "${{steps.container-publish.outputs.repo}}@${_digest}" > ${{steps.container-publish.outputs.tag}}.digest
+          cosign sign --yes "${{steps.container-publish.outputs.repo}}@${_digest}"
+
+          echo "digest=${_digest}" | tee -a "$GITHUB_OUTPUT"
+          echo "image=${{steps.container-publish.outputs.repo}}@${_digest}" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Attest published container
+        uses: actions/attest-build-provenance@v1
+        id: container-attest
+        if: matrix.build.container
+        with:
+          subject-name: ${{ steps.container-publish.outputs.repo }}
+          subject-digest: ${{ steps.container-sign.outputs.digest }}
+          push-to-registry: true
+
+      - name: Upload digest files
+        uses: actions/upload-artifact@v4
+        if: matrix.build.container
+        id: upload-digest
+        with:
+          name: ${{ matrix.codename }}${{ matrix.type == 'minimal' && '-minimal' || '' }}-${{ matrix.release }}-${{ matrix.arch }}.digest
+          path: '*.digest'
+          if-no-files-found: 'error'
+          retention-days: 1
+
+      - name: Create AMI from Cloud Image
+        shell: bash
+        if: matrix.build.ami
+        id: ami-publish
+        env:
+          PKR_VAR_source_ami: ${{ matrix.arch == 'arm64' && 'ami-0504881b6db750d2f' || 'ami-0f30a9c3a48f3fa79' }}
+          PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.medium' || 'c7a.medium' }}
+          PKR_VAR_aws_region: us-east-2
+          PKR_VAR_iam_instance_profile: runners-controlled
+          PKR_VAR_boot_mode: ${{ matrix.boot_mode }}
+          PKR_VAR_cloud_image_file: ${{github.workspace}}/${{ matrix.stem }}.img
+          PKR_VAR_ami_architecture: ${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }}
+          PKR_VAR_ami_name: ubuntu/images/hvm-ssd-gp3/ubuntu-${{ matrix.codename }}-${{ matrix.version }}-${{ matrix.arch }}-${{ matrix.type }}-${{ matrix.release }}
+        working-directory: janus/packer/ubuntu-cloud-images
+        run: |
+          packer init ami.pkr.hcl
+          packer build -machine-readable -on-error=cleanup ami.pkr.hcl | tee ${{github.workspace}}/${{ matrix.stem }}.ami.log
+          _ami_id=$(grep 'artifact,0,id' ${{github.workspace}}/${{ matrix.stem }}.ami.log | cut -d, -f6 | cut -d: -f2)
+          echo "ami_id=$_ami_id" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Test AMI
+        shell: bash
+        if: matrix.build.ami
+        env:
+          PKR_VAR_source_ami: ${{ steps.ami-publish.outputs.ami_id }}
+          PKR_VAR_aws_region: us-east-2
+          PKR_VAR_iam_instance_profile: runners-controlled
+          PKR_VAR_cloud_config: ${{ matrix.packer.test_config }}
+          PKR_VAR_instance_type: ${{ matrix.packer.test_instance_type }}
+        working-directory: janus/packer/ubuntu-cloud-images
+        run: |
+          packer init test.pkr.hcl
+          packer build -machine-readable -on-error=cleanup test.pkr.hcl | tee test.log
+          mv test.log ${{github.workspace}}/${{ matrix.stem }}.test.log
+
+      - name: Upload packer logs files
+        uses: actions/upload-artifact@v4
+        if: matrix.build.ami
+        id: upload-packer-logs
+        with:
+          name: ubuntu-${{ matrix.codename }}-${{ matrix.version }}-${{ matrix.arch }}-${{ matrix.type }}-${{ matrix.release }}.logs
+          path: '*.log'
+          if-no-files-found: 'error'
+          retention-days: 1
+
+  image-inspect:
+    name: Inspect Images
+    needs:
+      - images
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.inspect.outputs.matrix }}
+    permissions:
+      contents: read
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        id: container-digests
+        with:
+          merge-multiple: true
+
+      - name: Inspect Digests
+        id: inspect
+        shell: bash
+        run: |
+          ls -1 *.digest | sed -E 's/-[^-]+.digest//' | sort | uniq | jq -Rsc 'split("\n")[:-1] | {"image": .}' > matrix.json
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+
+  join:
+    name: Join ${{matrix.image}}
+    needs:
+      - image-inspect
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.image-inspect.outputs.matrix) }}
+    runs-on:
+      - aws:ec2launchtemplate:runner-arm64
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      attestations: write
+    steps:
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        id: container-digest-download
+        with:
+          merge-multiple: true
+
+      - name: Remove out of scope digests
+        id: container-digest-cleanup
+        shell: bash
+        run: |
+          set -ex
+          for digest in *.digest; do
+            if [[ ! "$digest" =~ ^${{ matrix.image }}- ]]; then
+              rm -f "$digest"
+            fi
+          done
+
+      - name: Publish and sign multiplatform container
+        id: container-publish
+        shell: bash
+        run: |
+          set -x
+
+          repo=$(cat $(ls -1 *.digest | head -n1) | cut -d@ -f1)
+          release=$(echo ${{matrix.image}} | rev | cut -f2- -d- | rev)
+
+          docker buildx imagetools create -t "$repo:${{matrix.image}}" $(cat *.digest)
+          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$repo:${{matrix.image}}" | jq -r '.digest')"
+          cosign sign --yes --recursive "$repo:@${digest}"
+
+          docker buildx imagetools create -t "$repo:${release}" $(cat *.digest)
+          release_digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$repo:${release}" | jq -r '.digest')"
+          cosign sign --yes "$repo:@${release_digest}"
+
+          echo "repo=${repo}" >> "$GITHUB_OUTPUT"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          echo "release_digest=${release_digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Attest published container
+        uses: actions/attest-build-provenance@v1
+        id: container-attest
+        with:
+          subject-name: ${{ steps.container-publish.outputs.repo }}
+          subject-digest: ${{ steps.container-publish.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest published release tag
+        uses: actions/attest-build-provenance@v1
+        id: release-attest
+        with:
+          subject-name: ${{ steps.container-publish.outputs.repo }}
+          subject-digest: ${{ steps.container-publish.outputs.release_digest }}
+          push-to-registry: true
