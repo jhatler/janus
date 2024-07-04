@@ -14,12 +14,28 @@
     "email": "hatler.jaremy@gmail.com"
   },
   "license": "MIT",
+  "type": "module",
+  "exports": {
+    "require": "./cjs/index.js",
+    "import": "./esm/index.js"
+  },
+  "main": "cjs/index.js",
   "scripts": {
-    "build": "tsc -p ."
+    "compile-cjs": "tsc --project . --module commonjs --outDir cjs/ --moduleResolution node10 && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
+    "compile-esm": "tsc --project . --module es2022 --outDir esm/ --moduleResolution node && echo '{\"type\": \"module\"}' > esm/package.json",
+    "compile": "npm run compile-cjs && npm run compile-esm",
+    "pretest": "npm run compile",
+    "test-esm": "mocha --exit esm/test",
+    "test-cjs": "mkdir -p cjs-test && cd test && tsc --project . --module commonjs --outDir ../cjs-test/ --moduleResolution node10 && cd ../cjs-test && echo '{\"type\": \"commonjs\"}' > package.json && mocha --exit --no-package",
+    "test": "npm run test-esm && npm run test-cjs",
+    "clean": "rm -rf cjs esm cjs-test"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/mocha": "^10.0.0",
     "@types/node": "^20.14.8",
-    "typescript": "~5.2.0"
+    "mocha": "^10.5.2",
+    "typescript": "~5.2.0",
+    "ts-node": "^10.9.2"
   }
 }
