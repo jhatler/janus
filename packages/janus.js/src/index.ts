@@ -1,11 +1,11 @@
-class Hello {
+export class Hello {
   msg: string
 
-  constructor () {
+  constructor() {
     this.msg = 'Hello, world!'
   }
 
-  say (): void {
+  say(): void {
     console.log(this.msg)
   }
 }

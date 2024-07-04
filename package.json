@@ -23,5 +23,16 @@
     "packages/*"
   ],
   "version": "0.1.5",
-  "scripts": {}
+  "scripts": {},
+  "mocha": {
+    "loader": [
+      "ts-node/esm"
+    ],
+    "recursive": true,
+    "extension": [
+      "ts",
+      "js",
+      "tsx"
+    ]
+  }
 }
