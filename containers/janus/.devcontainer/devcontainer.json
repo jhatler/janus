@@ -1,11 +1,8 @@
 {
     "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-    "image": "ghcr.io/jhatler/janus:v0", /* x-release-please-version */
+    "image": "${localEnv:FROM_IMAGE:ghcr.io/jhatler/janus:bootstrap}", /* x-release-please-version */
     "features": {
         "ghcr.io/devcontainers/features/sshd:1": {
-            "version": "latest"
-        },
-        "ghcr.io/devcontainers/features/git:1": {
             "version": "latest"
         },
         "ghcr.io/devcontainers/features/git-lfs:1": {
@@ -16,12 +13,6 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "latest"
-        },
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "latest"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "22"
         },
         "ghcr.io/devcontainers/features/go:1": {
             "version": "latest"
@@ -43,12 +34,9 @@
     },
     "overrideFeatureInstallOrder": [
         "ghcr.io/devcontainers/features/sshd",
-        "ghcr.io/devcontainers/features/git",
         "ghcr.io/devcontainers/features/git-lfs",
         "ghcr.io/devcontainers/features/github-cli",
         "ghcr.io/devcontainers/features/docker-in-docker",
-        "ghcr.io/devcontainers/features/python",
-        "ghcr.io/devcontainers/features/node",
         "ghcr.io/devcontainers/features/go",
         "ghcr.io/devcontainers/features/aws-cli",
         "ghcr.io/devcontainers/features/kubectl-helm-minikube",
@@ -57,9 +45,9 @@
         "./local-features/devcontainers",
         "./local-features/shfmt"
     ],
-    "remoteUser": "node",
-    "containerUser": "node",
-    "postCreateCommand": "/bin/bash -c 'liquidprompt_activate'",
+    "remoteUser": "code",
+    "containerUser": "code",
+    "postCreateCommand": "",
     "customizations": {
         "vscode": {
             "settings": {
