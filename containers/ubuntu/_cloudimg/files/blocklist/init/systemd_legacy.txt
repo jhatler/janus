@@ -1,5 +1,6 @@
 acpid
 apt-transport-https
+busybox.*
 ca-certificates
 cpio
 curl

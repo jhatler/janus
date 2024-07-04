@@ -2,6 +2,7 @@
 (lib|)perl[0-9.]*(|-modules)
 acpid
 apt-transport-https
+busybox.*
 ca-certificates
 cpio
 curl
@@ -14,6 +15,7 @@ initramfs.*
 iproute
 keyboard-configuration
 kmod
+libcryptsetup.*
 libcurl3(|-gnutls)
 libdevmapper.*
 libgdbm3

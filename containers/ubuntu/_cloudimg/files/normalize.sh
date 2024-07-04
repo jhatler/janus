@@ -265,7 +265,6 @@ function _uninstall_boot {
 
 function _uninstall_regex {
     local _pkgs _regex _removals
-
     if [ "$#" -ne 1 ]; then
         echo "Usage: $0 <regex>"
         exit 1
@@ -288,20 +287,15 @@ function _uninstall_regex {
     _dpkg_purge "${_removals[@]}"
 }
 
-function _uninstall_regex_list {
-    local _list _pkgs _regex _removals
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: $0 <file>"
-        exit 1
-    fi
+function _uninstall_regex_lists {
+    local _pkgs _regex _removals
 
     # jscpd:ignore-start
-    _list=$1
     _pkgs=($(_dpkg_list))
     _removals=()
 
     # shellcheck disable=SC2013
-    for _regex in $(cat "$_list"); do
+    for _regex in $(cat "$@"); do
         if [[ " ${_pkgs[*]} " =~ [[:space:]]${_regex}[[:space:]] ]]; then
             _removals+=($(echo "${_pkgs[@]}" | tr ' ' '\n' | grep -E "^${_regex}$"))
         fi
@@ -317,20 +311,15 @@ function _uninstall_regex_list {
     _dpkg_purge "${_removals[@]}"
 }
 
-function _try_uninstall_regex_list {
-    local _list _pkgs _regex _removals _skips
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: $0 <file>"
-        exit 1
-    fi
+function _try_uninstall_regex_lists {
+    local _pkgs _regex _removals _skips
 
-    _list=$1
     _pkgs=($(_dpkg_list))
     _removals=()
     _skips=()
 
     # shellcheck disable=SC2013
-    for _regex in $(cat "$_list"); do
+    for _regex in $(cat "$@"); do
         if [[ " ${_pkgs[*]} " =~ [[:space:]]${_regex}[[:space:]] ]]; then
             _removals+=($(echo "${_pkgs[@]}" | tr ' ' '\n' | grep -E "^${_regex}$"))
         fi
@@ -502,34 +491,34 @@ function _main {
 
     # systemd needs removed before other packages to avoid breaking post-remove scripts
     if [ "$VERSION" = "8.04" ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,codename/hardy}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,codename/hardy}.txt
     elif [ "$VERSION" = "10.04" ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,codename/lucid}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,codename/lucid}.txt
     elif [ "$VERSION" = "10.10" ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,codename/maverick}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,codename/maverick}.txt
     elif [ "$VERSION" = "11.04" ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,codename/natty}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,codename/natty}.txt
     elif [ "$VERSION_MAJOR" -lt 14 ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,init/legacy}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,init/legacy}.txt
     elif [ "$VERSION_MAJOR" -lt 15 ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,init/upstart}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,init/upstart}.txt
     elif [ "$VERSION_MAJOR" -lt 17 ] && [ "$VERSION" != "16.10" ]; then
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,init/systemd_legacy}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,init/systemd_legacy}.txt
     else
-        _uninstall_regex_list <(cat /setup/blocklist/{init/common,init/systemd_modern}.txt)
+        _uninstall_regex_lists /setup/blocklist/{init/common,init/systemd_modern}.txt
     fi
 
     # autoremove, then purge the rest
     _apt_autoremove
-    _uninstall_regex_list /setup/blocklist/misc.txt
+    _uninstall_regex_lists /setup/blocklist/misc.txt
     _apt_autoremove
 
     # removing systemd-resolved or resolvconf will break networking, fix that
     _unstash_dns
 
     # try removing the rest of the blocklist, twice (just in case)
-    _try_uninstall_regex_list /setup/blocklist/try.txt
-    _try_uninstall_regex_list /setup/blocklist/try.txt
+    _try_uninstall_regex_lists /setup/blocklist/try.txt
+    _try_uninstall_regex_lists /setup/blocklist/try.txt
 
     # Exclude man pages and docs from being installed
     [ "$_image_type" = "minimal" ] && _setup_apt_excludes
