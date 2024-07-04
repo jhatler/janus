@@ -1,17 +1,18 @@
 ---
 name: Containers PR
 on:
-  pull_request:
-    paths:
-      - 'containers/janus/**'
-      - '!containers/janus/CHANGELOG.md'
-      - 'devcontainers/janus/**'
-      - '!devcontainers/janus/CHANGELOG.md'
-      - '.devcontainer/**'
-      - '!.devcontainer/CHANGELOG.md'
-      - '.github/workflows/containers.yml'
-      - '.github/actions/container/**'
-      - '.github/actions/devcontainer/**'
+  workflow_dispatch:
+  # pull_request:
+  #   paths:
+  #     - 'containers/janus/**'
+  #     - '!containers/janus/CHANGELOG.md'
+  #     - 'devcontainers/janus/**'
+  #     - '!devcontainers/janus/CHANGELOG.md'
+  #     - '.devcontainer/**'
+  #     - '!.devcontainer/CHANGELOG.md'
+  #     - '.github/workflows/containers.yml'
+  #     - '.github/actions/container/**'
+  #     - '.github/actions/devcontainer/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
