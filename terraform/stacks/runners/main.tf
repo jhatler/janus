@@ -65,7 +65,7 @@ resource "aws_key_pair" "runners" {
 module "runner_template_arm64" {
   #checkov:skip=CKV_TF_1: Spacelift modules should be retrieved from Spacelift Module Registry
   source  = "spacelift.io/jhatler/runner-template/aws"
-  version = "0.2.1"
+  version = "0.2.2"
 
   name          = "runner-arm64"
   instance_type = "c7g.medium"
@@ -90,7 +90,7 @@ module "runner_template_arm64" {
 module "runner_template_amd64" {
   #checkov:skip=CKV_TF_1: Spacelift modules should be retrieved from Spacelift Module Registry
   source  = "spacelift.io/jhatler/runner-template/aws"
-  version = "0.2.1"
+  version = "0.2.2"
 
   name          = "runner-amd64"
   instance_type = "c7a.medium"
