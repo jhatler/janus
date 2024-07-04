@@ -1,0 +1,15 @@
+{
+    "cSpell.words": [
+        "cloudimg"
+    ],
+    "files.associations": {
+        "**/ansible/*.yml": "ansible",
+        "**/ansible/group_vars/**/*.yml": "ansible",
+        "**/ansible/plugins/**/*.yml": "ansible",
+        "**/ansible/*/roles/*/defaults/*.yml": "ansible",
+        "**/ansible/*/roles/*/handlers/*.yml": "ansible",
+        "**/ansible/*/roles/*/tasks/*.yml": "ansible",
+        "**/ansible/*/roles/*/templates/*.j2": "ansible-jinja",
+        "**/ansible/*/roles/*/vars/*.yml": "ansible"
+    }
+}
