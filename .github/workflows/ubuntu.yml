@@ -29,6 +29,7 @@ concurrency:
 
 permissions: {}
 
+# jscpd:ignore-start
 jobs:
   setup:
     name: Matrix Setup
@@ -48,7 +49,10 @@ jobs:
       - name: Determine Scope
         id: setup
         shell: bash
-        run: ./scripts/ubuntu-cloud-images setup
+        run: |
+          sudo apt-get install -y python3-pip
+          sudo pip install boto3
+          ./scripts/ubuntu-cloud-images setup
 
   images:
     name: ${{ matrix.image }}
@@ -85,7 +89,19 @@ jobs:
         if: matrix.build.container
         run: sudo ${{github.workspace}}/janus/containers/ubuntu/_cloudimg/scripts/20-repackage.sh "${{ matrix.stem }}"
 
-      - name: Login to Container Registry
+      - name: Configure AWS credentials
+        if: matrix.build.container
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_ROLE_REGION }}
+
+      - name: Login to Amazon ECR
+        if: matrix.build.container
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to GHCR
         if: matrix.build.container
         uses: docker/login-action@v3
         with:
@@ -98,7 +114,7 @@ jobs:
         id: container-publish
         if: matrix.build.container
         env:
-          CONTAINER_REPO: ghcr.io/${{ github.repository_owner }}/ubuntu-cloudimg
+          CONTAINER_REPO: ${{ secrets.AWS_ECR_DNS }}/ubuntu-cloudimg
           CONTAINER_TAG: ${{ matrix.codename }}${{ matrix.type == 'minimal' && '-minimal' || '' }}-${{ matrix.release }}-${{ matrix.arch }}
           PLATFORM: linux/${{ matrix.arch == 'i386' && '386' || matrix.arch }}
           FROM: ghcr.io/jhatler/scratch:sha-8ff508d-ci@sha256:dd99706086db38235266d97bfe3462d2be5938c0e48ecac7d6aee8e3ed9421b7
@@ -223,6 +239,16 @@ jobs:
       packages: write
       attestations: write
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_ROLE_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
@@ -283,3 +309,4 @@ jobs:
           subject-name: ${{ steps.container-publish.outputs.repo }}
           subject-digest: ${{ steps.container-publish.outputs.release_digest }}
           push-to-registry: true
+# jscpd:ignore-end

@@ -39,7 +39,7 @@ locals {
     {
       name         = "Ubuntu"
       description  = "Ubuntu Cloud Images"
-      project_root = "terraform/stacks/ubuntu_cloudimgs"
+      project_root = "terraform/stacks/ubuntu_cloudimg"
       id           = "ubuntu"
     },
     {

@@ -11,6 +11,8 @@ import sys
 import tempfile
 import threading
 
+import boto3
+
 import urllib.parse as urlparse
 
 from html.parser import HTMLParser
@@ -150,7 +152,61 @@ class UbuntuCloudImage(UbuntuResource):
         self.sha256sum = self.sha256sum.split()[0]
         logging.info(f"SHA256SUM: {self.file}: {self.sha256sum}")
 
-    def verify_image(self):
+    def cache_image(self):
+        logging.info(f"Caching {self.file} to S3")
+        s3 = boto3.client('s3')
+        sts = boto3.client('sts')
+        account_id = sts.get_caller_identity().get('Account')
+        key = '/'.join(self.url.split('/')[3:])
+        bucket = f"ubuntu-cloudimg-{account_id}"
+        s3.upload_file(self.file, bucket, key)
+        logging.info(f"Url: {self.url}")
+        logging.info(f"ETag: {self.etag}")
+        s3.put_object_tagging(
+            Bucket=bucket,
+            Key=key,
+            Tagging={
+                'TagSet': [
+                    {
+                        'Key': 'url',
+                        'Value': self.url
+                    },
+                    {
+                        'Key': 'etag',
+                        'Value': self.etag
+                    },
+                    {
+                        'Key': 'sha256sum',
+                        'Value': self.sha256sum
+                    }
+                ]
+            }
+        )
+
+    def verify_image_s3(self):
+        logging.info(f"Downloading (S3 Cache) {self.file}")
+        s3 = boto3.client('s3')
+        sts = boto3.client('sts')
+        account_id = sts.get_caller_identity().get('Account')
+        key = '/'.join(self.url.split('/')[3:])
+        bucket = f"ubuntu-cloudimg-{account_id}"
+
+        temp_file = tempfile.NamedTemporaryFile(delete=False).name
+        try:
+            s3.download_file(bucket, key, temp_file)
+            logging.info(f"Verifying {self.file}")
+            sha256sum = os.popen(f"sha256sum {temp_file}").read().split(' ')[0]
+            if sha256sum != self.sha256sum:
+                raise ValueError(f"SHA256SUM mismatch: {self.sha256sum} != {sha256sum}")
+        except Exception as e:
+            os.remove(temp_file)
+            logging.error(f"Error downloading (S3 Cache) {self.file}: {e}")
+            raise
+
+        logging.info(f"Renaming {temp_file} to {self.file}")
+        shutil.move(temp_file, self.file)
+
+    def verify_image_upstream(self):
         logging.info(f"Downloading {self.file}")
         response = requests.get(self.url, stream=True)
         response.raise_for_status()
@@ -176,6 +232,7 @@ class UbuntuCloudImage(UbuntuResource):
 
         logging.info(f"Renaming {temp_file} to {self.file}")
         shutil.move(temp_file, self.file)
+        self.cache_image()
 
     def __init__(self, url, release=None):
         super().__init__(url)
@@ -195,7 +252,37 @@ class UbuntuCloudImage(UbuntuResource):
     def safe_download(self):
         setup_gpg()
         self.verify_sha256sums()
-        self.verify_image()
+        if self.image_cached_s3:
+            self.verify_image_s3()
+        else:
+            self.verify_image_upstream()
+
+    @property
+    def image_cached_s3(self):
+        s3 = boto3.client('s3')
+        sts = boto3.client('sts')
+        account_id = sts.get_caller_identity().get('Account')
+        key = '/'.join(self.url.split('/')[3:])
+        bucket = f"ubuntu-cloudimg-{account_id}"
+
+        try:
+            response = s3.get_object_tagging(Bucket=bucket, Key=key)
+            tags = {tag['Key']: tag['Value'] for tag in response['TagSet']}
+            if tags['url'] != self.url:
+                raise ValueError(f"URL mismatch: {tags['url']} != {self.url}")
+            if tags['etag'] != self.etag:
+                raise ValueError(f"ETag mismatch: {tags['etag']} != {self.etag}")
+        except s3.exceptions.NoSuchKey as e:
+            logging.error(f"Error checking S3 cache: {e}")
+            return False
+        except KeyError as e:
+            logging.error(f"Error checking S3 cache: {e}")
+            return False
+        except ValueError as e:
+            logging.error(f"Error checking S3 cache: {e}")
+            return False
+
+        return True
 
     @property
     def etag(self):
@@ -203,7 +290,7 @@ class UbuntuCloudImage(UbuntuResource):
             logging.info(f"Getting etag for {self.file}")
             response = requests.head(self.url, allow_redirects=True)
             response.raise_for_status()
-            self.file_etag = response.headers['ETag'] if 'ETag' in response.headers else None
+            self.file_etag = response.headers['ETag'][1:-1] if 'ETag' in response.headers else None
         return self.file_etag
 
 
