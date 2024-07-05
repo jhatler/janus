@@ -9,5 +9,6 @@
     "**/packages/release-trigger/**/*",
     "**/CHANGELOG.md"
   ],
-  "absolute": true
+  "absolute": true,
+  "noSymlinks": true
 }

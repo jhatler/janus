@@ -1,0 +1,77 @@
+{
+    "ci": {
+        "needed": true,
+        "matrix": {
+            "include": [
+                {
+                    "name": "scratch",
+                    "id": "ci-i386",
+                    "platform": "linux/386",
+                    "runs-on": [
+                        "aws:ec2launchtemplate:runner-amd64"
+                    ],
+                    "context": "containers/scratch",
+                    "container": {
+                        "enable": true,
+                        "args": ""
+                    },
+                    "devcontainer": {
+                        "enable": false
+                    }
+                },
+                {
+                    "name": "scratch",
+                    "id": "ci-amd64",
+                    "platform": "linux/amd64",
+                    "runs-on": [
+                        "aws:ec2launchtemplate:runner-amd64"
+                    ],
+                    "context": "containers/scratch",
+                    "container": {
+                        "enable": true,
+                        "args": ""
+                    },
+                    "devcontainer": {
+                        "enable": false
+                    }
+                },
+                {
+                    "name": "scratch",
+                    "id": "ci-arm64",
+                    "platform": "linux/arm64",
+                    "runs-on": [
+                        "aws:ec2launchtemplate:runner-arm64"
+                    ],
+                    "context": "containers/scratch",
+                    "container": {
+                        "enable": true,
+                        "args": ""
+                    },
+                    "devcontainer": {
+                        "enable": false
+                    }
+                }
+            ]
+        }
+    },
+    "post": {
+        "needed": true,
+        "matrix": {
+            "include": [
+                {
+                    "name": "scratch",
+                    "id": "ci",
+                    "runs-on": [
+                        "aws:ec2launchtemplate:runner-arm64"
+                    ],
+                    "container": {
+                        "enable": true
+                    },
+                    "devcontainer": {
+                        "enable": false
+                    }
+                }
+            ]
+        }
+    }
+}

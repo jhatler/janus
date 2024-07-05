@@ -1,18 +1,13 @@
 ---
 name: Containers PR
 on:
-  workflow_dispatch:
-  # pull_request:
-  #   paths:
-  #     - 'containers/janus/**'
-  #     - '!containers/janus/CHANGELOG.md'
-  #     - 'devcontainers/janus/**'
-  #     - '!devcontainers/janus/CHANGELOG.md'
-  #     - '.devcontainer/**'
-  #     - '!.devcontainer/CHANGELOG.md'
-  #     - '.github/workflows/containers.yml'
-  #     - '.github/actions/container/**'
-  #     - '.github/actions/devcontainer/**'
+  pull_request:
+    paths:
+      - 'containers/**'
+      - '!containers/**/CHANGELOG.md'
+      - '.devcontainer/**'
+      - '!.devcontainer/CHANGELOG.md'
+      - '.github/workflows/containers.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -20,116 +15,248 @@ concurrency:
 
 permissions: {}
 
+# jscpd:ignore-start
 jobs:
-  # jscpd:ignore-start
-  container:
-    name: Build Janus Container
+  prep:
+    name: CI Prep
     runs-on: ubuntu-latest
+    outputs:
+      launch: ${{ steps.interrogate.outputs.launch }}
+      ci: ${{ steps.interrogate.outputs.ci }}
+      post: ${{ steps.interrogate.outputs.post }}
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/cache@v4
+        with:
+          path: '**/.cicache*'
+          key: ${{ runner.os }}-npm-v4-${{ github.head_ref || github.ref }}
+
+      - name: Interrogate
+        id: interrogate
+        shell: bash
+        run: ./.ci.py interrogate
+
+  ci:
+    name: ${{ matrix.name }} ${{ matrix.id }}
+    needs:
+      - prep
+    if: ${{ fromJson(needs.prep.outputs.ci).needed }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prep.outputs.ci).matrix }}
+    runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: read
       id-token: write
       packages: write
       attestations: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        if: ${{ matrix.container.enable || matrix.devcontainer.enable }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          fetch-depth: 0
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_ROLE_REGION }}
 
-      - name: Git Version
-        id: container-git-version
-        uses: codacy/git-version@2.8.0
+      - name: Login to Amazon ECR
+        if: ${{ matrix.container.enable || matrix.devcontainer.enable }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        if: ${{ matrix.container.enable || matrix.devcontainer.enable }}
         with:
-          release-branch: main
-          minor-identifier: /(feat|feature):/
-          major-identifier: /!:/
-          prefix: container-janus-v
-          log-paths: |
-            containers/janus/
-
-      - name: Git Version Output
-        id: container-version
-        run: |
-          echo "major=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f1 | rev | cut -f1 -dv)" >> "$GITHUB_OUTPUT"
-          echo "minor=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f2)" >> "$GITHUB_OUTPUT"
-          echo "patch=$(echo ${{ steps.container-git-version.outputs.version }} | cut -d. -f3-)" >> "$GITHUB_OUTPUT"
-
-      - name: Build Container
-        uses: ./.github/actions/container
-        with:
-          context: "{{defaultContext}}:containers/janus"
-          platforms: linux/amd64
-          push: true
-          sign: true
-          repository: ghcr.io/jhatler/janus
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          semver_major: ${{ steps.container-version.outputs.major }}
-          semver_minor: ${{ steps.container-version.outputs.minor }}
-          semver_patch: ${{ steps.container-version.outputs.patch }}
-  # jscpd:ignore-end
 
-  # jscpd:ignore-start
-  devcontainer:
-    name: Build Devcontainer
-    needs: container
-    runs-on: ubuntu-latest
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Container metadata
+        id: container-metadata
+        if: ${{ matrix.container.enable }}
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          tags: type=sha,suffix=-${{ matrix.id }}
+
+      - name: Devcontainer metadata
+        if: ${{ matrix.devcontainer.enable }}
+        id: devcontainer-metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          flavor:
+            latest=false
+          tags: |
+            type=sha,priority=999,suffix=-devenv-${{ matrix.id }}
+
+      - name: Build container
+        id: container-build
+        if: ${{ matrix.container.enable }}
+        uses: docker/build-push-action@v5
+        env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_INLINE_CACHE: 1
+        with:
+          build-args: ${{ matrix.container.args }}
+          cache-from: type=registry,ref=${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}:cache-${{ matrix.id }}
+          cache-to: type=registry,ref=${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}:cache-${{ matrix.id }},mode=max
+          context: ${{ matrix.context }}
+          provenance: false
+          push: true
+          sbom: false
+          tags: ${{ steps.container-metadata.outputs.tags }}
+          platforms: ${{ matrix.platform }}
+
+      - name: Retrieve container digest
+        if: ${{ matrix.container.enable }}
+        id: container-digest
+        shell: bash
+        run: |
+          echo '${{ steps.container-metadata.outputs.tags }}@${{ steps.container-build.outputs.digest }}' > ${{ matrix.name }}-${{ steps.container-metadata.outputs.version }}.digest
+
+      - name: Build devcontainer
+        id: devcontainer-build
+        if: ${{ matrix.devcontainer.enable }}
+        shell: bash
+        env:
+          FROM_IMAGE: ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}@${{ steps.container-build.outputs.digest }}
+        run: |
+          devcontainer build \
+            --workspace-folder ${{ matrix.context }} \
+            --cache-from type=registry,ref=${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}:devcache-${{ matrix.id }} \
+            --cache-to type=registry,ref=${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}:devcache-${{ matrix.id }},mode=max \
+            --platform ${{ matrix.platform }} \
+            --image-name ${{ steps.devcontainer-metadata.outputs.tags }} \
+            --output type=image,name=${{ steps.devcontainer-metadata.outputs.tags }},push=true
+
+      - name: Retrieve devcontainer digest
+        id: devcontainer-digest
+        if: ${{ matrix.devcontainer.enable }}
+        shell: bash
+        run: |
+          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ steps.devcontainer-metadata.outputs.tags }} | jq -r '.digest')"
+          echo "${{ steps.devcontainer-metadata.outputs.tags }}@${digest}" > ${{ matrix.name }}-${{ steps.devcontainer-metadata.outputs.version }}.digest
+
+      - name: Upload digest files
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.container.enable || matrix.devcontainer.enable }}
+        id: upload-digests
+        with:
+          name: ${{ matrix.name }}-${{ matrix.id }}
+          path: '*.digest'
+          if-no-files-found: 'error'
+          retention-days: 1
+
+  post:
+    name: ${{ matrix.name }} ${{ matrix.id }}
+    needs:
+      - prep
+      - ci
+    if: ${{ fromJson(needs.prep.outputs.post).needed }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prep.outputs.post).matrix }}
+    runs-on: ${{ matrix.runs-on }}
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
       id-token: write
       packages: write
       attestations: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          fetch-depth: 0
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_ROLE_REGION }}
 
-      - name: Git Version
-        id: devcontainer-git-version
-        uses: codacy/git-version@2.8.0
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
         with:
-          release-branch: main
-          minor-identifier: /(feat|feature):/
-          major-identifier: /!:/
-          prefix: devcontainer-janus-v
-          log-paths: |
-            devcontainers/janus/
-
-      - name: Git Version Output
-        id: devcontainer-version
-        run: |
-          echo "major=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f1 | rev | cut -f1 -dv)" >> "$GITHUB_OUTPUT"
-          echo "minor=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f2)" >> "$GITHUB_OUTPUT"
-          echo "patch=$(echo ${{ steps.devcontainer-git-version.outputs.version }} | cut -d. -f3-)" >> "$GITHUB_OUTPUT"
-
-      - name: Build Devcontainer
-        uses: ./.github/actions/devcontainer
-        with:
-          workspace: ${{ github.workspace }}/devcontainers/janus
-          platforms: linux/amd64
-          push: true
-          sign: true
-          repository: ghcr.io/jhatler/janus-devcontainer
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          semver_major: ${{ steps.devcontainer-version.outputs.major }}
-          semver_minor: ${{ steps.devcontainer-version.outputs.minor }}
-          semver_patch: ${{ steps.devcontainer-version.outputs.patch }}
 
-      - name: Update checkout devcontainer
+      - name: Container metadata
+        id: container-metadata
+        if: ${{ matrix.container.enable }}
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          tags: type=sha,suffix=-${{ matrix.id }}
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        id: container-digests
+        if: ${{ matrix.container.enable }} || ${{ matrix.devcontainer.enable }}
+        with:
+          merge-multiple: true
+          pattern: ${{ matrix.name }}-${{ matrix.id }}-*
+
+      - name: Publish and sign multiplatform container
+        id: container-publish
+        if: ${{ matrix.container.enable }}
         shell: bash
         run: |
-          sed -Ei 's/:v[^"]+"(.* x-release-please-version)/:v${{ steps.devcontainer-version.outputs.major }}.${{ steps.devcontainer-version.outputs.minor }}.${{ steps.devcontainer-version.outputs.patch }}"\1/' .devcontainer/devcontainer.json
-          cat .devcontainer/devcontainer.json
+          set -ex
+          sources=( $(find . -name '*.digest' | grep -E '${{ matrix.name }}-${{ steps.container-metadata.outputs.version }}-[^-]+.digest') )
+          docker buildx imagetools create -t ${{ steps.container-metadata.outputs.tags }} $(cat "${sources[@]}")
+          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ steps.container-metadata.outputs.tags }} | jq -r '.digest')"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          cosign sign --yes --recursive "${{ steps.container-metadata.outputs.tags }}@${digest}"
 
-      - name: Test Devcontainer Using CLI
+      - name: Attest published container
+        uses: actions/attest-build-provenance@v1
+        id: container-attest
+        if: ${{ matrix.container.enable }}
+        with:
+          subject-name: ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          subject-digest: ${{ steps.container-publish.outputs.digest }}
+          push-to-registry: true
+
+      - name: Devcontainer metadata
+        if: ${{ matrix.devcontainer.enable }}
+        id: devcontainer-metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          flavor:
+            latest=false
+          tags: |
+            type=sha,priority=999,suffix=-devenv-${{ matrix.id }}
+
+      - name: Publish and sign multiplatform devcontainer
+        id: devcontainer-publish
+        if: ${{ matrix.devcontainer.enable }}
         shell: bash
         run: |
-          devcontainer up --workspace-folder .
-          devcontainer exec --workspace-folder . --skip-post-attach --skip-post-create /usr/local/share/nvm/versions/node/v22.2.0/bin/devcontainer --version
-  # jscpd:ignore-end
+          sources=( $(find . -name '*.digest' | grep -E '${{ matrix.name }}-${{ steps.devcontainer-metadata.outputs.version }}-[^-]+.digest') )
+          docker buildx imagetools create -t ${{ steps.devcontainer-metadata.outputs.tags }} $(cat "${sources[@]}")
+          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ steps.devcontainer-metadata.outputs.tags }} | jq -r '.digest')"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          cosign sign --yes --recursive "${{ steps.devcontainer-metadata.outputs.tags }}@${digest}"
+
+      - name: Attest published devcontainer
+        uses: actions/attest-build-provenance@v1
+        id: devcontainer-attest
+        if: ${{ matrix.devcontainer.enable }}
+        with:
+          subject-name: ${{ secrets.AWS_ECR_DNS }}/${{ matrix.name }}
+          subject-digest: ${{ steps.devcontainer-publish.outputs.digest }}
+          push-to-registry: true
+# jscpd:ignore-end
