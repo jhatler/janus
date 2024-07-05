@@ -107,7 +107,11 @@ resource "aws_iam_role" "runners" {
   managed_policy_arns = [
     aws_iam_policy.runners_ec2.arn,
     aws_iam_policy.ssm_agent.arn,
-    data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
+    data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn,
+    aws_iam_policy.ubuntu_cloudimg_ecr.arn,
+    aws_iam_policy.ubuntu_cloudimg_s3.arn,
+    aws_iam_policy.scratch_ecr.arn,
+    aws_iam_policy.janus_ecr.arn,
   ]
 }
 

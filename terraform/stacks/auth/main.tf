@@ -11,7 +11,8 @@ module "github-oidc" {
   github_repository = var.control_repository
   role_policies = [
     aws_iam_policy.gh_oidc_runners.arn,
-    aws_iam_policy.ubuntu_cloudimgs_ecr.arn,
+    aws_iam_policy.ubuntu_cloudimg_ecr.arn,
+    aws_iam_policy.ubuntu_cloudimg_s3.arn,
     aws_iam_policy.scratch_ecr.arn,
     aws_iam_policy.janus_ecr.arn,
   ]
