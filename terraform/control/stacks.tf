@@ -35,6 +35,24 @@ locals {
       description  = "AWS Systems Manager Automation"
       project_root = "terraform/stacks/ssm"
       id           = "ssm"
+    },
+    {
+      name         = "Ubuntu"
+      description  = "Ubuntu Cloud Images"
+      project_root = "terraform/stacks/ubuntu_cloudimgs"
+      id           = "ubuntu"
+    },
+    {
+      name         = "Janus"
+      description  = "Just Another Neural Utility System"
+      project_root = "terraform/stacks/janus"
+      id           = "janus"
+    },
+    {
+      name         = "Scratch"
+      description  = "Scratch Images"
+      project_root = "terraform/stacks/scratch"
+      id           = "scratch"
     }
   ]
 }

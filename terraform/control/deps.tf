@@ -83,6 +83,21 @@ resource "spacelift_stack_dependency" "ssm__crypto" {
   depends_on_stack_id = spacelift_stack.children["Crypto"].id
 }
 
+resource "spacelift_stack_dependency" "ubuntu__auth" {
+  stack_id            = spacelift_stack.children["Ubuntu"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
+resource "spacelift_stack_dependency" "janus__auth" {
+  stack_id            = spacelift_stack.children["Janus"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
+resource "spacelift_stack_dependency" "scratch__auth" {
+  stack_id            = spacelift_stack.children["Scratch"].id
+  depends_on_stack_id = spacelift_stack.auth.id
+}
+
 resource "spacelift_stack_dependency_reference" "admin_apigateway_logs_role_arn" {
   stack_dependency_id = spacelift_stack_dependency.admin__auth.id
   output_name         = "TF_VAR_apigateway_logs_role_arn"
