@@ -24,10 +24,11 @@ resource "aws_iam_openid_connect_provider" "gh" {
 }
 
 module "github_oidc" {
-  source = "spacelift.io/jhatler/github-oidc/aws"
+  source = "${var.kernel_registry}/${var.kernel_namespace}-github-oidc/aws"
+  providers = { aws = aws }
 
-  github_owner      = "jhatler"
-  github_repository = "janus"
+  github_owner      = "my-org"
+  github_repository = "my-repo"
 
   role_policies = [
     "arn:aws:iam::aws:policy/PowerUserAccess",

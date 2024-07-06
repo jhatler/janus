@@ -7,7 +7,7 @@
   "lib/pyjanus": "0.1.2",
   "packages/release-trigger": "1.2.0",
   "terraform": "0.1.0",
-  "terraform/control": "0.1.0",
+  "terraform/kernel": "0.1.0",
   "terraform/modules": "0.1.0",
-  "terraform/stacks": "0.1.0"
+  "terraform/workloads": "0.1.0"
 }

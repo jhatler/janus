@@ -2,12 +2,12 @@
 name: "Packer Builds"
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'packer/runners/**'
-      - '.github/workflows/packer.yml'
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'packer/runners/**'
+  #     - '.github/workflows/packer.yml'
   push:
     branches:
       - main

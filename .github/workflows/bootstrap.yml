@@ -1,0 +1,714 @@
+---
+name: "Bootstrap"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: bootstrap
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  # kernel_stage1:
+  #   name: "Stage 1 - ${{ vars.KERNEL_NAMESPACE }}atkernel"
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   env:
+  #     TF_VAR_kernel_namespace: ${{ vars.KERNEL_NAMESPACE }}
+  #     TF_VAR_aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+  #     TF_VAR_aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
+  #     TF_VAR_kernel_branch: ${{ github.head_ref || github.ref_name }}
+  #     TF_VAR_kernel_cidr_prefix: ${{ vars.KERNEL_CIDR_PREFIX }}
+  #     TF_VAR_kernel_token: ${{ secrets.KERNEL_TOKEN }}
+  #     TF_VAR_kernel_owner: ${{ github.repository_owner }}
+  #     TF_VAR_kernel_registry: spacelift.io/${{ vars.SPACELIFT_ORGANIZATION }}
+  #     TF_VAR_spacelift_organization: ${{ vars.SPACELIFT_ORGANIZATION }}
+  #     TF_VAR_spacelift_api_key_endpoint: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     TF_VAR_spacelift_api_key_id: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     TF_VAR_spacelift_api_key_secret: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     TF_VAR_aikido_secret_key: ${{ secrets.AIKIDO_SECRET_KEY }}
+  #     TF_VAR_infracost_api_key: ${{ secrets.INFRACOST_API_KEY }}
+  #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     KERNEL_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atkernel
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Set Kernel Repository
+  #       run: echo "TF_VAR_kernel_repository=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> "$GITHUB_ENV"
+
+  #     - name: Authenticate to AWS API
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+  #         role-session-name: bootstrap
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Spoof Terragrunt
+  #       shell: bash
+  #       working-directory: terraform/kernel
+  #       run: |
+  #         # TODO: Use terragrunt here
+  #         sed -i 's|$KERNEL_REPOSITORY|'"$TF_VAR_kernel_repository"'|g' *.tf
+  #         sed -i 's|$KERNEL_REGISTRY|spacelift.io/${{ vars.SPACELIFT_ORGANIZATION }}|g' *.tf
+  #         sed -i 's|$KERNEL_NAMESPACE|${{ vars.KERNEL_NAMESPACE }}|g' *.tf
+
+  #     - name: Terraform Init
+  #       shell: bash
+  #       working-directory: terraform/kernel
+  #       run: |
+  #         mv kernel.tf kernel.tf.bak
+  #         mv kernel_deps.tf kernel_deps.tf.bak
+  #         terraform init
+
+  #     - name: Terraform Import - Kernel AWS IAM Role
+  #       working-directory: terraform/kernel
+  #       run: terraform import aws_iam_role.kernel "${{ vars.KERNEL_NAMESPACE }}@kernel"
+
+  #     - name: Terraform Apply - No Kernel
+  #       working-directory: terraform/kernel
+  #       run: terraform apply -auto-approve
+
+  #     - name: Terraform Apply - Bootstrap Kernel
+  #       working-directory: terraform/kernel
+  #       run: |
+  #         mv kernel.tf.bak kernel.tf
+  #         sed -i 's/### BOOTSTRAP: //' kernel.tf
+
+  #         terraform apply -auto-approve
+
+  #     - name: Terraform Import - Kernel Self-Import
+  #       working-directory: terraform/kernel
+  #       run: |
+  #         spacectl stack task --tail --id "$KERNEL_STACK_ID" \
+  #           terraform import spacelift_stack.kernel "$KERNEL_STACK_ID"
+
+  #     - name: Terraform Import - Kernel AWS Integration Self-Import
+  #       working-directory: terraform/kernel
+  #       run: |
+  #         AWS_INTEGRATION_ID="$(terraform output -raw -no-color TF_VAR_kernel_aws_integration_id)"
+  #         spacectl stack task --tail --id "$KERNEL_STACK_ID" \
+  #           terraform import spacelift_aws_integration_attachment.kernel "$AWS_INTEGRATION_ID"
+
+  # harness_stage1:
+  #   name: "Stage 1 - ${{ vars.KERNEL_NAMESPACE }}atharness"
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - kernel_stage1
+  #   permissions:
+  #     contents: read
+  #   outputs:
+  #     module_ids: ${{ steps.modules-ids.outputs.ids }}
+  #   env:
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     KERNEL_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atkernel
+  #     HARNESS_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atharness
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Deploy Test Harness
+  #       run: spacectl stack deploy --id "$HARNESS_STACK_ID" --tail --auto-confirm
+
+  #     - name: Retrieve Kernel Modules
+  #       id: modules-ids
+  #       run: |
+  #         spacectl stack outputs --id "$KERNEL_STACK_ID" --output-id TF_VAR_kernel_modules_ids --output json | jq -r '.[0].value' | jq -c > kernel_modules.json
+  #         echo "ids=$(cat kernel_modules.json)" >> "$GITHUB_OUTPUT"
+
+  # kernel_modules:
+  #   name: "Stage 1 - ${{ matrix.module_id }}"
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - harness_stage1
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       module_id: ${{fromJson(needs.harness_stage1.outputs.module_ids)}}
+  #   permissions:
+  #     contents: read
+  #   env:
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Authenticate to Spacelift API
+  #       env:
+  #         graphql_query: 'mutation GetSpaceliftToken($keyId: ID!, $keySecret: String!) {
+  #             apiKeyUser(id: $keyId, secret: $keySecret) {
+  #               id
+  #               jwt
+  #             }
+  #           }'
+  #         graphql_data: '{
+  #             "query": "%s",
+  #             "variables": {
+  #               "keyId": "%s",
+  #               "keySecret": "%s"
+  #             },
+  #             "operationName": "GetSpaceliftToken"
+  #           }'
+  #       run: |
+  #         DATA="$(
+  #           printf \
+  #             '${{ env.graphql_data }}' \
+  #             '${{ env.graphql_query }}' \
+  #             '${{ secrets.SPACELIFT_API_KEY_ID }}' \
+  #             '${{ secrets.SPACELIFT_API_KEY_SECRET }}'
+  #         )"
+
+  #         curl -sSf --url '${{ env.SPACELIFT_GRAPHQL_ENDPOINT }}' \
+  #           --request POST \
+  #           --header 'Content-Type: application/json' \
+  #           --data "$DATA" \
+  #           --output spacelift_token.json
+  #         echo "SPACELIFT_JWT=$(jq -r '.data.apiKeyUser.jwt' spacelift_token.json)" >> "$GITHUB_ENV"
+  #         rm spacelift_token.json
+
+  #     - name: Release Kernel Module
+  #       run: spacectl module create-version --id ${{ matrix.module_id }}
+
+  #     - name: Wait for Kernel Module to Release
+  #       env:
+  #         graphql_query: 'query GetSpaceliftModule($moduleId: ID!) {
+  #             module(id: $moduleId) {
+  #               versions(includeFailed: true) {
+  #                 state
+  #               }
+  #             }
+  #           }'
+  #         graphql_data: '{
+  #             "query": "%s",
+  #             "variables": {
+  #               "moduleId":"%s"
+  #             },
+  #             "operationName": "GetSpaceliftModule"
+  #           }'
+  #       run: |
+  #         while true; do
+  #           DATA="$(
+  #             printf \
+  #               '${{ env.graphql_data }}' \
+  #               '${{ env.graphql_query }}' \
+  #               "${{ matrix.module_id }}"
+  #           )"
+
+  #           curl -sSf --url '${{ env.SPACELIFT_GRAPHQL_ENDPOINT }}' \
+  #             --request POST \
+  #             --header "Authorization: Bearer $SPACELIFT_JWT" \
+  #             --header 'Content-Type: application/json' \
+  #             --data "$DATA" \
+  #             --output module.json
+  #           state="$(jq -r '.data.module.versions[0].state' module.json)"
+
+  #           echo "Module ${{ matrix.module_id }} state: $state"
+
+  #           if [ "$state" == "PENDING" ]; then
+  #             sleep 20
+  #           elif [ "$state" == "ACTIVE" ]; then
+  #             break
+  #           else
+  #             echo "Module ${{ matrix.module_id }} failed to deploy"
+  #             exit 1
+  #           fi
+  #         done
+
+  # bootstrap_workloads:
+  #   name: "Stage 1 - ${{ matrix.workload_id }}"
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - kernel_modules
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       workload_id:
+  #         - "${{ vars.KERNEL_NAMESPACE }}atecr"
+  #   permissions:
+  #     contents: read
+  #   env:
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     KERNEL_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atkernel
+  #     HARNESS_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atharness
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Deploy Workload
+  #       run: spacectl stack deploy --id "${{ matrix.workload_id }}" --tail --auto-confirm
+
+  # runners_stage1:
+  #   name: "Stage 1 - runner-${{ matrix.arch }}"
+  #   needs: bootstrap_workloads
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - arch: arm64
+  #           source: 'ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*'
+  #           owner: amazon
+  #         - arch: amd64
+  #           source: 'ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*'
+  #           owner: amazon
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   env:
+  #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Authenticate to AWS API
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+  #         role-session-name: bootstrap
+
+  #     - name: Create AMI
+  #       shell: bash
+  #       id: ami-publish
+  #       env:
+  #         PKR_VAR_associate_public_ip_address: true
+  #         PKR_VAR_subnet_name: "Test Harness Subnet"
+  #         PKR_VAR_vpc_name: "Test Harness VPC"
+  #         PKR_VAR_source_ami_prefix: ${{ matrix.source }}
+  #         PKR_VAR_source_ami_owner: ${{ matrix.owner }}
+  #         PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.large' || 'c7i.large' }}
+  #         PKR_VAR_aws_region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         PKR_VAR_iam_instance_profile: test-harness-ssm-agent
+  #         PKR_VAR_ami_name: runner-${{ matrix.arch }}
+  #         PKR_VAR_runner_name: runner
+  #       working-directory: packer/runners
+  #       run: |
+  #         /usr/bin/env packer init ami.pkr.hcl
+  #         /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl
+
+  # webhook_stage1:
+  #   name: "Stage 1 - github-webhook"
+  #   needs: bootstrap_workloads
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #     packages: write
+  #     attestations: write
+  #   env:
+  #     KERNEL_NAMESPACE: ${{ vars.KERNEL_NAMESPACE }}
+  #     KERNEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+  #     KERNEL_OWNER: ${{ github.repository_owner }}
+  #     KERNEL_REGISTRY: spacelift.io/${{ vars.SPACELIFT_ORGANIZATION }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Set Kernel Repository
+  #       run: echo "KERNEL_REPOSITORY=$(echo ${{ github.repository }} | cut -d '/' -f 2)" >> "$GITHUB_ENV"
+
+  #     - name: Set Kernel Identity
+  #       run: echo "KERNEL=$KERNEL_OWNER/$KERNEL_REPOSITORY/$KERNEL_BRANCH/$KERNEL_NAMESPACE" >> "$GITHUB_ENV"
+
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Install cosign
+  #       uses: sigstore/cosign-installer@v3.5.0
+
+  #     - name: Authenticate to AWS API
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+  #         role-session-name: bootstrap
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Container metadata
+  #       id: container-metadata
+  #       uses: docker/metadata-action@v5
+  #       with:
+  #         images: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/github-webhook
+  #         tags: type=raw,value=bootstrap
+
+  #     - name: Publish container
+  #       id: container-build
+  #       uses: docker/build-push-action@v6
+  #       env:
+  #         DOCKER_BUILDKIT: 1
+  #         BUILDKIT_INLINE_CACHE: 1
+  #       with:
+  #         build-args: |
+  #           CONTAINER_IMAGE=ubuntu:22.04
+  #         context: containers/github-webhook
+  #         provenance: true
+  #         push: true
+  #         sbom: true
+  #         tags: ${{ steps.container-metadata.outputs.tags }}
+
+  #     - name: Sign published container
+  #       id: container-sign
+  #       shell: bash
+  #       run: cosign sign --yes --recursive "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/github-webhook@${{ steps.container-build.outputs.digest }}"
+
+  #     - name: Attest published container
+  #       uses: actions/attest-build-provenance@v1
+  #       id: container-attest
+  #       with:
+  #         subject-name: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/github-webhook
+  #         subject-digest: ${{ steps.container-build.outputs.digest }}
+  #         push-to-registry: true
+
+  #     - name: Seed AWS Parameter Store
+  #       shell: bash
+  #       run: |
+  #         docker buildx imagetools inspect \
+  #           --format '{{json .Manifest}}' \
+  #           "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/github-webhook:bootstrap" > manifest.json
+
+  #         jq -r '.manifests[] | select("\(.platform.os)/\(.platform.architecture)" == "linux/amd64") | .digest' manifest.json > digest.txt
+
+  #         aws ssm put-parameter \
+  #           --name /github/webhook/image \
+  #           --value "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/github-webhook@$(cat digest.txt)" \
+  #           --type SecureString \
+  #           --overwrite
+
+  #         aws ssm add-tags-to-resource \
+  #           --resource-type Parameter \
+  #           --resource-id /github/webhook/image \
+  #           --tags \
+  #             "Key=Kernel,Value=$KERNEL" \
+  #             "Key=Owner,Value=$KERNEL_OWNER" \
+  #             "Key=Repository,Value=$KERNEL_REPOSITORY" \
+  #             "Key=Branch,Value=$KERNEL_BRANCH" \
+  #             "Key=Namespace,Value=$KERNEL_NAMESPACE" \
+  #             "Key=Registry,Value=$KERNEL_REGISTRY"
+
+  # kernel_stage2:
+  #   name: "Stage 2 - ${{ vars.KERNEL_NAMESPACE }}atkernel"
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - runners_stage1
+  #     - webhook_stage1
+  #   permissions:
+  #     contents: read
+  #   outputs:
+  #     workloads: ${{ steps.workloads.outputs.WORKLOADS }}
+  #   env:
+  #     KERNEL_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atkernel
+  #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Retrieve Workloads
+  #       id: workloads
+  #       shell: bash
+  #       env:
+  #         JQ: >
+  #           [ .[] | select( .labels as $labels | "${{ vars.KERNEL_NAMESPACE }}@workload" | IN($labels[])) | { id: .id, oldStateSetAt: .stateSetAt} ]
+  #       run: echo "WORKLOADS=$(spacectl stack list --output json | jq -c "$JQ")" >> "$GITHUB_OUTPUT"
+
+  #     - name: "Stage 2 - Kernel (Initializes Stack)"
+  #       shell: bash
+  #       run: spacectl stack deploy --id "$KERNEL_STACK_ID" --tail --auto-confirm
+
+  #     - name: "Stage 2 - Kernel (Triggers Workloads)"
+  #       shell: bash
+  #       run: spacectl stack deploy --id "$KERNEL_STACK_ID" --tail --auto-confirm
+
+  # workloads_stage2:
+  #   name: "Stage 2 - ${{ matrix.id }}"
+  #   runs-on: ubuntu-latest
+  #   needs: kernel_stage2
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include: ${{ fromJson(needs.kernel_stage2.outputs.workloads) }}
+  #   permissions:
+  #     contents: read
+  #   env:
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Wait for workload
+  #       shell: bash
+  #       run: |
+  #         while true; do
+  #           spacectl stack show --id ${{ matrix.id }} --output json > stack.json
+
+  #           state="$(jq -r '.state' stack.json)"
+  #           stateSetAt="$(jq -r '.stateSetAt' stack.json)"
+
+  #           echo "Workload ${{ matrix.id }} state: $state ($stateSetAt)"
+  #           case "$state" in
+  #             NONE)
+  #               sleep 20
+  #               ;;
+  #             INITIALIZING|PLANNING|APPLYING|PREPARING|PREPARING_APPLY)
+  #               spacectl stack logs --id ${{ matrix.id }} --run-latest
+  #               ;;
+  #             FAILED|DISCARDED|STOPPED)
+  #               echo "Workload ${{ matrix.id }} failed to deploy"
+  #               exit 1
+  #               ;;
+  #             DESTROYING|UNCONFIRMED|CONFIRMED|REPLAN_REQUESTED|PREPARING_REPLAN)
+  #               echo "Workload ${{ matrix.id }} is in an unexpected state"
+  #               exit 1
+  #               ;;
+  #             FINISHED)
+  #               if [ -z "${{ matrix.oldStateSetAt }}" ]; then
+  #                 echo "Workload ${{ matrix.id }} finished successfully"
+  #                 exit 0
+  #               elif [ "$stateSetAt" -gt "${{ matrix.oldStateSetAt }}" ]; then
+  #                 echo "Workload ${{ matrix.id }} finished successfully"
+  #                 exit 0
+  #               else
+  #                 echo "Workload ${{ matrix.id }} finished, but stateSetAt is not updated. Waiting for new deployment..."
+  #                 sleep 20
+  #               fi
+  #               ;;
+  #             *)
+  #               echo "Workload ${{ matrix.id }} failed to deploy"
+  #               exit 1
+  #               ;;
+  #           esac
+  #         done
+
+  cloudimgs_stage2:
+    name: "Stage 2 - ubuntu-cloud-images"
+    runs-on: ubuntu-latest
+    # needs: workloads_stage2
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Ubuntu Cloud Images via repository_dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.KERNEL_TOKEN }}
+        run: gh api repos/${{ github.repository }}/dispatches -f event_type=ubuntu-cloud-images
+
+      - name: Wait for Ubuntu Cloud Images
+        env:
+          GH_TOKEN: ${{ secrets.KERNEL_TOKEN }}
+        run: |
+          sleep 20 # Wait for the repository_dispatch to be processed
+          while true; do
+            gh run list --json databaseId,name,event -q '[.[] | select(.name == "Ubuntu Cloud Images")]' > workflow_runs.json
+            jq -r '.[] | select(.event == "repository_dispatch") | .databaseId' workflow_runs.json | sort -n | tail -n 1 > run_id.txt
+            if [ -s run_id.txt ]; then
+              break
+            fi
+            echo "Waiting for Ubuntu Cloud Images to start..."
+            sleep 20
+          done
+
+          echo "Waiting for Ubuntu Cloud Images to finish."
+          echo "You can watch the progress at: https://github.com/${{ github.repository }}/actions/runs/$(cat run_id.txt)"
+
+          gh run watch --exit-status "$(cat run_id.txt)" > /dev/null && echo "Ubuntu Cloud Images completed successfully."
+          gh run view --log "$(cat run_id.txt)"
+
+  # runners_stage2:
+  #   name: "Stage 2 - runner-${{ matrix.arch }}"
+  #   needs: cloudimgs_stage2
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - arch: arm64
+  #           source: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-arm64-server-*'
+  #           owner: self
+  #         - arch: amd64
+  #           source: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-server-*'
+  #           owner: self
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   env:
+  #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Authenticate to AWS API
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+  #         role-session-name: bootstrap
+
+  #     - name: Create AMI
+  #       shell: bash
+  #       id: ami-publish
+  #       env:
+  #         PKR_VAR_source_ami_prefix: ${{ matrix.source }}
+  #         PKR_VAR_source_ami_owner: ${{ matrix.owner }}
+  #         PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.large' || 'c7i.large' }}
+  #         PKR_VAR_aws_region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         PKR_VAR_iam_instance_profile: runners-controlled
+  #         PKR_VAR_ami_name: runner-${{ matrix.arch }}
+  #         PKR_VAR_runner_name: runner
+  #       working-directory: packer/runners
+  #       run: |
+  #         /usr/bin/env packer init ami.pkr.hcl
+  #         /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl
+
+  # cloudimgs_stage3:
+  #   name: "Stage 3 - ubuntu-cloud-images"
+  #   runs-on: ubuntu-latest
+  #   needs: runners_stage2
+  #   permissions:
+  #     contents: read
+  #   env:
+  #     RUNNERS_STACK_ID: ${{ vars.KERNEL_NAMESPACE }}atrunners
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Update Runners
+  #       shell: bash
+  #       run: spacectl stack deploy --id "$RUNNERS_STACK_ID" --tail --auto-confirm
+
+  #     - name: Clear GitHub Actions Caches
+  #       env:
+  #         GH_TOKEN: ${{ secrets.KERNEL_TOKEN }}
+  #       shell: bash
+  #       run: gh cache delete --all
+
+  #     - name: Trigger Ubuntu Cloud Images via repository_dispatch
+  #       shell: bash
+  #       env:
+  #         GH_TOKEN: ${{ secrets.KERNEL_TOKEN }}
+  #       run: gh api repos/${{ github.repository }}/dispatches -f event_type=ubuntu-cloud-images
+
+  #     - name: Wait for Ubuntu Cloud Images
+  #       env:
+  #         GH_TOKEN: ${{ secrets.KERNEL_TOKEN }}
+  #       run: |
+  #         sleep 20 # Wait for the repository_dispatch to be processed
+  #         while true; do
+  #           gh run list --json databaseId,name,event -q '[.[] | select(.name == "Ubuntu Cloud Images")]' > workflow_runs.json
+  #           jq -r '.[] | select(.event == "repository_dispatch") | .databaseId' workflow_runs.json | sort -n | tail -n 1 > run_id.txt
+  #           if [ -s run_id.txt ]; then
+  #             break
+  #           fi
+  #           echo "Waiting for Ubuntu Cloud Images to start..."
+  #           sleep 20
+  #         done
+
+  #         echo "Waiting for Ubuntu Cloud Images to finish."
+  #         echo "You can watch the progress at: https://github.com/${{ github.repository }}/actions/runs/$(cat run_id.txt)"
+
+  #         gh run watch --exit-status "$(cat run_id.txt)" > /dev/null && echo "Ubuntu Cloud Images completed successfully."
+  #         gh run view --log "$(cat run_id.txt)"
+
+  # runners_stage3:
+  #   name: "Stage 3 - runner-${{ matrix.arch }}"
+  #   needs: cloudimgs_stage3
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - arch: arm64
+  #           source: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-arm64-server-*'
+  #           owner: self
+  #         - arch: amd64
+  #           source: 'ubuntu/images/hvm-ssd-gp3/ubuntu-jammy-22.04-amd64-server-*'
+  #           owner: self
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   env:
+  #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  #     SPACELIFT_API_KEY_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io
+  #     SPACELIFT_API_KEY_ID: ${{ secrets.SPACELIFT_API_KEY_ID }}
+  #     SPACELIFT_API_KEY_SECRET: ${{ secrets.SPACELIFT_API_KEY_SECRET }}
+  #     SPACELIFT_GRAPHQL_ENDPOINT: https://${{ vars.SPACELIFT_ORGANIZATION }}.app.spacelift.io/graphql
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install spacectl
+  #       uses: spacelift-io/setup-spacectl@v1
+
+  #     - name: Authenticate to AWS API
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+  #         role-session-name: bootstrap
+
+  #     - name: Create AMI
+  #       shell: bash
+  #       id: ami-publish
+  #       env:
+  #         PKR_VAR_source_ami_prefix: ${{ matrix.source }}
+  #         PKR_VAR_source_ami_owner: ${{ matrix.owner }}
+  #         PKR_VAR_instance_type: ${{ matrix.arch == 'arm64' && 'c7g.large' || 'c7i.large' }}
+  #         PKR_VAR_aws_region: ${{ vars.AWS_DEFAULT_REGION }}
+  #         PKR_VAR_iam_instance_profile: runners-controlled
+  #         PKR_VAR_ami_name: runner-${{ matrix.arch }}
+  #         PKR_VAR_runner_name: runner
+  #       working-directory: packer/runners
+  #       run: |
+  #         /usr/bin/env packer init ami.pkr.hcl
+  #         /usr/bin/env packer build -machine-readable -on-error=cleanup ami.pkr.hcl

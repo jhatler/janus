@@ -20,8 +20,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - working_directory: terraform/control
-            sarif_file: tfsec-control.sarif
+          - working_directory: terraform/kernel
+            sarif_file: tfsec-kernel.sarif
           - tfpath: terraform/stacks/network
             sarif_file: tfsec-network.sarif
           - tfpath: terraform/stacks/admin

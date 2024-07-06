@@ -30,7 +30,7 @@ function _docker_buildx_drivers() {
 
 function _docker_buildx_init_driver() {
         if [[ "$(_docker_buildx_drivers)" =~ $1 ]]; then
-                echo "Docker buildx driver $1 already initialized for: $(id -un)" >&2
+                echo "INFO: Docker buildx driver $1 already initialized for: $(id -un)" >&2
                 return 0
         fi
 
@@ -67,8 +67,8 @@ function _actions_runner_remove_token() {
 
 function _actions_runner_init() {
         if [ -f "{{ actions_runner_user_home }}/.runner-uuid" ]; then
-                echo "ERROR: GitHub Actions Runner already initialized!" >&2
-                exit 1
+                echo "WARN: GitHub Actions Runner already initialized!" >&2
+                return 0
         fi
 
         uuid >"{{ actions_runner_user_home }}/.runner-uuid"
@@ -85,10 +85,16 @@ function _actions_runner_init() {
                 --work "{{ actions_runner_user_home }}"
 }
 
+function _actions_runner_update_cooloff() {
+        _ssm_param "/github/actions/runners/cooloff" > "{{ actions_runner_user_home }}/.runner-cooloff"
+        chown "{{ actions_runner_user }}:{{ actions_runner_group }}" "{{ actions_runner_user_home }}/.runner-cooloff"
+        chmod 0440 "{{ actions_runner_user_home }}/.runner-cooloff"
+}
+
 function _actions_runner_destroy() {
         if [ ! -f "{{ actions_runner_user_home }}/.runner-uuid" ]; then
-                echo "ERROR: GitHub Actions Runner already destroyed!" >&2
-                exit 1
+                echo "WARN: GitHub Actions Runner already destroyed!" >&2
+                return 0
         fi
 
         ./config.sh remove --token "$(_actions_runner_remove_token)"
@@ -105,6 +111,7 @@ function _actions_runner_destroy() {
 if [[ "$0" =~ actions.runner.service.pre.sh$ ]]; then
         _docker_buildx_init_driver docker-container &
         _actions_runner_init &
+        _actions_runner_update_cooloff &
         wait
 elif [[ "$0" =~ actions.runner.service.post.sh$ ]]; then
         _actions_runner_destroy

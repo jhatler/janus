@@ -28,19 +28,19 @@ updates:
   - package-ecosystem: "terraform"
     registries:
       - spacelift-private-registry
-    directory: "/terraform/control/"
+    directory: "/terraform/kernel/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
     registries:
       - spacelift-private-registry
-    directory: "/terraform/stacks/network/"
+    directory: "/terraform/workloads/network/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"
     registries:
       - spacelift-private-registry
-    directory: "/terraform/stacks/admin/"
+    directory: "/terraform/workloads/admin/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "terraform"

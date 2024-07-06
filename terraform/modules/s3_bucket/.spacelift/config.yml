@@ -1,0 +1,11 @@
+# The version of the configuration file format
+version: 1
+module_version: 0.1.1
+
+# Any default settings that should be used for all test cases
+test_defaults:
+  before_init: ["terraform fmt -check"]
+
+tests:
+  - name: S3 Access Logging (Covers all features)
+    project_root: examples/logging-bucket
