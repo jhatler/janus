@@ -2,6 +2,11 @@
 name: "Ubuntu Cloud Images"
 
 on:
+  repository_dispatch:
+    types:
+      - ubuntu-cloud-images
+      - bootstrap
+
   pull_request:
     branches:
       - main
