@@ -3,5 +3,5 @@ cookiecutter==2.6.0
 flake8==7.1.0
 isort==5.13.2
 pylint==3.2.5
-pyright==1.1.370
+pyright==1.1.371
 pytest==8.2.2
