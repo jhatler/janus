@@ -2,6 +2,33 @@
 <!--- @generated --->
 
 
+## [1.2.1](https://github.com/jhatler/janus/compare/release-trigger-v1.2.0...release-trigger-v1.2.1) (2024-07-11)
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** Bump @types/node from 20.13.0 to 20.14.0 ([#213](https://github.com/jhatler/janus/issues/213)) ([5c39c6d](https://github.com/jhatler/janus/commit/5c39c6d275bc95c09a7896469e5d18675d80b658))
+* **deps-dev:** Bump @types/node from 20.14.0 to 20.14.2 ([#237](https://github.com/jhatler/janus/issues/237)) ([33c7d49](https://github.com/jhatler/janus/commit/33c7d4913ce47bac4e099023024909b6996a5da8))
+* **deps-dev:** Bump @types/node from 20.14.2 to 20.14.8 ([#269](https://github.com/jhatler/janus/issues/269)) ([c07ec1c](https://github.com/jhatler/janus/commit/c07ec1cc8f241f5009e4fa0d5ea14807f19ab4f5))
+* **deps-dev:** Bump gts from 5.3.0 to 5.3.1 ([#255](https://github.com/jhatler/janus/issues/255)) ([626ea80](https://github.com/jhatler/janus/commit/626ea80033398a06331879a41b9cea0ec1269342))
+* **deps-dev:** Bump mocha from 10.5.1 to 10.5.2 ([#358](https://github.com/jhatler/janus/issues/358)) ([c3ccdf5](https://github.com/jhatler/janus/commit/c3ccdf5679718e792dd48b708d797c07fd9119fe))
+* **deps:** Bump urllib3 ([#260](https://github.com/jhatler/janus/issues/260)) ([24e1921](https://github.com/jhatler/janus/commit/24e192158b99200dc978cebad2f961bb24bb3ad0))
+* **deps:** Update dependency certifi to v2024.6.2 ([#212](https://github.com/jhatler/janus/issues/212)) ([16f3e46](https://github.com/jhatler/janus/commit/16f3e463b5ac9eb0f9207e7cb1a98ac78c3a2453))
+* **deps:** Update dependency certifi to v2024.7.4 ([#385](https://github.com/jhatler/janus/issues/385)) ([60413a5](https://github.com/jhatler/janus/commit/60413a5be90ed3b828472cf49b9b00626c7514df))
+* **deps:** Update dependency click to v8.1.7 ([#268](https://github.com/jhatler/janus/issues/268)) ([96a2b33](https://github.com/jhatler/janus/commit/96a2b339d15f2edae984cde27595ca1539f79def))
+* **deps:** Update dependency cryptography to v42.0.8 ([#226](https://github.com/jhatler/janus/issues/226)) ([f506bdd](https://github.com/jhatler/janus/commit/f506bdddc89dfe825643333395f9cdd3da45d193))
+* **deps:** Update dependency google-auth to v2.30.0 ([#232](https://github.com/jhatler/janus/issues/232)) ([1db0c79](https://github.com/jhatler/janus/commit/1db0c798219642bde80a894139f3fcfb8bc50184))
+* **deps:** Update dependency google-auth to v2.31.0 ([#370](https://github.com/jhatler/janus/issues/370)) ([f3cdbce](https://github.com/jhatler/janus/commit/f3cdbce798328631b65a55357ad2214d52300152))
+* **deps:** Update dependency google-auth to v2.32.0 ([#425](https://github.com/jhatler/janus/issues/425)) ([ee97738](https://github.com/jhatler/janus/commit/ee97738299ce9315eda9a1c1ef894ac0ae3eef7b))
+* **deps:** Update dependency importlib-metadata to v7.2.1 ([#265](https://github.com/jhatler/janus/issues/265)) ([6b0f9e6](https://github.com/jhatler/janus/commit/6b0f9e69a3a999c2e148a26a2e9cb7260219ca83))
+* **deps:** Update dependency importlib-metadata to v8 ([#305](https://github.com/jhatler/janus/issues/305)) ([8d99e56](https://github.com/jhatler/janus/commit/8d99e568495a58c076ce25f6eba699f3de534760))
+* **deps:** Update dependency more-itertools to v10.3.0 ([#239](https://github.com/jhatler/janus/issues/239)) ([981a4f2](https://github.com/jhatler/janus/commit/981a4f2a323095439883901299100c103db2531c))
+* **deps:** Update dependency packaging to v24.1 ([#235](https://github.com/jhatler/janus/issues/235)) ([4a8df3f](https://github.com/jhatler/janus/commit/4a8df3fe3c74972df9d72453d412f1235eebb129))
+* **deps:** Update dependency protobuf to v5.27.1 ([#229](https://github.com/jhatler/janus/issues/229)) ([6b3677f](https://github.com/jhatler/janus/commit/6b3677ffcc045149a94e2910966ba4ea9a0a12cd))
+* **deps:** Update dependency protobuf to v5.27.2 ([#315](https://github.com/jhatler/janus/issues/315)) ([79cbaf3](https://github.com/jhatler/janus/commit/79cbaf39887c299faded0c1e87e64aa00dd2f5a0))
+* **deps:** Update dependency pyperclip to v1.9.0 ([#264](https://github.com/jhatler/janus/issues/264)) ([056da94](https://github.com/jhatler/janus/commit/056da94b0bcd2e551d36192cc6be91020924fabe))
+* **deps:** Update dependency zipp to v3.19.2 ([#224](https://github.com/jhatler/janus/issues/224)) ([6cb6488](https://github.com/jhatler/janus/commit/6cb6488bc44b6c1964e09654d982814082db3987))
+
 ## [1.2.0](https://github.com/jhatler/janus/compare/release-trigger-v1.1.0...release-trigger-v1.2.0) (2024-05-31)
 
 

@@ -2,6 +2,14 @@
 <!--- @generated --->
 
 
+## [0.1.6](https://github.com/jhatler/janus/compare/container-janus-v0.1.5...container-janus-v0.1.6) (2024-07-11)
+
+
+### Miscellaneous Chores
+
+* Migrate to opencontainer labels ([#208](https://github.com/jhatler/janus/issues/208)) ([fc0d474](https://github.com/jhatler/janus/commit/fc0d474742bc020f2d9fe8a7ac4541186d5587c4)), closes [#207](https://github.com/jhatler/janus/issues/207) [#203](https://github.com/jhatler/janus/issues/203)
+* Move janus devcontainer to container root ([#391](https://github.com/jhatler/janus/issues/391)) ([a828428](https://github.com/jhatler/janus/commit/a8284285dc8704e366733a8c0d7bd6e0c293beef)), closes [#390](https://github.com/jhatler/janus/issues/390)
+
 ## [0.1.5](https://github.com/jhatler/janus/compare/container-janus-v0.1.4...container-janus-v0.1.5) (2024-05-31)
 
 

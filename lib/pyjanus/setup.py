@@ -12,7 +12,7 @@ requirements = requirements_text.split()
 
 setuptools.setup(
     name="pyJanus",
-    version="0.1.2",
+    version="0.1.3",
     author="Jaremy Hatler",
     author_email="hatler.jaremy@gmail.com",
     description="Just Another Neural Utility System",
