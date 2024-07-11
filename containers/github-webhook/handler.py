@@ -54,9 +54,8 @@ class GithubEventHandler:
         event_type = event.event_type()
         self.logger.debug("Found GitHub event type: %s", event_type)
 
-        if hasattr(handlers, event_type):
-            self.logger.debug("found handler for %s", event_type)
-            handler = getattr(handlers, event_type)
-            handler(event)
+        if event_type == "workflow_job":
+            self.logger.debug("found handler for workflow_job")
+            handlers.workflow_job(event)
         else:
             self.log_event(event, context)

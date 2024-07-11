@@ -121,9 +121,9 @@
             "release-type": "simple",
             "package-name": "tf-root"
         },
-        "terraform/control": {
+        "terraform/kernel": {
             "release-type": "simple",
-            "package-name": "tf-control"
+            "package-name": "tf-kernel"
         },
         "terraform/modules": {
             "release-type": "simple",

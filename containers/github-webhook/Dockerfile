@@ -19,12 +19,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Apt Packages
 RUN apt-get update \
- && apt-get install --no-install-recommends -y \
+        && apt-get install --no-install-recommends -y \
         python3-pip=22.0.2+dfsg-1ubuntu0.4 \
- && apt-get autoremove --purge -y \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* \
- && find /var/cache/apt -type f -print0 | xargs -0 rm -f
+        && apt-get autoremove --purge -y \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/* \
+        && find /var/cache/apt -type f -print0 | xargs -0 rm -f
 
 # Update Pip
 RUN python3 -m pip install --no-cache-dir --upgrade \
@@ -38,8 +38,6 @@ ARG FUNCTION_DIR
 RUN mkdir -p ${FUNCTION_DIR}
 COPY *.py ${FUNCTION_DIR}/
 COPY requirements.txt ${FUNCTION_DIR}/
-COPY handlers ${FUNCTION_DIR}/handlers
-COPY workflows ${FUNCTION_DIR}/workflows
 
 # Install Python Packages
 RUN python3 -m pip install \

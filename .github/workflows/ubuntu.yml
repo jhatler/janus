@@ -7,14 +7,14 @@ on:
       - ubuntu-cloud-images
       - bootstrap
 
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'scripts/ubuntu-cloud-images'
-      - 'packer/ubuntu-cloud-images/**'
-      - 'containers/ubuntu/_cloudimg/**'
-      - '.github/workflows/ubuntu.yml'
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'scripts/ubuntu-cloud-images'
+  #     - 'packer/ubuntu-cloud-images/**'
+  #     - 'containers/ubuntu/_cloudimg/**'
+  #     - '.github/workflows/ubuntu.yml'
 
   push:
     branches:

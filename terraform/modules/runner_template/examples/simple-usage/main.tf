@@ -12,7 +12,16 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  default_tags {
+    tags = {
+      Kernel     = var.kernel
+      Owner      = var.kernel_owner
+      Repository = var.kernel_repository
+      Branch     = var.kernel_branch
+      Namespace  = var.kernel_namespace
+      Registry   = var.kernel_registry
+    }
+  }
 }
 
 resource "tls_private_key" "example" {
@@ -21,73 +30,60 @@ resource "tls_private_key" "example" {
 }
 
 resource "aws_key_pair" "generated_key" {
-  key_name   = "runner-test"
+  key_name   = "test-${uuid()}"
   public_key = tls_private_key.example.public_key_openssh
 }
 
-data "aws_vpc" "primary" {
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["amazon"]
+}
+
+data "aws_subnet" "example" {
   tags = {
-    Name = "Primary VPC"
+    Name   = "Test Harness Subnet"
+    Kernel = var.kernel
   }
 }
 
-data "aws_subnet" "dmz" {
-  vpc_id = data.aws_vpc.primary.id
-
+data "aws_security_group" "example" {
   tags = {
-    Name = "DMZ A"
+    Name   = "Test Harness Default Security Group - Allow All"
+    Kernel = var.kernel
   }
 }
-
-resource "aws_security_group" "runner_test" {
-  name = "runner-test"
-
-  description = "Allow access to the GitHub Actions Runners"
-  vpc_id      = data.aws_vpc.primary.id
-
-  tags = {
-    Name = "runner-test"
-  }
-
-  ingress = []
-
-  egress {
-    description = "Allow all outbound traffic via IPv4"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description      = "Allow all outbound traffic via IPv6"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    ipv6_cidr_blocks = ["::/0"]
-  }
-}
-
 
 module "example" {
-  source = "../../"
+  source    = "../../"
+  providers = { aws = aws }
 
-  name          = "runner-example"
-  instance_type = "c7a.medium"
+  name          = "runner-example-${uuid()}"
+  instance_type = "t3.medium"
 
-  image_id = "ami-0f30a9c3a48f3fa79"
+  image_id = data.aws_ami.ubuntu.id
   key_name = aws_key_pair.generated_key.key_name
 
-  iam_instance_profile_name = "ssm-agent"
+  iam_instance_profile_name = "test-harness-ssm-agent"
 
   security_groups = [
-    aws_security_group.runner_test.id
+    data.aws_security_group.example.id
   ]
 
-  subnet_id = data.aws_subnet.dmz.id
+  subnet_id = data.aws_subnet.example.id
 
   tags = {
-    Name    = "runner-example"
-    "class" = "runner"
+    Name  = "runner-example-${uuid()}"
+    Class = "Test:runner-${uuid()}"
   }
 }

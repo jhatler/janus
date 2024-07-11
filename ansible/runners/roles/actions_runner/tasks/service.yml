@@ -43,13 +43,3 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Configure cooloff
-  tags:
-    - launch
-  ansible.builtin.copy:
-    content: "{{ lookup('amazon.aws.aws_ssm', '/github/actions/runners/cooloff', region='us-east-2') }}"
-    dest: "{{ actions_runner_user_home }}/.runner-cooloff"
-    owner: "{{ actions_runner_user }}"
-    group: "{{ actions_runner_group }}"
-    mode: "0440"

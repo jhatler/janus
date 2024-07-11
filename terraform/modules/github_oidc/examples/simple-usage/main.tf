@@ -8,14 +8,24 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  default_tags {
+    tags = {
+      Kernel     = var.kernel
+      Owner      = var.kernel_owner
+      Repository = var.kernel_repository
+      Branch     = var.kernel_branch
+      Namespace  = var.kernel_namespace
+      Registry   = var.kernel_registry
+    }
+  }
 }
 
 module "github_oidc_simple_usage" {
-  source = "../../"
+  source    = "../../"
+  providers = { aws = aws }
 
-  github_owner      = var.control_owner
-  github_repository = var.control_repository
+  github_owner      = var.kernel_owner
+  github_repository = var.kernel_repository
 
   role_policies = [
     "arn:aws:iam::aws:policy/PowerUserAccess"
