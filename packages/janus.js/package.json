@@ -1,7 +1,7 @@
 {
   "name": "janus.js",
   "description": "Just Another Neural Utility System",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "repository": {
     "type": "git",
