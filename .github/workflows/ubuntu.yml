@@ -98,8 +98,9 @@ jobs:
         if: matrix.build.container
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_ROLE_REGION }}
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+          role-session-name: ubuntu-cloud-images
 
       - name: Login to Amazon ECR
         if: matrix.build.container
@@ -119,7 +120,7 @@ jobs:
         id: container-publish
         if: matrix.build.container
         env:
-          CONTAINER_REPO: ${{ secrets.AWS_ECR_DNS }}/ubuntu-cloudimg
+          CONTAINER_REPO: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_DEFAULT_REGION }}.amazonaws.com/ubuntu-cloudimg
           CONTAINER_TAG: ${{ matrix.codename }}${{ matrix.type == 'minimal' && '-minimal' || '' }}-${{ matrix.release }}-${{ matrix.arch }}
           PLATFORM: linux/${{ matrix.arch == 'i386' && '386' || matrix.arch }}
           FROM: ghcr.io/jhatler/scratch:sha-8ff508d-ci@sha256:dd99706086db38235266d97bfe3462d2be5938c0e48ecac7d6aee8e3ed9421b7
@@ -247,8 +248,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_ROLE_REGION }}
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.KERNEL_NAMESPACE }}/${{ vars.KERNEL_NAMESPACE }}@kernel
+          role-session-name: ubuntu-cloud-images
 
       - name: Login to Amazon ECR
         id: login-ecr
