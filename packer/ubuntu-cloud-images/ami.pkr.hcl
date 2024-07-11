@@ -39,9 +39,26 @@ variable "ami_architecture" {
   type    = string
 }
 
+variable "vpc_name" {
+  type    = string
+  default = "Kernel"
+}
+
+variable "subnet_name" {
+  type    = string
+  default = "DMZ A"
+}
+
+variable "associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
 source "amazon-ebssurrogate" "ubuntu-cloud-images" {
   region =  "${var.aws_region}"
   instance_type =  "${var.instance_type}"
+
+  associate_public_ip_address = var.associate_public_ip_address
 
   force_deregister = true
   force_delete_snapshot = true
@@ -84,7 +101,6 @@ source "amazon-ebssurrogate" "ubuntu-cloud-images" {
     volume_type = "gp3"
   }
 
-
   run_tags = {
     "Name" = "Packer: ${var.ami_name}"
   }
@@ -99,6 +115,20 @@ source "amazon-ebssurrogate" "ubuntu-cloud-images" {
 
   tags = {
     "Name" = "${var.ami_name}"
+  }
+
+  vpc_filter {
+    filters = {
+      "tag:Name": var.vpc_name
+    }
+  }
+
+  subnet_filter {
+    filters = {
+      "tag:Name": var.subnet_name
+    }
+    most_free = true
+    random = false
   }
 }
 

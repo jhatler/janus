@@ -27,9 +27,26 @@ variable "cloud_config" {
   type    = string
 }
 
+variable "vpc_name" {
+  type    = string
+  default = "Kernel"
+}
+
+variable "subnet_name" {
+  type    = string
+  default = "DMZ A"
+}
+
+variable "associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
 source "amazon-ebs" "ubuntu-cloud-images-test" {
   region =  "${var.aws_region}"
   instance_type =  "${var.instance_type}"
+
+  associate_public_ip_address = var.associate_public_ip_address
 
   ssh_timeout = "5m"
 
@@ -56,6 +73,20 @@ source "amazon-ebs" "ubuntu-cloud-images-test" {
 
   run_volume_tags = {
     "Name" = "Packer Test: ${var.source_ami}"
+  }
+
+  vpc_filter {
+    filters = {
+      "tag:Name": var.vpc_name
+    }
+  }
+
+  subnet_filter {
+    filters = {
+      "tag:Name": var.subnet_name
+    }
+    most_free = true
+    random = false
   }
 }
 

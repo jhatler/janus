@@ -39,6 +39,21 @@ variable "runner_name" {
   type    = string
 }
 
+variable "vpc_name" {
+  type    = string
+  default = "Kernel"
+}
+
+variable "subnet_name" {
+  type    = string
+  default = "DMZ A"
+}
+
+variable "associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
 data "amazon-ami" "source" {
     filters = {
         virtualization-type = "hvm"
@@ -54,6 +69,8 @@ data "amazon-ami" "source" {
 source "amazon-ebs" "runner" {
   region =  "${var.aws_region}"
   instance_type =  "${var.instance_type}"
+
+  associate_public_ip_address = var.associate_public_ip_address
 
   ami_name =  "${var.ami_name} {{timestamp}}"
 
@@ -85,6 +102,20 @@ source "amazon-ebs" "runner" {
 
   tags = {
     "Name" = "${var.ami_name} {{timestamp}}"
+  }
+
+  vpc_filter {
+    filters = {
+      "tag:Name": var.vpc_name
+    }
+  }
+
+  subnet_filter {
+    filters = {
+      "tag:Name": var.subnet_name
+    }
+    most_free = true
+    random = false
   }
 }
 
