@@ -5,7 +5,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-USERNAME=${USERNAME:-"node"}
+USERNAME=${USERNAME:-"code"}
 
 set -eux
 
@@ -43,5 +43,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 # install liquidprompt
 check_packages "liquidprompt"
+
+cat <<'EOF' >>/etc/bash.bashrc
+echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt
+EOF
 
 echo "Done!"

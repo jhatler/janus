@@ -5,7 +5,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-USERNAME=${USERNAME:-"node"}
+USERNAME=${USERNAME:-"code"}
 
 set -eux
 
@@ -21,6 +21,6 @@ chmod +x /etc/profile.d/00-restore-env.sh
 
 # jscpd:ignore-end
 
-npm install -g @devcontainers/cli
+npm install -g @devcontainers/cli@0.62.0
 
 echo "Done!"
