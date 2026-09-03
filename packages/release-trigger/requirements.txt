@@ -252,7 +252,7 @@ keyring==25.2.1 \
     --hash=sha256:2458681cdefc0dbc0b7eb6cf75d0b98e59f9ad9b2d4edd319d18f68bdca95e50 \
     --hash=sha256:daaffd42dbda25ddafb1ad5fec4024e5bbcfe424597ca1ca452b299861e49f1b
     # via gcp-releasetool
-keyrings-alt==5.0.1 \
+keyrings-alt==5.0.2 \
     --hash=sha256:cd372a1ec446a1bc5a90624a52c88e83b9330218e39047a6c9a48ae37d116745 \
     --hash=sha256:dcd08cd5dcaddb7008c9e1cd2d35c0ecd344faea4e2c02a60277cb36510f0023
     # via -r requirements.in
@@ -390,3 +390,6 @@ zipp==3.19.2 \
     --hash=sha256:bf1dcf6450f873a13e952a29504887c89e6de7506209e5b1bcc3460135d4de19 \
     --hash=sha256:f091755f667055f2d02b32c53771a7a6c8b47e1fdbc4b72a8b9072b3eef8015c
     # via importlib-metadata
+keyrings.alt==5.0.2 \
+    --hash=sha256:6be74693192f3f37bbb752bfac9b86e6177076b17d2ac12a390f1d6abff8ac7c \
+    --hash=sha256:8f097ebe9dc8b185106502b8cdb066c926d2180e13b4689fd4771a3eab7d69fb
